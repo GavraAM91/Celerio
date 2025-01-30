@@ -13,6 +13,26 @@ return new class extends Migration
     {
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
+            //connect to user 
+            $table->foreignId('user_id')
+            ->constrained(
+                table: 'users'
+            );
+            //connect to product
+            $table->foreignId('product_id')
+            ->constrained(
+                table: 'products'
+            );
+            //connect to coupon (default null)
+            $table->foreignId('coupon_id')
+            ->nullable()
+            ->constrained(
+                table: 'coupons'
+            );
+            $table->string('payment_method');
+            $table->unsignedBigInteger('price');
+            $table->integer('quantity');
+            $table->string('access_role');
             $table->timestamps();
         });
     }

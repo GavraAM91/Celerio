@@ -13,6 +13,17 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            //connect to category Product 
+            $table->foreignId('category_id')
+                ->constrained(
+                    table: 'category_products'
+                );
+
+            $table->string('product_name');
+            $table->string('product_image', 500)->nullable();
+            $table->unsignedBigInteger('product_price');
+            $table->integer('stock');
+            $table->string('access_role');
             $table->timestamps();
         });
     }

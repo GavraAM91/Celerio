@@ -9,4 +9,9 @@ class ActivityLog extends Model
 {
     /** @use HasFactory<\Database\Factories\ActivityLogFactory> */
     use HasFactory;
+
+    //table 
+
+    //guarded
+    
 }
