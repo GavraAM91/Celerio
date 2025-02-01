@@ -19,6 +19,7 @@ return new class extends Migration
                     table: 'category_products'
                 );
 
+            $table->string('product_code')->unique();
             $table->string('product_name');
             $table->string('product_image', 500)->nullable();
             $table->unsignedBigInteger('product_price');
