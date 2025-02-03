@@ -24,6 +24,9 @@ return new class extends Migration
             $table->string('product_image', 500)->nullable();
             $table->unsignedBigInteger('product_price');
             $table->integer('stock');
+            $table->integer('sold_products');
+            $table->string('product_status');
+            $table->string('edited_by');
             $table->string('access_role');
             $table->timestamps();
         });

@@ -29,11 +29,18 @@ return new class extends Migration
                 ->constrained(
                     table: 'coupons'
                 );
+
+            //connect to member (default null)
+            $table->foreignId('membership_id')
+            ->nullable()
+            ->constrained(
+                table: 'memberships'
+            );
+            
             $table->string('payment_method');
             $table->unsignedBigInteger('total_price');
             $table->integer('quantity');
-            $table->string('access_role')->nullable();
-            $table->timestamps();
+            $table->timestamps('created_at');
         });
     }
 
