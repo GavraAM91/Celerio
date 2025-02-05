@@ -43,59 +43,77 @@
     <!-- Helpers -->
     <script src="{{ asset('template/assets/vendor/js/helpers.js') }}"></script>
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+    <!--? Config:  Mandatory theme config file contain global   vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset('template/assets/js/config.js') }}"></script>
 
 </head>
 
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-gray-100">
-        <div class="layout-wrapper layout-content-navbar">
-            <div class="layout-container">
-                @include('layouts.navigation')
+        @include('layouts.navigation')
 
-                <!-- Page Heading -->
-                @isset($header)
-                    <header class="bg-white shadow">
-                        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                            {{ $header }}
-                        </div>
-                    </header>
-                @endisset
+        {{-- sidebar --}}
+        {{-- @include('layouts.sidebar') --}}
 
-                <!-- Page Content -->
+        <!-- Page Heading -->
+        @isset($header)
+            <header class="bg-white shadow">
+                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    {{ $header }}
+                </div>
+            </header>
+        @endisset
 
+        <!-- Page Content -->
+        <main>
+            {{ $slot }}
+        </main>
+        {{-- </div> --}}
 
+        <!-- Overlay -->
+        {{-- <div class="layout-overlay layout-menu-toggle"></div>
 
-                <main>
-                    {{ $slot }}
-                </main>
+        {{-- <body class="font-sans antialiased">
+            <div class="layout-wrapper">
+                <div class="layout-container">
+                 
+                    @include('layouts.sidebar')
+
+                    <div class="layout-page">
+                        
+                        @include('layouts.navigation')
+
+                        <main class="content-wrapper">
+                            {{ $slot }}
+                        </main>
+                    </div>
+                </div>
             </div>
 
-            <!-- Overlay -->
+       
             <div class="layout-overlay layout-menu-toggle"></div>
-        </div>
+        </body> --}}
 
 
         <!-- Core JS -->
         <!-- build:js assets/vendor/js/core.js -->
 
-        <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
-        <script src="{{ asset('assets/vendor/libs/popper/popper.js') }}"></script>
-        <script src="{{ asset('assets/vendor/js/bootstrap.js') }}"></script>
-        <script src="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
-        <script src="{{ asset('assets/vendor/js/menu.js') }}"></script>
+        <script src="{{ asset('template/assets/vendor/libs/jquery/jquery.js') }}"></script>
+        <script src="{{ asset('template/assets/vendor/libs/popper/popper.js') }}"></script>
+        <script src="{{ asset('template/assets/vendor/js/bootstrap.js') }}"></script>
+        <script src="{{ asset('template/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
+        <script src="{{ asset('template/assets/vendor/js/menu.js') }}"></script>
 
         <!-- endbuild -->
 
         <!-- Vendors JS -->
-        <script src="{{ asset('assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
+        <script src="{{ asset('template/assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
 
         <!-- Main JS -->
-        <script src="{{ asset('assets/js/main.js') }}"></script>
+        <script src="{{ asset('template/assets/js/main.js') }}"></script>
 
         <!-- Page JS -->
-        <script src="{{ asset('assets/js/dashboards-analytics.js') }}"></script>
+        <script src="{{ asset('template/assets/js/dashboards-analytics.js') }}"></script>
 
         <!-- Place this tag before closing body tag for GitHub widget button. -->
         <script async defer src="https://buttons.github.io/buttons.js"></script>
