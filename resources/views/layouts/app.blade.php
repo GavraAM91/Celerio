@@ -49,74 +49,56 @@
 </head>
 
 <body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100">
-        @include('layouts.navigation')
+    <div class="flex h-screen bg-gray-100 ">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-gray-200 h-screen fixed overflow-y-auto flex-shrink-0">
+            @include('layouts.sidebar')
+        </aside>
 
-        {{-- sidebar --}}
-        {{-- @include('layouts.sidebar') --}}
+        <!-- Content Wrapper -->
+        <div class="flex-1 overflow-auto">
+            <!-- Page Heading -->
+            @isset($header)
+                <header class="bg-white shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endisset
 
-        <!-- Page Heading -->
-        @isset($header)
-            <header class="bg-white shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
-                </div>
-            </header>
-        @endisset
-
-        <!-- Page Content -->
-        <main>
-            {{ $slot }}
-        </main>
-        {{-- </div> --}}
+            <!-- Page Content -->
+            <main class="flex-1 overflow-auto max-w-7xl mx-auto px-4">
+                {{ $slot }}
+            </main>
+        </div>
 
         <!-- Overlay -->
-        {{-- <div class="layout-overlay layout-menu-toggle"></div>
-
-        {{-- <body class="font-sans antialiased">
-            <div class="layout-wrapper">
-                <div class="layout-container">
-                 
-                    @include('layouts.sidebar')
-
-                    <div class="layout-page">
-                        
-                        @include('layouts.navigation')
-
-                        <main class="content-wrapper">
-                            {{ $slot }}
-                        </main>
-                    </div>
-                </div>
-            </div>
-
-       
-            <div class="layout-overlay layout-menu-toggle"></div>
-        </body> --}}
+        <div class="layout-overlay layout-menu-toggle"></div>
+    </div>
+</body>
 
 
-        <!-- Core JS -->
-        <!-- build:js assets/vendor/js/core.js -->
+<!-- Core JS -->
+<!-- build:js assets/vendor/js/core.js -->
 
-        <script src="{{ asset('template/assets/vendor/libs/jquery/jquery.js') }}"></script>
-        <script src="{{ asset('template/assets/vendor/libs/popper/popper.js') }}"></script>
-        <script src="{{ asset('template/assets/vendor/js/bootstrap.js') }}"></script>
-        <script src="{{ asset('template/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
-        <script src="{{ asset('template/assets/vendor/js/menu.js') }}"></script>
+<script src="{{ asset('template/assets/vendor/libs/jquery/jquery.js') }}"></script>
+<script src="{{ asset('template/assets/vendor/libs/popper/popper.js') }}"></script>
+<script src="{{ asset('template/assets/vendor/js/bootstrap.js') }}"></script>
+<script src="{{ asset('template/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
+<script src="{{ asset('template/assets/vendor/js/menu.js') }}"></script>
 
-        <!-- endbuild -->
+<!-- endbuild -->
 
-        <!-- Vendors JS -->
-        <script src="{{ asset('template/assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
+<!-- Vendors JS -->
+<script src="{{ asset('template/assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
 
-        <!-- Main JS -->
-        <script src="{{ asset('template/assets/js/main.js') }}"></script>
+<!-- Main JS -->
+<script src="{{ asset('template/assets/js/main.js') }}"></script>
 
-        <!-- Page JS -->
-        <script src="{{ asset('template/assets/js/dashboards-analytics.js') }}"></script>
+<!-- Page JS -->
+<script src="{{ asset('template/assets/js/dashboards-analytics.js') }}"></script>
 
-        <!-- Place this tag before closing body tag for GitHub widget button. -->
-        <script async defer src="https://buttons.github.io/buttons.js"></script>
-
+<!-- Place this tag before closing body tag for GitHub widget button. -->
+<script async defer src="https://buttons.github.io/buttons.js"></script>
 
 </html>

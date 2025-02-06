@@ -12,7 +12,21 @@ class MembershipController extends Controller
      */
     public function index()
     {
-        //
+        //all membership's data 
+        $membership_data = Membership::all();
+
+        if ($membership_data) {
+            return response()->json([
+                'success' => true,
+                'message' => 'all data send',
+                'data' => $membership_data
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'error sending data ',
+            ], 200);
+        }
     }
 
     /**
@@ -28,15 +42,30 @@ class MembershipController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // $validator = FacadeValidator::valid
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Membership $membership)
+    public function show($id)
     {
-        //
+        //sort data by ID
+        $membership_data = Membership::findOrFail($id);
+
+
+        if ($membership_data) {
+            return response()->json([
+                'success' => true,
+                'message' => 'show data',
+                'data' => $membership_data
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'error sending data ',
+            ], 200);
+        }
     }
 
     /**
@@ -58,8 +87,30 @@ class MembershipController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Membership $membership)
+    public function destroy(Request $request)
     {
-        //
+
+        $request = request()->all();
+
+        $membership_data = Membership::findOrFail($request['id']);
+
+        if ($membership_data) {
+            if ($membership_data->delete()) {
+                return response()->json([
+                    'success' => 'true',
+                    'message' => 'The Membership Succesfully deleted'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The Membership failed to delete'
+                ]);
+            }
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'The Membership Not Found'
+            ]);
+        }
     }
 }
