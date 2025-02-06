@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Membership;
+use App\Models\Sales_Detail;
+use App\Models\SalesReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
 
-class MembershipController extends Controller
+class SalesReportController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,13 +15,13 @@ class MembershipController extends Controller
     public function index()
     {
         //all membership's data 
-        $membership_data = Membership::all();
+        $sales_report_data = SalesReport::all();
 
-        if ($membership_data) {
+        if ($sales_report_data) {
             return response()->json([
                 'success' => true,
                 'message' => 'all data send',
-                'data' => $membership_data
+                'data' => $sales_report_data
             ], 200);
         } else {
             return response()->json([
@@ -77,19 +78,19 @@ class MembershipController extends Controller
             'type' => request()->type
         ];
 
-        $membership_data = Membership::create($data_request);
+        $sales_report_data = SalesReport::create($data_request);
 
         //generate code 
-        $membership_code = $this->codeGenerator($membership_data->id, $membership_data->username);
+        $membership_code = $this->codeGenerator($sales_report_data->id, $sales_report_data->username);
 
         //update the data 
-        $membership_data->update(['membership_code' => $membership_code]);
+        $sales_report_data->update(['membership_code' => $membership_code]);
 
-        if ($membership_data) {
+        if ($sales_report_data) {
             return response()->json([
                 'success' => true,
                 'message' => 'membership created!',
-                'data' => $membership_data
+                'data' => $sales_report_data
             ], 200);
         } else {
             return response()->json([
@@ -105,14 +106,14 @@ class MembershipController extends Controller
     public function show($id)
     {
         //sort data by ID
-        $membership_data = Membership::findOrFail($id);
+        $sales_report_data = SalesReport::findOrFail($id);
 
 
-        if ($membership_data) {
+        if ($sales_report_data) {
             return response()->json([
                 'success' => true,
                 'message' => 'show data',
-                'data' => $membership_data
+                'data' => $sales_report_data
             ], 200);
         } else {
             return response()->json([
@@ -135,7 +136,7 @@ class MembershipController extends Controller
 
         // $request = request()->all();
 
-        $membership_data = Membership::findOrFail($request->id);
+        $sales_report_data = SalesReport::findOrFail($request->id);
 
         $validator = FacadesValidator::make($request->all(), [
             'name' => 'sometimes|string',
@@ -156,18 +157,18 @@ class MembershipController extends Controller
         $validated_data = $validator->validated();
 
         //update to db
-        $membership_data->update($validated_data);
+        $sales_report_data->update($validated_data);
 
-        if ($membership_data) {
+        if ($sales_report_data) {
             return response()->json([
                 'success' => true,
-                'message' => 'Membership updated successfully',
-                'membership' => $membership_data
+                'message' => 'SalesReport updated successfully',
+                'membership' => $sales_report_data
             ], 200);
         } else {
             return response()->json([
-                'message' => 'Membership updated successfully',
-                'membership' => $membership_data
+                'message' => 'SalesReport updated successfully',
+                'membership' => $sales_report_data
             ], 200);
         }
     }
@@ -180,24 +181,24 @@ class MembershipController extends Controller
 
         $request = request()->all();
 
-        $membership_data = Membership::findOrFail($request['id']);
+        $sales_report_data = SalesReport::findOrFail($request['id']);
 
-        if ($membership_data) {
-            if ($membership_data->delete()) {
+        if ($sales_report_data) {
+            if ($sales_report_data->delete()) {
                 return response()->json([
                     'success' => 'true',
-                    'message' => 'The Membership Succesfully deleted'
+                    'message' => 'The SalesReport Succesfully deleted'
                 ]);
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'The Membership failed to delete'
+                    'message' => 'The SalesReport failed to delete'
                 ]);
             }
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'The Membership Not Found'
+                'message' => 'The SalesReport Not Found'
             ]);
         }
     }

@@ -9,13 +9,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Sales_Detail extends Model
+class SalesReport extends Model
 {
     /** @use HasFactory<\Database\Factories\SalesDetailFactory> */
     use HasFactory;
 
     //table
-    protected $table = 'sales_detail';
+    protected $table = 'sales_report';
 
     //fillable
     protected $guarded = ['id'];
