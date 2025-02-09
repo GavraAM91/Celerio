@@ -15,14 +15,22 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index() {}
+    public function index()
+    {
+        $data_product = Product::all();
+
+        return view('admin.Products.index', compact('data_product'), ['title => Product']);
+    }
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        //
+        //category
+        $data_category = CategoryProduct::all();
+
+        return view('admin.Products.create', compact('data_category'), ['title => Product']);
     }
 
     /**
@@ -146,6 +154,7 @@ class ProductController extends Controller
             'product_price' => 'required',
             'stock' => 'required',
             'access_role' => 'required',
+            'expired_date' => 'required|date',
             'product_status' => 'nullable '
         ], [
             'product_image.max' => 'The product image must not exceed 10 MB.',
@@ -173,6 +182,7 @@ class ProductController extends Controller
             'access_role' => request()->access_role,
             'edited_by' => $edited_by,
             'product_status' => request()->product_status,
+            'expired_date' => request()->expired_date,
             'updated_at' => $updated_at
         ];
 
@@ -202,18 +212,26 @@ class ProductController extends Controller
         $data_product->update($data_request);
 
         if ($data_product) {
-            return response()->json([
-                'response' => '200',
-                'success' => true,
-                'message' => 'Update Proposal Success',
-            ], 200);
+            return redirect()->route('product.index')
+                ->with('success', 'Update Product Success!');
         } else {
-            return response()->json([
-                'response' => 422,
-                'success' => false,
-                'message' => 'Failed to Update Product',
-            ], 422);
+            return redirect()->route('product.index')
+                ->with('error', 'Failed to Update Product!');
         }
+
+        // if ($data_product) {
+        //     return response()->json([
+        //         'response' => '200',
+        //         'success' => true,
+        //         'message' => 'Update Proposal Success',
+        //     ], 200);
+        // } else {
+        //     return response()->json([
+        //         'response' => 422,
+        //         'success' => false,
+        //         'message' => 'Failed to Update Product',
+        //     ], 422);
+        // }
     }
 
     /**

@@ -1,28 +1,8 @@
-{{-- <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
-        </h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    {{ __("You're logged in!") }}
-                </div>
-            </div>
-        </div>
-    </div>
-</x-app-layout> --}}
-
-
 <x-app-layout>
+
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
-
-
             <!-- Layout container -->
             <div class="layout-page">
                 <!-- Navbar -->
@@ -116,8 +96,6 @@
                         </ul>
                     </div>
                 </nav>
-
-                <!-- / Navbar -->
 
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
@@ -416,16 +394,20 @@
                     </div>
                     <!-- / Content -->
 
+
                     <div class="content-backdrop fade"></div>
                 </div>
                 <!-- Content wrapper -->
             </div>
             <!-- / Layout page -->
-        </div>
+            {{-- </div> --}}
 
-        <!-- Overlay -->
-        <div class="layout-overlay layout-menu-toggle"></div>
-    </div>
-    </body>
 
+            {{-- </div> --}}
+            <!-- / Layout wrapper -->
+
+            <div class="buy-now">
+                <a href="https://themeselection.com/item/sneat-dashboard-pro-bootstrap/" target="_blank"
+                    class="btn btn-danger btn-buy-now">Upgrade to Pro</a>
+            </div>
 </x-app-layout>

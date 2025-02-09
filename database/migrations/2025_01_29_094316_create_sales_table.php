@@ -29,9 +29,11 @@ return new class extends Migration
                 ->constrained(
                     table: 'coupons'
                 );
+            $table->string('invoice_sales');
             $table->string('payment_method');
             $table->unsignedBigInteger('total_price');
             $table->integer('quantity');
+            $table->float('tax');
             $table->string('access_role')->nullable();
             $table->timestamps();
         });

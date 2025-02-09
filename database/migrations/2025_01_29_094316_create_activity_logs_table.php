@@ -13,6 +13,14 @@ return new class extends Migration
     {
         Schema::create('activity_logs', function (Blueprint $table) {
             $table->id();
+
+            //connect to user
+            $table->foreignId('user_id')
+                ->constrained(
+                    table: 'users'
+                );
+
+            $table->string('log');
             $table->timestamps();
         });
     }

@@ -51,7 +51,7 @@
 <body class="font-sans antialiased">
     <div class="flex h-screen bg-gray-100 ">
         <!-- Sidebar -->
-        <aside class="w-64 bg-white border-r border-gray-200 h-screen fixed overflow-y-auto flex-shrink-0">
+        <aside class="w-64 bg-white border-r border-gray-200 h-full overflow-y-auto flex-shrink-0">
             @include('layouts.sidebar')
         </aside>
 
@@ -76,7 +76,6 @@
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>
 </body>
-
 
 <!-- Core JS -->
 <!-- build:js assets/vendor/js/core.js -->

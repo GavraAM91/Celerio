@@ -9,4 +9,13 @@ class CategoryProduct extends Model
 {
     /** @use HasFactory<\Database\Factories\CategoryProductFactory> */
     use HasFactory;
+
+    protected $table = 'category_products';
+
+    protected $guarded = ['id'];
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'category_id', 'id');
+    }
 }

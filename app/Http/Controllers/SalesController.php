@@ -13,6 +13,7 @@ use App\Models\selling_price;
 use App\Models\MembershipBenefits;
 use Illuminate\Routing\Controller;
 // use Illuminate\Support\Carbon as SupportCarbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
 
 class SalesController extends Controller
@@ -258,6 +259,21 @@ class SalesController extends Controller
             ], 404);
         }
 
+        //casier name
+        $user_data = User::where('user_id', Auth::user()->id);
+        $casier_name = $user_data->username;
+
+        //check membership
+        $membership_data = Membership::where('id', $data_sales->membership_id)->first();
+        $membership_discount = $membership_data ? $membership_data->discount : 0;
+        $membership_text = $membership_data ? number_format($membership_discount, 0, ',', '.') : "Tidak Memakai";
+
+        //discount
+        $discount_data = Coupon::where('id', $data_sales->discount_id)->first();
+        $discount = $discount_data ? $discount_data->amount : 0;
+
+
+
         //set local time
         Carbon::setLocale('id');
         $hari = Carbon::parse($data_sales->created_at)->translatedFormat('1');
@@ -290,9 +306,9 @@ class SalesController extends Controller
         <div class="container">
             <!-- Header -->
             <div class="header">
-                <h2>' . htmlspecialchars($store_name) . '</h2>
-                <p>Tanggal: ' . htmlspecialchars($transaction_date) . '</p>
-                <p>Kasir: ' . htmlspecialchars($cashier_name) . '</p>
+                <h2>' . htmlspecialchars($data_sales->gugugaga) . '</h2>
+                <p>Tanggal: ' . htmlspecialchars($data_sales->created_at) . '</p>
+                <p>Kasir: ' . htmlspecialchars($casier_name) . '</p>
             </div>
             <hr>
 
@@ -307,15 +323,15 @@ class SalesController extends Controller
                         </tr>
                     </thead>
                     <tbody>';
-            foreach ($products as $product) {
-                $html .= '
+        foreach ($data_sales as $product) {
+            $html .= '
                         <tr>
                             <td>' . htmlspecialchars($product['name']) . '</td>
                             <td>' . htmlspecialchars($product['quantity']) . '</td>
                             <td style="text-align:right;">Rp ' . number_format($product['price'], 0, ',', '.') . '</td>
                         </tr>';
-            }
-            $html .= '
+        }
+        $html .= '
                     </tbody>
                 </table>
             </div>
@@ -326,27 +342,23 @@ class SalesController extends Controller
                 <table>
                     <tr>
                         <td class="label">Jumlah:</td>
-                        <td class="value">Rp ' . number_format($subtotal, 0, ',', '.') . '</td>
+                        <td class="value">Rp ' . number_format($data_sales->quantity,) . '</td>
                     </tr>
                     <tr>
                         <td class="label">Pajak:</td>
-                        <td class="value">Rp ' . number_format($tax, 0, ',', '.') . '</td>
+                        <td class="value">Rp ' . number_format($data_sales->tax) . '</td>
                     </tr>
                     <tr>
-                        <td class="label">Diskon:</td>
-                        <td class="value">Rp ' . number_format($discount, 0, ',', '.') . '</td>
-                    </tr>';
-            if ($is_member) {
-                $html .= '
-                    <tr>
-                        <td class="label">Potongan Membership:</td>
-                        <td class="value">Rp ' . number_format($membership_discount, 0, ',', '.') . '</td>
-                    </tr>';
-            }
-            $html .= '
+    <td class="label">Diskon:</td>
+    <td class="value">Rp ' . number_format($discount, 0, ',', '.') . '</td>
+</tr>
+<tr>
+    <td class="label">Potongan Membership:</td>
+    <td class="value">Rp ' . $membership_text . '</td>
+</tr>
                     <tr>
                         <td class="label"><b>Total:</b></td>
-                        <td class="value"><b>Rp ' . number_format($total, 0, ',', '.') . '</b></td>
+                        <td class="value"><b>Rp ' . number_format($data_sales->total, 0, ',', '.') . '</b></td>
                     </tr>
                 </table>
             </div>

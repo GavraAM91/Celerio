@@ -22,7 +22,7 @@ class Product extends Model
     protected $guarded = ['id'];
 
     //connect to category
-    public function category(): BelongsTo
+    public function categoryProduct(): BelongsTo
     {
         return $this->belongsTo(CategoryProduct::class, 'category_id');
     }

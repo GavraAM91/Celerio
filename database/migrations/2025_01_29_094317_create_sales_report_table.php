@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sales_details', function (Blueprint $table) {
+        Schema::create('sales_report', function (Blueprint $table) {
             $table->id();
             //connect to sales
             $table->foreignId('sales_id')
@@ -24,6 +24,8 @@ return new class extends Migration
                 ->constrained(
                     table: 'products'
                 );
+
+            $table->string('invoice_sales')->unique();
             $table->integer('quantity');
             $table->unsignedBigInteger('price');
             $table->unsignedBigInteger('subtotal');
