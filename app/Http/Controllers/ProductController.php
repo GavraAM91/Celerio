@@ -45,9 +45,10 @@ class ProductController extends Controller
             'product_name' => 'required',
             'product_image' => 'nullable|mimes:png,jgp,jpeg|max:10240',
             'product_price' => 'required',
+            'product_status' => 'required',
             'stock' => 'required',
+            'expired_at' => 'required|date_format:Y-m-d',
             'access_role' => 'required',
-            'created_by' => 'required'
         ], [
             'product_image.max' => 'The product image must not exceed 10 MB.',
             'product_image.mimes' => 'The product image must be in PNG, JPG, or JPEG format.',
@@ -72,16 +73,23 @@ class ProductController extends Controller
         }
 
         //created_by
-        $created_by = Auth::user()->name;
+        $created_by = Auth::user()->username;
+
+
+        //productCode
+        $productCode = 'PRD-' . strtoupper(substr(request()->product_name, 0, 4)) . time();
 
         //created_at
         $created_at = now();
 
         $data_request = [
             'category_id' => request()->category_id,
+            'product_code' => $productCode,
             'product_name' => request()->product_name,
             'product_image' => $imageName,
             'product_price' => request()->product_price,
+            'product_status' => request()->product_status,
+            'expired_at' => request()->expired_at,
             'stock' => request()->stock,
             'access_role' => request()->access_role,
             'created_by' => $created_by,
@@ -90,18 +98,11 @@ class ProductController extends Controller
 
         $data_product = Product::create($data_request);
 
+
         if ($data_product) {
-            return response()->json([
-                'response' => '200',
-                'success' => true,
-                'message' => 'New Product Added',
-            ], 200);
+            return redirect()->route('product.index')->with('success', 'New Product Added Successfully!');
         } else {
-            return response()->json([
-                'response' => 422,
-                'success' => false,
-                'message' => 'Failed to Add Product',
-            ], 422);
+            return redirect()->back()->with('error', 'Failed to Add Product');
         }
     }
 
@@ -122,20 +123,25 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit()
+    public function edit($id)
     {
-        if (request()->ajax()) {
-            $id = request()->id;
+        // if (request()->ajax()) {
+        // $id = request()->id;
 
-            $data_product = Product::find($id);
-            $category = CategoryProduct::orderBy('category_name', 'asc')->get();
+        $data_product = Product::find($id);
+        // var_dump($data_product);
 
-            return response()->json([
-                'message' => 'data for edit',
-                'data_product' => $data_product,
-                'category' => $category,
-            ], 200);
-        }
+        $data_category = CategoryProduct::orderBy('category_name', 'asc')->get();
+
+        return view('admin.Products.edit', compact('data_product', 'data_category'), ['title' => 'Product Edit']);
+
+        //response json use this
+        // return response()->json([
+        //     'message' => 'data for edit',
+        //     'data_product' => $data_product,
+        //     'category' => $category,
+        // ], 200);
+        // }
     }
 
     /**
@@ -154,7 +160,7 @@ class ProductController extends Controller
             'product_price' => 'required',
             'stock' => 'required',
             'access_role' => 'required',
-            'expired_date' => 'required|date',
+            // 'expired_at' => 'required|date_format:Y-m-d',
             'product_status' => 'nullable '
         ], [
             'product_image.max' => 'The product image must not exceed 10 MB.',
@@ -239,24 +245,15 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        $proposal_data = Product::find($id);
-        if ($proposal_data) {
-            if ($proposal_data->delete()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Data deleted successfully.'
-                ], 200);
+        $data_product = Product::find($id);
+        if ($data_product) {
+            if ($data_product->delete()) {
+                return redirect()->route('product.index')->with('success', 'Delete Product  Successfully!');
             } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data failed to delete.'
-                ], 500);
+                return redirect()->back()->with('error', 'Failed to Delete Product');
             }
         } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data not found.'
-            ], 400);
+            return redirect()->back()->with('error', 'Data Product Not Found');
         }
     }
 

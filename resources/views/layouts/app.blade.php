@@ -18,6 +18,7 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('template/assets/img/favicon/favicon.ico') }}" />
 
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -80,6 +81,9 @@
 <!-- Core JS -->
 <!-- build:js assets/vendor/js/core.js -->
 
+<!-- Ajax -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script src="{{ asset('template/assets/vendor/libs/jquery/jquery.js') }}"></script>
 <script src="{{ asset('template/assets/vendor/libs/popper/popper.js') }}"></script>
 <script src="{{ asset('template/assets/vendor/js/bootstrap.js') }}"></script>
@@ -96,6 +100,13 @@
 
 <!-- Page JS -->
 <script src="{{ asset('template/assets/js/dashboards-analytics.js') }}"></script>
+<!-- Page JS -->
+<script src="{{ asset('template/assets/js/ui-toasts.js') }}"></script>
+<script src="{{ asset('template/assets/js/ui-modals.js') }}"></script>
+
+
+<!-- Page JS -->
+{{-- <script src="{{ asset('template/assets/js/ui-modals.js') }}"></script> --}}
 
 <!-- Place this tag before closing body tag for GitHub widget button. -->
 <script async defer src="https://buttons.github.io/buttons.js"></script>

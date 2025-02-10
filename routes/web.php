@@ -39,8 +39,8 @@ Route::prefix('product')->name('product.')->group(function () {
     Route::get('/', [ProductController::class, 'index'])->name('index');
     Route::get('create', [ProductController::class, 'create'])->name('create');
     Route::post('store', [ProductController::class, 'store'])->name('store');
-    Route::get('edit', [ProductController::class, 'edit'])->name('edit');
-    Route::get('show/{id?}', [ProductController::class, 'view'])->name('show');
+    Route::get('edit/{id}', [ProductController::class, 'edit'])->name('edit');
+    Route::get('show/{id?}', [ProductController::class, 'show'])->name('show');
     Route::post('update/{id?}', [ProductController::class, 'update'])->name('update');
     Route::get('destroy/{id?}', [ProductController::class, 'destroy'])->name('destroy');
 });
@@ -62,7 +62,7 @@ Route::prefix('membership_benefits')->name('membership_benefits.')->group(functi
     Route::get('create', [MembershipBenefitsController::class, 'create'])->name('create');
     Route::post('store', [MembershipBenefitsController::class, 'store'])->name('store');
     Route::get('edit', [MembershipBenefitsController::class, 'edit'])->name('edit');
-    Route::get('show/{id?}', [MembershipBenefitsController::class, 'view'])->name('show');
+    Route::get('view/{id?}', [MembershipBenefitsController::class, 'view'])->name('show');
     Route::post('update/{id?}', [MembershipBenefitsController::class, 'update'])->name('update');
     Route::get('destroy/{id?}', [MembershipBenefitsController::class, 'destroy'])->name('destroy');
 });
