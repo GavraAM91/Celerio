@@ -11,7 +11,7 @@ class Membership extends Model
     use HasFactory;
 
     //table
-    protected $table = 'membership';
+    protected $table = 'memberships';
 
     //guarded or fillable
     protected $guarded = ['id'];

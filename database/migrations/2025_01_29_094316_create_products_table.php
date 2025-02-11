@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('category_id')
                 ->constrained(
                     table: 'category_products'
-                );
+                )->onDelete('cascade');;
 
             $table->string('product_code')->unique();
             $table->string('product_name');

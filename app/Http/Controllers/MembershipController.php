@@ -11,23 +11,40 @@ class MembershipController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //all membership's data 
-        $membership_data = Membership::all();
+        $query = Membership::query();
 
-        if ($membership_data) {
-            return response()->json([
-                'success' => true,
-                'message' => 'all data send',
-                'data' => $membership_data
-            ], 200);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'error sending data ',
-            ], 200);
+        //if has filter
+        // if (request()->has('filter')) {
+        //     if ($request->filter === 'sold') {
+        //         $query->where('sold_product', '>', 0);
+        //     } else if ($request->filter === 'stock') {
+        //         $query->where('stock', '>', 0);
+        //     } else if ($request->filter === 'expired') {
+        //         $query->where('created_at', '<', now());
+        //     }
+        // }
+
+
+        //if has sorting type
+        if (request()->has('sort')) {
+            if ($request->sort === 'asc') {
+                $query->orderby('name', 'asc');
+            } else if ($request->sort === 'desc') {
+                $query->orderby('name', 'desc');
+            }
         }
+
+        //if search
+        // Search by Product Name
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('product_name', 'like', '%' . $request->search . '%');
+        }
+
+        $membership_data = $query->get();
+
+        return view('admin.membership.index', compact('membership_data'), ['title => Product']);
     }
 
     /**
@@ -35,7 +52,7 @@ class MembershipController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.membership.create', ['title => create membership']);
     }
 
     // generate code for member
@@ -107,25 +124,23 @@ class MembershipController extends Controller
         //sort data by ID
         $membership_data = Membership::findOrFail($id);
 
-
-        if ($membership_data) {
-            return response()->json([
-                'success' => true,
-                'message' => 'show data',
-                'data' => $membership_data
-            ], 200);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'error sending data ',
-            ], 200);
-        }
+        return response()->json([
+            'success' => '200',
+            'message' => 'detail data sended',
+            'proposal' => $membership_data,
+        ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id) {}
+    public function edit($id)
+    {
+
+        $membership_data = Membership::findOrFail($id);
+
+        return view('admin.membership.edit', compact('membership_data'), ['title => $membership_data']);
+    }
 
     /**
      * Update the specified resource in storage.
@@ -158,47 +173,30 @@ class MembershipController extends Controller
         //update to db
         $membership_data->update($validated_data);
 
+
         if ($membership_data) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Membership updated successfully',
-                'membership' => $membership_data
-            ], 200);
+            return redirect()->route('membership.index')
+                ->with('success', 'Update Membership Success!');
         } else {
-            return response()->json([
-                'message' => 'Membership updated successfully',
-                'membership' => $membership_data
-            ], 200);
+            return redirect()->route('membership_data.index')
+                ->with('error', 'Failed to Update Membership!');
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request)
+    public function destroy($id)
     {
-
-        $request = request()->all();
-
-        $membership_data = Membership::findOrFail($request['id']);
-
+        $membership_data = Membership::find($id);
         if ($membership_data) {
             if ($membership_data->delete()) {
-                return response()->json([
-                    'success' => 'true',
-                    'message' => 'The Membership Succesfully deleted'
-                ]);
+                return redirect()->route('product.index')->with('success', 'Delete Member Successfully!');
             } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'The Membership failed to delete'
-                ]);
+                return redirect()->back()->with('error', 'Failed to Delete Member');
             }
         } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'The Membership Not Found'
-            ]);
+            return redirect()->back()->with('error', 'Member Not Found');
         }
     }
 }

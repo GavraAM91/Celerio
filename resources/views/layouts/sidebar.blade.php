@@ -1,6 +1,6 @@
-<aside id="layout-menu" class=" layout-menu menu-vertical menu bg-menu-theme overflow-y-auto flex-shrink-0">
+<aside id="layout-menu" class=" layout-menu menu-vertical min-h=screen menu bg-menu-theme overflow-y-auto flex-shrink-0">
     <div class="app-brand demo">
-        <a href="index.html" class="app-brand-link">
+        <a href="{{ route('dashboard') }}" class="app-brand-link">
             <span class="app-brand-logo demo">
                 <svg width="25" viewBox="0 0 25 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
                     xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -80,6 +80,13 @@
                 <div class="text-truncate" data-i18n="Email">Add Product</div>
             </a>
         </li>
+        <li class="menu-item {{ request()->is('coupon.index') ? 'active open' : '' }}">
+            <a href="{{ route('coupon.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-envelope"></i>
+                <div class="text-truncate" data-i18n="Email">Coupon</div>
+            </a>
+        </li>
+
 
         <!-- Category  -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Category Product</span></li>
@@ -99,23 +106,6 @@
         </li>
 
         <!-- Coupon  -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Coupon</span></li>
-
-        <li class="menu-item {{ request()->is('membership.index') ? 'active open' : '' }}">
-            <a href="{{ route('membership.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-home-smile"></i>
-                <div class="text-truncate" data-i18n="Membership">Membership Data</div>
-            </a>
-        </li>
-
-        <li class="menu-item {{ request()->is('membership_benefits.index') ? 'active open' : '' }}">
-            <a href="{{ route('membership_benefits.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-home-smile"></i>
-                <div class="text-truncate" data-i18n="Membership">Membership Benefits</div>
-            </a>
-        </li>
-
-        <!-- Membership  -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Membership</span></li>
 
         <li class="menu-item {{ request()->is('membership.index') ? 'active open' : '' }}">
@@ -131,7 +121,6 @@
                 <div class="text-truncate" data-i18n="Membership">Membership Benefits</div>
             </a>
         </li>
-
 
     </ul>
 

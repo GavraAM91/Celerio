@@ -11,22 +11,40 @@ class CouponController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //get data from database
-        $data_coupon = Coupon::all();
+        $query = Coupon::query();
 
-        //send data
-        if ($data_coupon) {
-            return response()->json([
-                'message' => 'coupon data',
-                'data' => $data_coupon,
-            ], 200);
-        } else {
-            return response()->json([
-                'message' => 'error get coupon data',
-            ], 400);
+        //if has filter
+        if (request()->has('filter')) {
+            if ($request->filter === 'sold') {
+                $query->where('used_coupon', '>', 0);
+            } else if ($request->filter === 'stock') {
+                $query->where('minimum_usage_coupon', '>', 0);
+            } else if ($request->filter === 'expired') {
+                $query->where('expired_at', '<', now());
+            }
         }
+
+
+        //if has sorting type
+        if (request()->has('sort')) {
+            if ($request->sort === 'asc') {
+                $query->orderby('name_coupon', 'asc');
+            } else if ($request->sort === 'desc') {
+                $query->orderby('name_coupon', 'desc');
+            }
+        }
+
+        //if search
+        // Search by Product Name
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('coupon_name', 'like', '%' . $request->search . '%');
+        }
+
+        $data_product = $query->get();
+
+        return view('admin.coupon.index', compact('data_coupon'), ['title => Coupon']);
     }
 
     /**
@@ -34,7 +52,7 @@ class CouponController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.coupons.create', ['title => create coupon']);
     }
 
     /**
@@ -76,17 +94,11 @@ class CouponController extends Controller
 
         $dataCoupon = Coupon::create($data_request);
 
+
         if ($dataCoupon) {
-            return response()->json([
-                'succes' => true,
-                'message' => 'Coupon Created!',
-                'data' => $dataCoupon,
-            ], 200);
+            return redirect()->route('coupon.index')->with('success', 'New coupon Added Successfully!');
         } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create Coupon!',
-            ], 400);
+            return redirect()->back()->with('error', 'Failed to Add coupon');
         }
     }
 
@@ -114,17 +126,12 @@ class CouponController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Request $request)
+    public function edit($id)
     {
 
-        $request_id = request()->id;
+        $data_coupon = Coupon::findOrFail($id);
 
-        $data_coupon = Coupon::findOrFail($request_id);
-
-        return response()->json([
-            'message' => 'data for edit',
-            'data' => $data_coupon
-        ]);
+        return view('admin.coupons.edit', compact('data_coupon'), ['title => edit coupon']);
     }
 
 
@@ -186,30 +193,18 @@ class CouponController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request)
+    public function destroy($id)
     {
 
-        $request = request()->all();
-
-        $coupon_data = Coupon::findOrFail($request['id']);
-
-        if ($coupon_data) {
-            if ($coupon_data->delete()) {
-                return response()->json([
-                    'success' => 'true',
-                    'message' => 'The Coupon Succesfully deleted'
-                ]);
+        $data_coupon = Coupon::findOrFail($id);
+        if ($data_coupon) {
+            if ($data_coupon->delete()) {
+                return redirect()->route('product.index')->with('success', 'Delete Coupon  Successfully!');
             } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'The Coupon failed to delete'
-                ]);
+                return redirect()->back()->with('error', 'Failed to Delete Coupon');
             }
         } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'The Coupon Not Found'
-            ]);
+            return redirect()->back()->with('error', 'Data Coupon Not Found');
         }
     }
 }
