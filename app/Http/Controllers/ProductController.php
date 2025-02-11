@@ -15,12 +15,45 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data_product = Product::all();
+        $query = Product::query();
+
+        //if has filter
+        if (request()->has('filter')) {
+            if ($request->filter === 'sold') {
+                $query->where('sold_product', '>', 0);
+            } else if ($request->filter === 'stock') {
+                $query->where('stock', '>', 0);
+            } else if ($request->filter === 'expired') {
+                $query->where('expired_at', '<', now());
+            }
+        }
+
+
+        //if has sorting type
+        if (request()->has('sort')) {
+            if ($request->sort === 'asc') {
+                $query->orderby('product_name', 'asc');
+            } else if ($request->sort === 'desc') {
+                $query->orderby('product_name', 'desc');
+            }
+        }
+
+        //if search
+        // Search by Product Name
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('product_name', 'like', '%' . $request->search . '%');
+        }
+
+        $data_product = $query->get();
 
         return view('admin.Products.index', compact('data_product'), ['title => Product']);
     }
+
+    /**
+     * Display a listing of the resource.
+     */
 
     /**
      * Show the form for creating a new resource.

@@ -45,11 +45,73 @@
     <div class="mt-4">
         <h2>Products Table</h2>
     </div>
-    <div class="mt-4">
+    <div class="mt-4 min-h-screen">
         <div class="card">
-            <div class="d-flex justify-content-between align-items-center">
-                <!-- Header Title -->
-                <h5 class="card-header mb-0">Product List</h5>
+            <div class="d-flex justify-content-between align-items-center my-4">
+                {{-- <!-- Header Title -->
+                <h5 class="card-header mb-0">Product List</h5> --}}
+
+                <div class="d-flex align-items-center gap-3 mx-3 ">
+                    <form class="flex-grow-1" method="GET" action="{{ route('product.index') }}">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="tf-icons bx bx-search"></i></span>
+                            <input type="text" name="search" class="form-control" placeholder="cari nama produk"
+                                value="{{ request('search') }}" />
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </form>
+
+                    <!-- Dropdown dengan Icon -->
+                    <div class="flex-grow-1">
+                        <div class="btn-group dropdown w-100 position-relative" id="dropdown-icon-demo">
+                            <button type="button" class="btn btn-primary dropdown-toggle w-100"
+                                data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                                <i class="bx bx-menu me-1"></i> Filter
+                            </button>
+                            <ul class="dropdown-menu w-100">
+                                <li>
+                                    <a href="{{ route('product.index') }}"
+                                        class="dropdown-item d-flex align-items-center text-danger">
+                                        <i class="bx bx-refresh"></i> All Data
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('product.index', ['filter' => 'sold']) }}"
+                                        class="dropdown-item d-flex align-items-center">
+                                        Sold Product
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('product.index', ['filter' => 'stock']) }}"
+                                        class="dropdown-item d-flex align-items-center">
+                                        Stock Product
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('product.index', ['filter' => 'expired']) }}"
+                                        class="dropdown-item d-flex align-items-center">
+                                        Expired Date
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
+                                <li>
+                                    <a href="{{ route('product.index', ['sort' => 'asc']) }}"
+                                        class="dropdown-item d-flex align-items-center">
+                                        Ascending
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{{ route('product.index', ['sort' => 'desc']) }}"
+                                        class="dropdown-item d-flex align-items-center">
+                                        Descending
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Button -->
                 <a class="btn btn-primary mx-4" href="{{ route('product.create') }}">
@@ -113,7 +175,8 @@
                                                 Detail Data
                                             </button>
 
-                                            <div class="modal fade" id="modalCentercc " tabindex="-1" aria-hidden="true">
+                                            <div class="modal fade" id="modalCentercc " tabindex="-1"
+                                                aria-hidden="true">
                                                 <div class="modal-dialog modal-dialog-centered">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
