@@ -11,20 +11,41 @@ class CategoryProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $category_data = CategoryProduct::all();
+        $query = CategoryProduct::query();
 
-        if ($category_data) {
-            return response()->json([
-                'message' => 'all data sended',
-                'category_data' => $category_data
-            ], 200);
-        } else {
-            return response()->json([
-                'message' => 'zero data in db',
-            ], 422);
+
+        //if has filter
+        // if (request()->has('filter')) {
+        //     if ($request->filter === 'sold') {
+        //         $query->where('sold_product', '>', 0);
+        //     } else if ($request->filter === 'stock') {
+        //         $query->where('stock', '>', 0);
+        //     } else if ($request->filter === 'expired') {
+        //         $query->where('expired_at', '<', now());
+        //     }
+        // }
+
+
+        //if has sorting type
+        if (request()->has('sort')) {
+            if ($request->sort === 'asc') {
+                $query->orderby('category_name', 'asc');
+            } else if ($request->sort === 'desc') {
+                $query->orderby('category_name', 'desc');
+            }
         }
+
+        //if search
+        // Search by Product Name
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where('category_name', 'like', '%' . $request->search . '%');
+        }
+
+        $data_category = $query->get();
+
+        return view('admin.category.index', compact('data_category'), ['title => Product']);
     }
 
     /**
@@ -32,7 +53,7 @@ class CategoryProductController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.category.create', ['title => Category']);
     }
 
     /**
@@ -62,16 +83,21 @@ class CategoryProductController extends Controller
         $data_category = CategoryProduct::create($data_request);
 
         if ($data_category) {
-            return response()->json([
-                'success' => true,
-                'message' => 'New Category Added',
-            ], 200);
+            return redirect()->route('category.index')->with('success', 'New Product Added Successfully!');
         } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to add Category',
-            ], 422);
+            return redirect()->back()->with('error', 'Failed to Add Product');
         }
+        // if ($data_category) {
+        //     return response()->json([
+        //         'success' => true,
+        //         'message' => 'New Category Added',
+        //     ], 200);
+        // } else {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Failed to add Category',
+        //     ], 422);
+        // }
     }
 
     /**
@@ -91,9 +117,11 @@ class CategoryProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(CategoryProduct $categoryProduct)
+    public function edit($id)
     {
-        //
+        $data_category = CategoryProduct::findOrFail();
+
+        return view('admin.category.edit', compact('data_category'), ['title' => 'Category edit']);
     }
 
     /**
@@ -126,18 +154,26 @@ class CategoryProductController extends Controller
         $data_category->update($data_request);
 
         if ($data_category) {
-            return response()->json([
-                'response' => '200',
-                'success' => true,
-                'message' => 'Update Category Success',
-            ], 200);
+            return redirect()->route('category.index')
+                ->with('success', 'Update Product Success!');
         } else {
-            return response()->json([
-                'response' => 422,
-                'success' => false,
-                'message' => 'Failed to Category Proposal',
-            ], 422);
+            return redirect()->route('category.index')
+                ->with('error', 'Failed to Update Product!');
         }
+
+        // if ($data_category) {
+        //     return response()->json([
+        //         'response' => '200',
+        //         'success' => true,
+        //         'message' => 'Update Category Success',
+        //     ], 200);
+        // } else {
+        //     return response()->json([
+        //         'response' => 422,
+        //         'success' => false,
+        //         'message' => 'Failed to Category Proposal',
+        //     ], 422);
+        // }
     }
 
     /**
@@ -145,24 +181,15 @@ class CategoryProductController extends Controller
      */
     public function destroy($id)
     {
-        $category_dataa = CategoryProduct::find($id);
-        if ($category_dataa) {
-            if ($category_dataa->delete()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Category deleted successfully.'
-                ], 200);
+        $category_data = CategoryProduct::find($id);
+        if ($category_data) {
+            if ($category_data->delete()) {
+                return redirect()->route('category.index')->with('success', 'Delete Product  Successfully!');
             } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Category failed to delete.'
-                ], 422);
+                return redirect()->back()->with('error', 'Failed to Delete Product');
             }
         } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data not found.'
-            ], 400);
+            return redirect()->back()->with('error', 'Data Product Not Found');
         }
     }
 }

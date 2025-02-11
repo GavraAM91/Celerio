@@ -84,17 +84,17 @@
         <!-- Category  -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Category Product</span></li>
 
-        <li class="menu-item {{ request()->is('membership.index') ? 'active open' : '' }}">
-            <a href="{{ route('membership.index') }}" class="menu-link">
+        <li class="menu-item {{ request()->is('category.index') ? 'active open' : '' }}">
+            <a href="{{ route('category.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home-smile"></i>
-                <div class="text-truncate" data-i18n="Membership">Category Data</div>
+                <div class="text-truncate" data-i18n="category">Category Data</div>
             </a>
         </li>
 
-        <li class="menu-item {{ request()->is('membership_benefits.index') ? 'active open' : '' }}">
-            <a href="{{ route('membership_benefits.index') }}" class="menu-link">
+        <li class="menu-item {{ request()->is('category.create') ? 'active open' : '' }}">
+            <a href="{{ route('category.create') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home-smile"></i>
-                <div class="text-truncate" data-i18n="Membership">Membership Benefits</div>
+                <div class="text-truncate" data-i18n="category">Create Category</div>
             </a>
         </li>
 

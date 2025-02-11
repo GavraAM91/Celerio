@@ -43,7 +43,7 @@
 
 
     <div class="mt-4">
-        <h2>Products Table</h2>
+        <h2>Category Table</h2>
     </div>
     <div class="mt-4 min-h-screen">
         <div class="card">
@@ -52,7 +52,7 @@
                 <h5 class="card-header mb-0">Product List</h5> --}}
 
                 <div class="d-flex align-items-center gap-3 mx-3 ">
-                    <form class="flex-grow-1" method="GET" action="{{ route('product.index') }}">
+                    <form class="flex-grow-1" method="GET" action="{{ route('category.index') }}">
                         <div class="input-group">
                             <span class="input-group-text"><i class="tf-icons bx bx-search"></i></span>
                             <input type="text" name="search" class="form-control" placeholder="cari nama produk"
@@ -70,40 +70,19 @@
                             </button>
                             <ul class="dropdown-menu w-100">
                                 <li>
-                                    <a href="{{ route('product.index') }}"
+                                    <a href="{{ route('category.index') }}"
                                         class="dropdown-item d-flex align-items-center text-danger">
                                         <i class="bx bx-refresh"></i> All Data
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('product.index', ['filter' => 'sold']) }}"
-                                        class="dropdown-item d-flex align-items-center">
-                                        Sold Product
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('product.index', ['filter' => 'stock']) }}"
-                                        class="dropdown-item d-flex align-items-center">
-                                        Stock Product
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('product.index', ['filter' => 'expired']) }}"
-                                        class="dropdown-item d-flex align-items-center">
-                                        Expired Date
-                                    </a>
-                                </li>
-                                <li>
-                                    <hr class="dropdown-divider" />
-                                </li>
-                                <li>
-                                    <a href="{{ route('product.index', ['sort' => 'asc']) }}"
+                                    <a href="{{ route('category.index', ['sort' => 'asc']) }}"
                                         class="dropdown-item d-flex align-items-center">
                                         Ascending
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('product.index', ['sort' => 'desc']) }}"
+                                    <a href="{{ route('category.index', ['sort' => 'desc']) }}"
                                         class="dropdown-item d-flex align-items-center">
                                         Descending
                                     </a>
@@ -114,48 +93,22 @@
                 </div>
 
                 <!-- Button -->
-                <a class="btn btn-primary mx-4" href="{{ route('product.create') }}">
-                    Add Product
+                <a class="btn btn-primary mx-4" href="{{ route('category.create') }}">
+                    Add Category
                 </a>
             </div>
             <div class="table-responsive text-nowrap">
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Image</th>
-                            <th>Product Code</th>
-                            <th>Product</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th>Sold Product</th>
-                            <th>Expired Date</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th>category name</th>
+                            <th>option</th>
                         </tr>
                     </thead>
                     <tbody class="table-border-bottom-0">
-                        @foreach ($data_product as $product)
+                        @foreach ($data_category as $category)
                             <tr>
-                                <td>
-                                    <img src="{{ asset('storage/Product/product_image/' . $product->product_image) }}"
-                                        alt="{{ $product->product_name }}" class="rounded-circle" width="50">
-                                </td>
-                                <td>{{ $product->product_code }}</td>
-                                <td>{{ $product->product_name }}</td>
-                                <td>Rp {{ number_format($product->product_price, 0, ',', '.') }}</td>
-                                <td>{{ $product->stock }}</td>
-                                <td>{{ $product->sold_product }}</td>
-                                <td>{{ $product->expired_at }}</td>
-                                <td>
-                                    <span
-                                        class="badge 
-                        @if ($product->product_status == 'available') bg-label-success 
-                        @elseif ($product->product_status == 'out of stock') bg-label-danger 
-                        @elseif ($product->product_status == 'expired') bg-label-warning 
-                        @else bg-label-secondary @endif">
-                                        {{ ucfirst($product->product_status) }}
-                                    </span>
-                                </td>
+                                <td>{{ $category->category_name }}</td>
                                 <td>
                                     <div class="dropdown">
                                         <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
@@ -163,11 +116,11 @@
                                             <i class="bx bx-dots-vertical-rounded"></i>
                                         </button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('product.edit', $product->id) }}">
+                                            <a class="dropdown-item" href="{{ route('category.edit', $category->id) }}">
                                                 <i class="bx bx-edit-alt me-1"></i> Edit
                                             </a>
                                             {{-- <a href="javascript:void(0);" class="btn btn-info btn-detail"
-                                                data-id="{{ $product->id }}" data-bs-toggle="modal"
+                                                data-id="{{ $category->id }}" data-bs-toggle="modal"
                                                 data-bs-target="#detailModal">
                                                 <i class="bx bx-edit-alt me-1"></i> Detail
                                             </a> --}}
@@ -215,11 +168,11 @@
                                             </x-modal-detail-layouts> --}}
 
 
-                                            <form action="{{ route('product.destroy', $product->id) }}"
+                                            <form action="{{ route('category.destroy', $category->id) }}"
                                                 class="d-inline">
                                                 @csrf
                                                 <button type="submit" class="dropdown-item"
-                                                    onclick="return confirm('Are you sure you want to delete this product?')">
+                                                    onclick="return confirm('Are you sure you want to delete this category?')">
                                                     <i class="bx bx-trash me-1"></i> Delete
                                                 </button>
                                             </form>
@@ -244,11 +197,11 @@
                 let id = $(this).data('id'); // Ambil ID dari tombol
 
                 $.ajax({
-                    url: `{{ url('product') }}/${id}`
+                    url: `{{ url('category') }}/${id}`
                     success: function(response) {
                         if (response.success == "200") {
                             // Masukkan data ke dalam modal
-                            $('#nameWithTitle').val(response.product.name);
+                            $('#nameWithTitle').val(response.category.name);
                         }
                     },
                     error: function(xhr) {

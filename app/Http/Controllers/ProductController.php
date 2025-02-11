@@ -36,7 +36,7 @@ class ProductController extends Controller
             if ($request->sort === 'asc') {
                 $query->orderby('product_name', 'asc');
             } else if ($request->sort === 'desc') {
-                $query->orderby('product_name', 'desc');
+            $query->orderby('product_name', 'desc');
             }
         }
 
