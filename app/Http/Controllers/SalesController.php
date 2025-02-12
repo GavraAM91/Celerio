@@ -31,7 +31,7 @@ class SalesController extends Controller
      */
     public function create()
     {
-        //
+        return view('casier.sales.create', ['title => Create']);
     }
 
     /**
