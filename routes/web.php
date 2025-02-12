@@ -145,6 +145,7 @@ Route::middleware(['auth', 'verified', 'role:casier'])->group(function () {
         Route::get('/', [SalesController::class, 'index'])->name('index');
         Route::get('create', [SalesController::class, 'create'])->name('create');
         Route::post('store', [SalesController::class, 'store'])->name('store');
+        Route::get('searchMembership', [SalesController::class, 'searchMembership'])->name('searchMembership');
     });
 
     //sales report

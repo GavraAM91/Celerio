@@ -21,15 +21,12 @@ class SalesController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        //
-    }
+    public function index() {}
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
         return view('casier.sales.create', ['title => Create']);
     }
@@ -72,6 +69,26 @@ class SalesController extends Controller
     public function destroy(Sales $sales)
     {
         //
+    }
+
+    public function searchMembership(Request $request)
+    {
+
+        $membership_code = $request->query('code'); // Ambil dari query string
+
+        $membership = Membership::where('membership_code', $membership_code)->first();
+
+        if ($membership) {
+            return response()->json([
+                'success' => true,
+                'data' => $membership
+            ], 200);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Data tidak ditemukan'
+        ], 404);
     }
 
     public function PurchasedProduct(Request $request)
