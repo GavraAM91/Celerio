@@ -1,4 +1,4 @@
-<aside id="layout-menu" class=" layout-menu menu-vertical min-h=screen menu bg-menu-theme overflow-y-auto flex-shrink-0">
+<aside id="layout-menu" class=" layout-menu menu-vertical min-h-screen menu bg-menu-theme">
     <div class="app-brand demo">
         <a href="{{ route('dashboard') }}" class="app-brand-link">
             <span class="app-brand-logo demo">
@@ -64,7 +64,30 @@
             </a>
         </li>
 
-        <!-- Products -->
+        <!-- Data Master -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Data Master</span>
+        </li>
+        <li class="menu-item {{ request()->is('product.index') ? 'active open' : '' }}">
+            <a href="{{ route('product.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-envelope"></i>
+                <div class="text-truncate" data-i18n="Email">Data Pengguna</div>
+            </a>
+        </li>
+        <li class="menu-item {{ request()->is('product.create') ? 'active open' : '' }}">
+            <a href="{{ route('product.create') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-envelope"></i>
+                <div class="text-truncate" data-i18n="Email">Aktifitas Pengguna</div>
+            </a>
+        </li>
+        <li class="menu-item {{ request()->is('coupon.index') ? 'active open' : '' }}">
+            <a href="{{ route('coupon.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-envelope"></i>
+                <div class="text-truncate" data-i18n="Email">Coupon</div>
+            </a>
+        </li>
+
+          <!-- Product -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Products</span>
         </li>

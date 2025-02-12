@@ -42,7 +42,8 @@ class RoleSeeder extends Seeder
         // $getPermissions = PermissionsModel::all()->pluck('name')->toArray();
 
         // //sync permissions to admin
-        // $roleAdmin = Role::findByName('admin');
+        $roleAdmin = Role::findById('2');
+        $roleAdmin->assignRole('admin');
         // $roleAdmin->givePermissionTo($getPermissions);
     }
 }

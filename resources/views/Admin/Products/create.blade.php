@@ -7,7 +7,6 @@
                 <div class="card mb-6">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Add Product</h5>
-                        <small class="text-body float-end">Default label</small>
                     </div>
                     <div class="card-body">
                         <form action="{{ route('product.store') }}" name="createProduct" method="POST"
@@ -60,7 +59,7 @@
                                     value="{{ old('expired_at', isset($data) ? \Carbon\Carbon::parse($data->expired_date)->format('Y-m-d') : '') }}"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                             </div>
-x
+
                             <!-- Product Status -->
                             <div class="mb-6">
                                 <label class="form-label" for="product_status">Product Status</label>
@@ -73,12 +72,15 @@ x
 
                             <!-- Access Role -->
                             <div class="mb-6">
-                                <label class="form-label" for="access_role">Access Role</label>
+                                <label class="form-label" for="access_role">Access Role (can edit this)</label>
                                 <input type="text" class="form-control" id="access_role" name="access_role"
                                     placeholder="Enter access role" required />
                             </div>
 
                             <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="button" class="btn btn-secondary"
+                                onclick="window.history.back();">Kembali</button>
+
                         </form>
 
                     </div>

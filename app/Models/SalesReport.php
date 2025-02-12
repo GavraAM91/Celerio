@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Models\User;
+use App\Models\Sales;
 use App\Models\Product;
+use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SalesReport extends Model
 {
@@ -30,5 +32,12 @@ class SalesReport extends Model
     public function product(): HasMany
     {
         return $this->hasMany(Product::class, 'product_id');
+    }
+
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logUnguarded('*');
     }
 }

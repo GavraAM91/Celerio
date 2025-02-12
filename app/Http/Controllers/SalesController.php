@@ -74,11 +74,9 @@ class SalesController extends Controller
         //
     }
 
-    //if product already buy do this
     public function PurchasedProduct(Request $request)
     {
-
-        //validate all data
+        // Validasi semua data
         $validator = FacadesValidator::make($request->all(), [
             'user.id' => 'required',
             'membership_id' => 'nullable',
@@ -92,7 +90,7 @@ class SalesController extends Controller
             'cart.*.total_price' => 'required',
         ]);
 
-        //if error 
+        // Jika validasi gagal
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validasi gagal',
@@ -100,28 +98,28 @@ class SalesController extends Controller
             ], 400);
         }
 
-        //prepare variable
+        // Siapkan variabel
         $membershipData = null;
         $membershipBenefit = null;
         $discountMembership = 0;
         $pointMembership = 0;
 
-        //insert data to variable
+        // Masukkan data ke variabel
         $totalPrice = $request->total_price;
 
         try {
-            //if they use membership card
+            // Jika menggunakan kartu membership
             if ($request->membership_id) {
-                //insert membership_id from request 
-                $membershipId = $request->membeship_id;
+                // Masukkan membership_id dari request
+                $membershipId = $request->membership_id;
 
-                //check into db membership 
+                // Cek ke database membership
                 $membershipData = Membership::findOrFail($membershipId);
 
-                //check into db membership Benefit
+                // Cek ke database membership Benefit
                 $membershipBenefit = MembershipBenefits::where('type', $membershipData->type)->firstOrFail();
 
-                //check the type
+                // Cek tipe membership
                 if ($membershipData->type == 'type1') {
                     $discountMembership = $membershipBenefit->percentageDiscount;
                 } elseif ($membershipData->type == 'type2') {
@@ -131,14 +129,14 @@ class SalesController extends Controller
                 }
             }
 
-            //purchase system
+            // Sistem pembelian
             foreach ($request->cart as $item) {
                 $product = Product::findOrFail($item['product_id']);
 
-                //insert product price
+                // Masukkan harga produk
                 $basePrice = $product->product_price;
 
-                //check the membership type
+                // Cek tipe membership
                 if ($membershipData) {
                     $selling_price = selling_price::where('type', $membershipData->type)->first();
                     $markup = $selling_price ? $selling_price->markup / 100 : 0.03;
@@ -146,16 +144,16 @@ class SalesController extends Controller
                     $markup = 0.03;
                 }
 
-                //counting + margin
+                // Hitung harga + margin
                 $price = $basePrice + ($basePrice * $markup);
 
-                //check if any discount added
+                // Cek jika ada diskon yang ditambahkan
                 $discountByCoupon = 0;
 
                 if (!empty($item['coupon_code'])) {
                     $coupon = Coupon::where('coupon_code', $item['coupon_code'])->first();
                     if ($coupon->used_coupon <= $coupon->total_coupon) {
-                        //if any coupon available, edit the table
+                        // Jika ada kupon yang tersedia, edit tabel
                         $coupon->used_coupon += 1;
                         $coupon->save();
 
@@ -169,29 +167,28 @@ class SalesController extends Controller
                     }
                 }
 
-                //perhitungann 
+                // Perhitungan subtotal
                 $subtotal = ($price * $item['quantity']) - $discountByCoupon;
 
-                //hitung pajak 
-                $tax = $subtotal * 0.11;
+                // Hitung pajak
+                $tax = $subtotal * 0.12; // PPN 12%
 
-                //point membership
+                // Poin membership
                 $points = ($membershipData && in_array($membershipData->type, ['type1', 'type2'])) ? ($subtotal * 0.02) : 0;
 
-                //total price
+                // Total harga
                 $totalPrice += $subtotal + $tax;
                 $pointMembership += $points;
 
-                //insert into membership point 0  
+                // Masukkan ke membership point
                 $data_membership = Membership::where('id', $membershipData->id)->update([
-                    'points' => $membershipData->poin + $pointMembership,
+                    'points' => $membershipData->points + $pointMembership,
                 ]);
 
-
-                //creating sales invoice 
+                // Membuat invoice penjualan
                 $invoiceSales = 'INV-' . time() . '-' . strtoupper(substr($data_membership->username, 0, 5));
 
-                //insert into sales 
+                // Masukkan ke penjualan
                 $sale = Sales::create([
                     'membership_id' => $item['membership_id'],
                     'product_id' => $item['product_id'],
@@ -204,12 +201,12 @@ class SalesController extends Controller
 
                 if ($sale) {
                     Product::where('id', $item['product_id'])
-                        ->increment('sold_product', $item['quantity']);
+                        ->decrement('stock', $item['quantity']);
 
                     $product = Product::find($item['product_id']);
 
-                    if ($product->sold_product >= $product->stock) {
-                        $product->status = 'sold out';
+                    if ($product->stock <= $product->minimal_stock) {
+                        $product->status = 'low stock';
                         $product->save();
                     }
                 } else {
@@ -218,8 +215,8 @@ class SalesController extends Controller
                     ], 500);
                 }
 
-                //get username
-                $user = User::where('id', $item['user_id']);
+                // Dapatkan username
+                $user = User::where('id', $item['user_id'])->first();
 
                 $items[] = [
                     'product_name' => $product->name,
@@ -236,7 +233,10 @@ class SalesController extends Controller
                 'receipt' => [
                     'cashier' => $user->name,
                     'items' => $items,
-                    'total' => $totalPrice
+                    'total' => $totalPrice,
+                    'tax' => $tax,
+                    'discount' => $discountByCoupon,
+                    'points_earned' => $pointMembership
                 ]
             ]);
         } catch (\Exception $e) {

@@ -1,16 +1,4 @@
 <x-app-layout>
-    {{-- @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @endif --}}
-
     @if (session('success'))
         <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
             <div class="toast align-items-center text-white bg-success border-0 show" role="alert" aria-live="assertive"
@@ -172,16 +160,19 @@
                                                 <i class="bx bx-edit-alt me-1"></i> Detail
                                             </a> --}}
 
+                                            <!-- Button trigger modal -->
                                             <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                                 data-bs-target="#modalCenter">
-                                                Detail Data
+                                                Launch modal
                                             </button>
 
+                                            <!-- Modal -->
                                             <div class="modal fade" id="modalCenter" tabindex="-1" aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-dialog modal-dialog-centered" role="document">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title">Detail Data</h5>
+                                                            <h5 class="modal-title" id="modalCenterTitle">Modal title
+                                                            </h5>
                                                             <button type="button" class="btn-close"
                                                                 data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
@@ -191,17 +182,38 @@
                                                                     <label for="nameWithTitle"
                                                                         class="form-label">Name</label>
                                                                     <input type="text" id="nameWithTitle"
-                                                                        class="form-control" readonly />
+                                                                        class="form-control"
+                                                                        placeholder="Enter Name" />
+                                                                </div>
+                                                            </div>
+                                                            <div class="row g-6">
+                                                                <div class="col mb-0">
+                                                                    <label for="emailWithTitle"
+                                                                        class="form-label">Email</label>
+                                                                    <input type="email" id="emailWithTitle"
+                                                                        class="form-control"
+                                                                        placeholder="xxxx@xxx.xx" />
+                                                                </div>
+                                                                <div class="col mb-0">
+                                                                    <label for="dobWithTitle"
+                                                                        class="form-label">DOB</label>
+                                                                    <input type="date" id="dobWithTitle"
+                                                                        class="form-control" />
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary"
-                                                                data-bs-dismiss="modal">Close</button>
+                                                            <button type="button" class="btn btn-outline-secondary"
+                                                                data-bs-dismiss="modal">
+                                                                Close
+                                                            </button>
+                                                            <button type="button" class="btn btn-primary">Save
+                                                                changes</button>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
+
 
                                             {{-- 
                                             <x-modal-detail-layouts>
@@ -233,29 +245,31 @@
             </div>
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    @push('scripts')
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <script>
-        var myModal = new bootstrap.Modal(document.getElementById('modalCenter'));
-        myModal.show();
+        <script>
+            var myModal = new bootstrap.Modal(document.getElementById('modalCenter'));
+            myModal.show();
 
-        $(document).ready(function() {
-            $('.btn-info').click(function() {
-                let id = $(this).data('id'); // Ambil ID dari tombol
+            $(document).ready(function() {
+                $('.btn-info').click(function() {
+                    let id = $(this).data('id'); // Ambil ID dari tombol
 
-                $.ajax({
-                    url: `{{ url('product') }}/${id}`
-                    success: function(response) {
-                        if (response.success == "200") {
-                            // Masukkan data ke dalam modal
-                            $('#nameWithTitle').val(response.product.name);
+                    $.ajax({
+                        url: `{{ url('product') }}/${id}`
+                        success: function(response) {
+                            if (response.success == "200") {
+                                // Masukkan data ke dalam modal
+                                $('#nameWithTitle').val(response.product.name);
+                            }
+                        },
+                        error: function(xhr) {
+                            console.log(xhr.responseText);
                         }
-                    },
-                    error: function(xhr) {
-                        console.log(xhr.responseText);
-                    }
+                    });
                 });
             });
-        });
-    </script>
+        </script>
+    @endpush
 </x-app-layout>

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Sales;
 use App\Models\SalesReport;
 use App\Models\CategoryProduct;
+use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -37,5 +38,12 @@ class Product extends Model
     public function salesReport(): HasMany
     {
         return $this->hasMany(SalesReport::class, 'sales_report_id');
+    }
+
+    //log activity
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logUnguarded('*');
     }
 }

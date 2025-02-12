@@ -12,6 +12,7 @@
         "laravel/tinker": "^2.9",
         "nesbot/carbon": "^3.8",
         "phpoffice/phpspreadsheet": "^3.9",
+        "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-permission": "^6.10"
     },
     "require-dev": {

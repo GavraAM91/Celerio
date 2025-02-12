@@ -36,7 +36,7 @@ class ProductController extends Controller
             if ($request->sort === 'asc') {
                 $query->orderby('product_name', 'asc');
             } else if ($request->sort === 'desc') {
-            $query->orderby('product_name', 'desc');
+                $query->orderby('product_name', 'desc');
             }
         }
 
@@ -131,6 +131,7 @@ class ProductController extends Controller
 
         $data_product = Product::create($data_request);
 
+        activity()->log(Auth::user()->name . 'has add product');
 
         if ($data_product) {
             return redirect()->route('product.index')->with('success', 'New Product Added Successfully!');
