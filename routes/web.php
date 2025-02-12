@@ -18,9 +18,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Route::get('/dashboard', function () {
-//     return view('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -32,7 +32,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     //dashboard
     Route::get('/admin/dashboard', function () {
         return view('admin.dashboard');
-    })->name('dashboard');
+    })->name('admin.dashboard');
 
     //Products
     Route::prefix('product')->name('product.')->group(function () {
@@ -133,12 +133,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     });
 });
 
-Route::middleware(['auth', 'role:casier'])->group(function () {
-
+Route::middleware(['auth', 'verified', 'role:casier'])->group(function () {
     //dashboard
     Route::get('/casier/dashboard', function () {
         return view('casier.dashboard');
-    })->name('dashboard.casier');
+    })->name('casier.dashboard');
 
 
     //sales 

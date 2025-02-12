@@ -7,7 +7,7 @@
             <div class="layout-page">
                 <!-- Navbar -->
 
-                <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
+                {{-- <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
                     id="layout-navbar">
                     <div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0 d-xl-none">
                         <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
@@ -73,6 +73,7 @@
                                         <a class="dropdown-item" href="#"> <i
                                                 class="bx bx-cog bx-md me-3"></i><span>Settings</span> </a>
                                     </li>
+                                    <h1>INI KASIR</h1>
                                     <li>
                                         <a class="dropdown-item" href="#">
                                             <span class="d-flex align-items-center align-middle">
@@ -95,7 +96,7 @@
                             <!--/ User -->
                         </ul>
                     </div>
-                </nav>
+                </nav> --}}
 
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
@@ -108,7 +109,7 @@
                                 <div class="card h-100">
                                     <div class="card-header d-flex justify-content-between">
                                         <div class="card-title mb-0">
-                                            <h5 class="mb-1 me-2">Order Statistics</h5>
+                                            <h5 class="mb-1 me-2">JUAL NJER</h5>
                                             <p class="card-subtitle">42.82k Total Sales</p>
                                         </div>
                                         <div class="dropdown">
@@ -216,12 +217,10 @@
                                                 </button>
                                             </li>
                                             <li class="nav-item">
-                                                <button type="button" class="nav-link"
-                                                    role="tab">Expenses</button>
+                                                <button type="button" class="nav-link" role="tab">Expenses</button>
                                             </li>
                                             <li class="nav-item">
-                                                <button type="button" class="nav-link"
-                                                    role="tab">Profit</button>
+                                                <button type="button" class="nav-link" role="tab">Profit</button>
                                             </li>
                                         </ul>
                                     </div>

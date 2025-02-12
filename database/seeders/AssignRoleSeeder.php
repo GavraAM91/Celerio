@@ -17,6 +17,6 @@ class AssignRoleSeeder extends Seeder
         // $user->assignRole('admin');
 
         $user = User::find(1);
-        $user->assignRole('casier');
+        $user->assignRole('admin');
     }
 }
