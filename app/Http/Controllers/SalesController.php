@@ -8,11 +8,12 @@ use App\Models\Sales;
 use App\Models\Coupon;
 use App\Models\Product;
 use App\Models\Membership;
+use App\Models\SellingPrice;
 use Illuminate\Http\Request;
 use App\Models\selling_price;
 use App\Models\MembershipBenefits;
-use Illuminate\Routing\Controller;
 // use Illuminate\Support\Carbon as SupportCarbon;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
 
@@ -48,22 +49,6 @@ class SalesController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Sales $sales)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Sales $sales)
-    {
-        //
-    }
-
-    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Sales $sales)
@@ -71,6 +56,55 @@ class SalesController extends Controller
         //
     }
 
+    //search coupon
+    public function searchCoupon(Request $request)
+    {
+        $coupon_name = $request->query('name');
+
+        $coupon = Coupon::where('name_coupon', $coupon_name)->first();
+
+        if ($coupon) {
+            return response()->json([
+                'success' => true,
+                'data' => $coupon
+            ], 200);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Coupon tidak ditemukan'
+        ], 404);
+    }
+
+    //search product
+    public function searchProduct(Request $request)
+    {
+        $product_name = $request->query('productName');
+        $membershipType = $request->query('membershipType');
+        // var_dump($product_name);
+
+        $product = Product::where('product_name', 'LIKE', "%$product_name%")->first();
+
+        if (!$product) {
+            return response()->json(['success' => false, 'message' => 'Produk tidak ditemukan']);
+        }
+
+        $selling_price = SellingPrice::where('type_buyer', $membershipType)->first();
+
+        // if (!$selling_price) {
+        //     return response()->json(['success' => false, 'message' => 'Membership tidak ditemukan']);
+        // }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'product' => $product,
+                'sellingPrice' => $selling_price,
+            ],
+        ]);
+    }
+
+    //search membership
     public function searchMembership(Request $request)
     {
 
@@ -155,7 +189,7 @@ class SalesController extends Controller
 
                 // Cek tipe membership
                 if ($membershipData) {
-                    $selling_price = selling_price::where('type', $membershipData->type)->first();
+                    $selling_price = SellingPrice::where('type', $membershipData->type)->first();
                     $markup = $selling_price ? $selling_price->markup / 100 : 0.03;
                 } else {
                     $markup = 0.03;

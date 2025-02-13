@@ -7,19 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class selling_price extends Model
+class SellingPrice extends Model
 {
     /** @use HasFactory<\Database\Factories\SellingPriceFactory> */
     use HasFactory;
 
     //table 
-    protected $table = "selling_price";
+    protected $table = "selling_prices";
 
     //guarded
     protected $guarded = ['id'];
 
     //connection to table product 
-    public function product(): HasMany {
-        return $this->hasMany(Product::class, 'product_id');
-    }
+    // public function product(): HasMany
+    // {
+    //     return $this->hasMany(Product::class, 'product_id');
+    // }
 }

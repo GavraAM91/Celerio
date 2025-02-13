@@ -146,6 +146,8 @@ Route::middleware(['auth', 'verified', 'role:casier'])->group(function () {
         Route::get('create', [SalesController::class, 'create'])->name('create');
         Route::post('store', [SalesController::class, 'store'])->name('store');
         Route::get('searchMembership', [SalesController::class, 'searchMembership'])->name('searchMembership');
+        Route::get('searchCoupon', [SalesController::class, 'searchCoupon'])->name('searchCoupon');
+        Route::get('searchProduct', [SalesController::class, 'searchProduct'])->name('searchProduct');
     });
 
     //sales report

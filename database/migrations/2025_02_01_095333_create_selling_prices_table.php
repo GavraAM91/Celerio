@@ -13,13 +13,8 @@ return new class extends Migration
     {
         Schema::create('selling_prices', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignid('product_id')
-                ->constrained(
-                    table: 'products'
-                );
             $table->string('type_buyer');
-            $table->float('cogs');
+            $table->float('selling_price');
             $table->timestamps();
         });
     }

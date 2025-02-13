@@ -12,7 +12,7 @@ class Coupon extends Model
     use HasFactory;
 
     //table
-    protected $table = 'coupon';
+    protected $table = 'coupons';
 
     //guarded or fillable
     protected $guarded = ['id'];
