@@ -158,7 +158,8 @@
     <script src="{{ asset('template/assets/js/dashboards-analytics.js') }}"></script>
     <!-- Page JS -->
     <script src="{{ asset('template/assets/js/ui-toasts.js') }}"></script>
-    <script src="{{ asset('template/assets/js/ui-modals.js') }}"></script>
+    <script src="{{ asset('template/assets/js/showCustomToast.js') }}"></script>
+    {{-- <script src="{{ asset('template/assets/js/ui-modals.js') }}"></script> --}}
 
 
     <!-- Page JS -->

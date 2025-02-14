@@ -28,16 +28,10 @@ class Product extends Model
         return $this->belongsTo(CategoryProduct::class, 'category_id');
     }
 
-    //connect to sales detail 
-    public function sales(): HasMany
-    {
-        return $this->hasMany(Sales::class, 'sales_id');
-    }
-
     //connect to sales_detail 
-    public function salesReport(): HasMany
+    public function SalesDetail(): HasMany
     {
-        return $this->hasMany(SalesReport::class, 'sales_report_id');
+        return $this->hasMany(SalesDetail::class, 'product_id', 'id');
     }
 
     //log activity

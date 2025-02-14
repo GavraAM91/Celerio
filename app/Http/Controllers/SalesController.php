@@ -8,11 +8,14 @@ use App\Models\Sales;
 use App\Models\Coupon;
 use App\Models\Product;
 use App\Models\Membership;
+use App\Models\ReportSales;
+use App\Models\SalesDetail;
+use Illuminate\Support\Str;
 use App\Models\SellingPrice;
+// use Illuminate\Support\Carbon as SupportCarbon;
 use Illuminate\Http\Request;
 use App\Models\selling_price;
 use App\Models\MembershipBenefits;
-// use Illuminate\Support\Carbon as SupportCarbon;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
@@ -43,7 +46,7 @@ class SalesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Sales $sales)
+    public function show()
     {
         //
     }
@@ -51,7 +54,7 @@ class SalesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Sales $sales)
+    public function destroy()
     {
         //
     }
@@ -127,18 +130,21 @@ class SalesController extends Controller
 
     public function PurchasedProduct(Request $request)
     {
-        // Validasi semua data
         $validator = FacadesValidator::make($request->all(), [
-            'user.id' => 'required',
-            'membership_id' => 'nullable',
-            'payment_method' => 'required|string',
+            'user_id' => 'required|exists:users,id',
+            'membership_id' => 'nullable|exists:memberships,id',
+            'coupon_id' => 'nullable|exists:coupons,id',
             'total_price' => 'required',
-            'cart' => 'required|array',
-            'cart.*.membership_id' => 'nullable',
-            'cart.*.product_id' => 'required',
-            'cart.*.coupon_code' => 'nullable',
-            'cart.*.quantity' => 'required|integer|min:1',
-            'cart.*.total_price' => 'required',
+            'tax' => 'required|numeric',
+            'total_price_with_discount' => 'nullable',
+            'final_price' => 'required',
+            'cash_received' => 'required|min:0',
+            'change' => 'required|numeric',
+            'data' => 'required|array',
+            'data.*.product_id' => 'required|exists:products,id',
+            'data.*.product_name' => 'required',
+            'data.*.quantity' => 'required|integer|min:1',
+            'data.*.selling_price' => 'required|numeric|min:0'
         ]);
 
         // Jika validasi gagal
@@ -149,159 +155,80 @@ class SalesController extends Controller
             ], 400);
         }
 
-        // Siapkan variabel
-        $membershipData = null;
-        $membershipBenefit = null;
-        $discountMembership = 0;
-        $pointMembership = 0;
+        //ambil data tervalidasi
+        $validatedData = $validator->validate();
+        $membershipId = $validatedData['membership_id'] ?? null;
+        $finalPrice = $validatedData['final_price'];
+        $couponId = $validatedData['coupon_id'] ?? null;
 
-        // Masukkan data ke variabel
-        $totalPrice = $request->total_price;
+        // Cek Membership dan Tambahkan Poin
+        $pointsEarned = 0;
 
-        try {
-            // Jika menggunakan kartu membership
-            if ($request->membership_id) {
-                // Masukkan membership_id dari request
-                $membershipId = $request->membership_id;
+        if ($membershipId) {
+            $membershipInfo = Membership::where('id', $membershipId)->first();
 
-                // Cek ke database membership
-                $membershipData = Membership::findOrFail($membershipId);
-
-                // Cek ke database membership Benefit
-                $membershipBenefit = MembershipBenefits::where('type', $membershipData->type)->firstOrFail();
-
-                // Cek tipe membership
-                if ($membershipData->type == 'type1') {
-                    $discountMembership = $membershipBenefit->percentageDiscount;
-                } elseif ($membershipData->type == 'type2') {
-                    $discountMembership = $membershipBenefit->percentageDiscount;
-                } elseif ($membershipData->type == 'type3') {
-                    $discountMembership = $membershipBenefit->percentageDiscount;
-                }
+            if ($membershipInfo && in_array($membershipInfo->type, ['type1', 'type2'])) {
+                $pointsEarned = $finalPrice * 0.02;
+                $membershipInfo->point += $pointsEarned;
+                $membershipInfo->save();
             }
-
-            // Sistem pembelian
-            foreach ($request->cart as $item) {
-                $product = Product::findOrFail($item['product_id']);
-
-                // Masukkan harga produk
-                $basePrice = $product->product_price;
-
-                // Cek tipe membership
-                if ($membershipData) {
-                    $selling_price = SellingPrice::where('type', $membershipData->type)->first();
-                    $markup = $selling_price ? $selling_price->markup / 100 : 0.03;
-                } else {
-                    $markup = 0.03;
-                }
-
-                // Hitung harga + margin
-                $price = $basePrice + ($basePrice * $markup);
-
-                // Cek jika ada diskon yang ditambahkan
-                $discountByCoupon = 0;
-
-                if (!empty($item['coupon_code'])) {
-                    $coupon = Coupon::where('coupon_code', $item['coupon_code'])->first();
-                    if ($coupon->used_coupon <= $coupon->total_coupon) {
-                        // Jika ada kupon yang tersedia, edit tabel
-                        $coupon->used_coupon += 1;
-                        $coupon->save();
-
-                        if (!empty($coupon->percentage_coupon)) {
-                            $discountByCoupon = $coupon->percentage_coupon;
-                        } else {
-                            $discountByCoupon = $coupon->value_coupon;
-                        }
-                    } else {
-                        $discountByCoupon = 0;
-                    }
-                }
-
-                // Perhitungan subtotal
-                $subtotal = ($price * $item['quantity']) - $discountByCoupon;
-
-                // Hitung pajak
-                $tax = $subtotal * 0.12; // PPN 12%
-
-                // Poin membership
-                $points = ($membershipData && in_array($membershipData->type, ['type1', 'type2'])) ? ($subtotal * 0.02) : 0;
-
-                // Total harga
-                $totalPrice += $subtotal + $tax;
-                $pointMembership += $points;
-
-                // Masukkan ke membership point
-                $data_membership = Membership::where('id', $membershipData->id)->update([
-                    'points' => $membershipData->points + $pointMembership,
-                ]);
-
-                // Membuat invoice penjualan
-                $invoiceSales = 'INV-' . time() . '-' . strtoupper(substr($data_membership->username, 0, 5));
-
-                // Masukkan ke penjualan
-                $sale = Sales::create([
-                    'membership_id' => $item['membership_id'],
-                    'product_id' => $item['product_id'],
-                    'coupon_id' => $item['coupon_id'],
-                    'invoice_sales' => $invoiceSales,
-                    'payment_method' => $item['payment_method'],
-                    'total_price' => $item['total_price'],
-                    'quantity' => $item['quantity']
-                ]);
-
-                if ($sale) {
-                    Product::where('id', $item['product_id'])
-                        ->decrement('stock', $item['quantity']);
-
-                    $product = Product::find($item['product_id']);
-
-                    if ($product->stock <= $product->minimal_stock) {
-                        $product->status = 'low stock';
-                        $product->save();
-                    }
-                } else {
-                    return response()->json([
-                        'message' => 'Gagal menyimpan data penjualan untuk produk ' . $product->name
-                    ], 500);
-                }
-
-                // Dapatkan username
-                $user = User::where('id', $item['user_id'])->first();
-
-                $items[] = [
-                    'product_name' => $product->name,
-                    'quantity' => $item['quantity'],
-                    'price' => $price,
-                    'subtotal' => $subtotal
-                ];
-            }
-
-            return response()->json([
-                'message' => 'Transaksi berhasil',
-                'total_price' => $totalPrice,
-                'points_earned' => $pointMembership,
-                'receipt' => [
-                    'cashier' => $user->name,
-                    'items' => $items,
-                    'total' => $totalPrice,
-                    'tax' => $tax,
-                    'discount' => $discountByCoupon,
-                    'points_earned' => $pointMembership
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Terjadi kesalahan saat memproses transaksi.',
-                'error' => $e->getMessage()
-            ], 500);
         }
+
+        if ($couponId) {
+            $couponInfo = Coupon::where('id', $couponId)->first();
+
+            $couponInfo->used_coupon += 1;
+            $couponInfo->save();
+        }
+
+        // Generate Invoice
+        $invoiceSales = 'INV-' . date('Ymd') . '-' . strtoupper(Str::random(6));
+
+        // Simpan ke Report Sales
+        $sales = ReportSales::create([
+            'user_id' => Auth::id(),
+            'membership_id' => $membershipId,
+            'coupon_id' => $validatedData['coupon_id'] ?? null,
+            'invoice_sales' => $invoiceSales,
+            'tax' => $validatedData['tax'],
+            'total_product_price' => $validatedData['total_price'],
+            'total_price_discount' => $validatedData['total_price_with_discount'],
+            'final_price' => $finalPrice,
+            'cash_received' => $validatedData['cash_received'],
+            'change' => $validatedData['change'],
+        ]);
+
+        // Simpan Detail Penjualan
+        foreach ($validatedData['data'] as $item) {
+            SalesDetail::create([
+                'sales_id' => $sales->id,
+                'product_id' => $item['product_id'],
+                'invoice_sales' => $invoiceSales,
+                'quantity' => $item['quantity'],
+                'selling_price' => $item['selling_price'],
+            ]);
+
+            //update stock
+            $productData = Product::where('id', $item['product_id'])->first();
+            $productData->sold_product += $item['quantity'];
+            $productData->save();
+        }
+
+
+        activity()->log(Auth::user()->name . 'has doing transaction with code ' . $invoiceSales);
+
+        // Response JSON dengan PDF link
+        return response()->json([
+            'message' => 'Transaksi berhasil',
+            'invoice' => $invoiceSales,
+            'points_earned' => $pointsEarned,
+        ], 201);
     }
 
     public function pdfReceipt($invoice_sales)
     {
         //search by invoice sales
-        $data_sales = Sales::where('invoice_sales', $invoice_sales)->firstOrFail();
+        $data_sales = ReportSales::where('invoice_sales', $invoice_sales)->firstOrFail();
 
         //check empty
         if ($data_sales->isEmpty()) {

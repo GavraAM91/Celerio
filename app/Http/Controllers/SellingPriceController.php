@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\selling_price;
+use App\Models\SellingPrice;
 use Illuminate\Http\Request;
 
 class SellingPriceController extends Controller
@@ -34,7 +34,7 @@ class SellingPriceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(selling_price $selling_price)
+    public function show(SellingPrice $SellingPrice)
     {
         //
     }
@@ -42,7 +42,7 @@ class SellingPriceController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(selling_price $selling_price)
+    public function edit(SellingPrice $SellingPrice)
     {
         //
     }
@@ -50,7 +50,7 @@ class SellingPriceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, selling_price $selling_price)
+    public function update(Request $request, SellingPrice $SellingPrice)
     {
         //
     }
@@ -58,7 +58,7 @@ class SellingPriceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(selling_price $selling_price)
+    public function destroy(SellingPrice $SellingPrice)
     {
         //
     }

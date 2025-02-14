@@ -11,24 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sales_report', function (Blueprint $table) {
+        Schema::create('sales_detail', function (Blueprint $table) {
             $table->id();
             //connect to sales
             $table->foreignId('sales_id')
                 ->constrained(
-                    table: 'sales'
-                );
+                    table: 'report_sales'
+                )->onDelete('cascade');
 
             //connect to product
             $table->foreignId('product_id')
                 ->constrained(
                     table: 'products'
-                );
+                )->onDelete('cascade');
 
             $table->string('invoice_sales')->unique();
             $table->integer('quantity');
-            $table->unsignedBigInteger('price');
-            $table->unsignedBigInteger('subtotal');
+            $table->decimal('selling_price', 10, 2);
             $table->timestamps();
         });
     }

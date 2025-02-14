@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sales_Detail;
-use App\Models\SalesReport;
+use App\Models\SalesDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
 
-class SalesReportController extends Controller
+class SalesDetailController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,7 +15,7 @@ class SalesReportController extends Controller
     public function index()
     {
         //all membership's data 
-        $sales_report_data = SalesReport::all();
+        $sales_report_data = SalesDetail::all();
 
         if ($sales_report_data) {
             return response()->json([
@@ -67,7 +67,7 @@ class SalesReportController extends Controller
             'type' => request()->type
         ];
 
-        $sales_report_data = SalesReport::create($data_request);
+        $sales_report_data = SalesDetail::create($data_request);
 
         if ($sales_report_data) {
             return response()->json([
@@ -89,7 +89,7 @@ class SalesReportController extends Controller
     public function show($id)
     {
         //sort data by ID
-        $sales_report_data = SalesReport::findOrFail($id);
+        $sales_report_data = SalesDetail::findOrFail($id);
 
 
         if ($sales_report_data) {
@@ -114,24 +114,24 @@ class SalesReportController extends Controller
 
         $request = request()->all();
 
-        $sales_report_data = SalesReport::findOrFail($request['id']);
+        $sales_report_data = SalesDetail::findOrFail($request['id']);
 
         if ($sales_report_data) {
             if ($sales_report_data->delete()) {
                 return response()->json([
                     'success' => 'true',
-                    'message' => 'The SalesReport Succesfully deleted'
+                    'message' => 'The SalesDetail Succesfully deleted'
                 ]);
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'The SalesReport failed to delete'
+                    'message' => 'The SalesDetail failed to delete'
                 ]);
             }
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'The SalesReport Not Found'
+                'message' => 'The SalesDetail Not Found'
             ]);
         }
     }

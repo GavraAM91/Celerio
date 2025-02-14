@@ -13,6 +13,7 @@ use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\CategoryProductController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\MembershipBenefitsController;
+use App\Http\Controllers\SalesDetailController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -80,11 +81,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
     //sales report
     Route::prefix('sales_report')->name('sales_report.')->group(function () {
-        Route::get('/', [SalesReportController::class, 'index'])->name('index');
-        Route::get('create', [SalesReportController::class, 'create'])->name('create');
-        Route::post('store', [SalesReportController::class, 'store'])->name('store');
-        Route::get('show/{id?}', [SalesReportController::class, 'view'])->name('show');
-        Route::get('destroy/{id?}', [SalesReportController::class, 'destroy'])->name('destroy');
+        Route::get('/', [SalesDetailController::class, 'index'])->name('index');
+        Route::get('create', [SalesDetailController::class, 'create'])->name('create');
+        Route::post('store', [SalesDetailController::class, 'store'])->name('store');
+        Route::get('show/{id?}', [SalesDetailController::class, 'view'])->name('show');
+        Route::get('destroy/{id?}', [SalesDetailController::class, 'destroy'])->name('destroy');
     });
 
     //category
@@ -145,18 +146,19 @@ Route::middleware(['auth', 'verified', 'role:casier'])->group(function () {
         Route::get('/', [SalesController::class, 'index'])->name('index');
         Route::get('create', [SalesController::class, 'create'])->name('create');
         Route::post('store', [SalesController::class, 'store'])->name('store');
+        Route::post('PurchasedProduct', [SalesController::class, 'PurchasedProduct'])->name('PurchasedProduct');
         Route::get('searchMembership', [SalesController::class, 'searchMembership'])->name('searchMembership');
         Route::get('searchCoupon', [SalesController::class, 'searchCoupon'])->name('searchCoupon');
         Route::get('searchProduct', [SalesController::class, 'searchProduct'])->name('searchProduct');
     });
 
     //sales report
-    Route::prefix('sales_report')->name('sales_report.')->group(function () {
-        Route::get('/', [SalesReportController::class, 'index'])->name('index');
-        Route::get('create', [SalesReportController::class, 'create'])->name('create');
-        Route::post('store', [SalesReportController::class, 'store'])->name('store');
-        Route::get('show/{id?}', [SalesReportController::class, 'view'])->name('show');
-        Route::get('destroy/{id?}', [SalesReportController::class, 'destroy'])->name('destroy');
+    Route::prefix('sales_detail')->name('sales_detail.')->group(function () {
+        Route::get('/', [SalesDetailController::class, 'index'])->name('index');
+        Route::get('create', [SalesDetailController::class, 'create'])->name('create');
+        Route::post('store', [SalesDetailController::class, 'store'])->name('store');
+        Route::get('show/{id?}', [SalesDetailController::class, 'view'])->name('show');
+        Route::get('destroy/{id?}', [SalesDetailController::class, 'destroy'])->name('destroy');
     });
 });
 

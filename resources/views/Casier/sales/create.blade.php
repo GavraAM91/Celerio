@@ -1,34 +1,4 @@
 <x-app-layout>
-    @if (session('success'))
-        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
-            <div class="toast align-items-center text-white bg-success border-0 show" role="alert" aria-live="assertive"
-                aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        {{ session('success') }}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                        aria-label="Close"></button>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
-            <div class="toast align-items-center text-white bg-danger border-0 show" role="alert"
-                aria-live="assertive" aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        {{ session('error') }}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                        aria-label="Close"></button>
-                </div>
-            </div>
-        </div>
-    @endif
-
     <div class="mx-2 my-2">
         <div class="row">
             <!-- Basic Layout -->
@@ -38,9 +8,8 @@
                         <h5 class="mb-0">Penjualan Kasir</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ route('sales.store') }}">
+                        <form id="purchaseForm" method="POST">
                             @csrf
-                            <!-- Dropdown untuk memilih tipe membership -->
                             <div class="row mb-3">
                                 <label class="col-sm-2 col-form-label" for="membership-type">Tipe Membership</label>
                                 <div class="col-sm-10">
@@ -49,12 +18,8 @@
                                         <option value="member">Member</option>
                                     </select>
                                 </div>
-
-                                <!-- get type mmember-->
-                                {{-- <input type="hidden" name="membership_type" id="hidden-membership-type" value="type3"> --}}
                             </div>
 
-                            <!-- MEMBERSHIP DATA (Disembunyikan secara default) -->
                             <div id="membership-section" style="display: none;">
                                 <div class="row mb-3">
                                     <label class="col-sm-2 col-form-label" for="membership-code">Kode Membership</label>
@@ -64,19 +29,16 @@
                                     </div>
                                 </div>
                                 <div id="membership-data" class="mt-3"></div>
-                                <!-- get type mmember-->
-                                {{-- <input type="hidden" name="membership_type" id="hidden-membership-type" value=""> --}}
                             </div>
-
 
                             <div class="container mt-4">
                                 <button type="button" id="addProduct" class="btn btn-primary mb-3">Tambah
                                     Produk</button>
-
                                 <div class="table-responsive text-nowrap">
                                     <table class="table table-hover">
                                         <thead>
                                             <tr>
+                                                <th>Id Produk</th>
                                                 <th>Produk</th>
                                                 <th>Stock Tersedia</th>
                                                 <th>Jumlah</th>
@@ -86,47 +48,45 @@
                                                 <th>Aksi</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="table-border-bottom-0" id="productTableBody">
-                                        </tbody>
+                                        <tbody class="table-border-bottom-0" id="productTableBody"></tbody>
                                     </table>
                                 </div>
                             </div>
+
                             <div class="mt-3">
-                                <!-- TOTAL HARGA BARANG SEMENTARA-->
                                 <label>Total Harga Barang </label>
                                 <input type="text" id="productTotal" class="form-control" readonly>
 
                                 <label>Total Pajak (PPN 12%)</label>
                                 <input type="text" id="taxTotal" class="form-control" readonly>
 
-                                <!-- Coupon Name -->
                                 <div class="row my-1 mx-0">
-                                    <label class="" for="coupon-name">Coupon Name</label>
+                                    <label for="coupon-name">Coupon Name</label>
                                     <input type="text" class="form-control" id="coupon-name"
                                         placeholder="#BELANJATERUS" />
                                 </div>
 
                                 <div id="coupon-data" class="mt-3"></div>
 
-                                {{-- <label>Diskon Membership (%) (Opsional)</label>
-                                <div class="input-group">
-                                    <input type="number" id="discountInput" class="form-control" placeholder="0">
-                                    <button id="applyDiscount" class="btn btn-primary">Terapkan</button>
-                                </div> --}}
+                                <label>Harga Final</label>
+                                <input type="text" id="finalPrice" class="form-control" readonly>
 
                                 <label>Total Harga Dengan Diskon</label>
                                 <input type="text" id="totalDiscount" class="form-control" readonly>
 
-
-                                <label> Jumlah Uang </label>
+                                <label>Jumlah Uang</label>
                                 <input type="text" class="form-control" id="jumlahUang" placeholder="Rp 100000" />
 
-                                <label> Uang Kembalian </label>
+                                <label>Uang Kembalian</label>
                                 <input type="text" class="form-control" id="uangKembalian" />
+
+                                <input type="hidden" class="form-control" id="user_id"
+                                    value="{{ Auth::user()->id }}">
                             </div>
 
-                            <button id="saveTransaction" class="btn btn-success mt-3">Simpan</button>
+                            <button type="submit" class="btn btn-success mt-3">Simpan</button>
                         </form>
+
                     </div>
                 </div>
             </div>
@@ -143,7 +103,7 @@
 
                 if (this.value === "member") {
                     membershipSection.style.display = "block";
-                    hiddenMembershipType.value = "";
+                    hiddenMembershipType.value = "member";
                 } else {
                     membershipSection.style.display = "none";
                     document.getElementById("membership-data").innerHTML = "";
@@ -168,6 +128,7 @@
                             <p><strong>Point:</strong> ${response.data.point}</p>
                             <p><strong>Tipe Member:</strong> ${response.data.type}</p>
                             <input type="hidden" name="membership_type" id="hidden-membership-type" value="${response.data.type}">
+                            <input type="hidden" name="membership_id" id="hidden-membership_id" value="${response.data.id}">
                         </div>
                     `);
                             } else {
@@ -194,6 +155,7 @@
                 $("#addProduct").click(function() {
                     let newRow = `
             <tr>
+               <td><input type="text" class="form-control product_id" readonly></td>
                 <td><input type="text" class="form-control product-name" placeholder="Nama Produk"></td>
                 <td><input type="number" class="form-control stock" value="0" min="0" readonly></td>
                 <td><input type="number" class="form-control quantity" value="1" min="1"></td>
@@ -228,6 +190,7 @@
                             method: 'GET',
                             success: function(response) {
                                 if (response.success && response.data) {
+                                    let product_id = response.data.product.id;
                                     let stock = response.data.product.stock;
                                     let price = response.data.product.product_price;
                                     let sellingMultiplier = response.data.sellingPrice
@@ -237,13 +200,13 @@
                                     let sellingPrice = price * sellingMultiplier;
                                     let total = sellingPrice * quantity;
 
+                                    row.find(".product_id").val(product_id); // Perbaikan dari "id"
                                     row.find(".stock").val(stock);
                                     row.find(".price").text("Rp " + price.toLocaleString("id-ID"));
                                     row.find(".sellingMultiplier-input").val(sellingMultiplier);
                                     row.find(".selling_price").text("Rp " + sellingPrice
                                         .toLocaleString("id-ID"));
                                     row.find(".total").text("Rp " + total.toLocaleString("id-ID"));
-
                                     calculateProductTotal();
                                 } else {
                                     resetRow(row);
@@ -326,7 +289,7 @@
                                 <p><strong>Status Kupon:</strong> ${response.data.status}</p>
                                 <input type="hidden" id="coupon-value" value="${response.data.value_coupon || 0}">
                                 <input type="hidden" id="coupon-percentage" value="${response.data.percentage_coupon || 0}">
-                                <input type="hidden" id="coupon-id" value="${response.data.id || 0}">
+                                <input type="hidden" id="coupon_id" value="${response.data.id || 0}">
                             </div>
                         `);
 
@@ -353,6 +316,24 @@
                 });
             });
 
+            function updateFinalPrice() {
+                let totalDiscount = $("#totalDiscount").val();
+                let finalPrice;
+
+                if (totalDiscount === "TIDAK ADA KUPON") {
+                    finalPrice = $("#taxTotal").val(); // Gunakan harga setelah pajak jika tidak ada kupon
+                } else {
+                    finalPrice = totalDiscount; // Gunakan harga setelah diskon jika ada kupon
+                }
+
+                $("#finalPrice").val(finalPrice);
+            }
+
+            // Panggil updateFinalPrice() setelah menghitung kupon dan setelah perhitungan pajak
+            $(document).on("input", "#coupon-name, .quantity, #jumlahUang", function() {
+                updateFinalPrice();
+            });
+
 
             // Fungsi untuk menghitung pajak
             function calculateTax(productTotal) {
@@ -376,7 +357,7 @@
             // Menghitung pembayaran berdasarkan total harga setelah diskon
             function calculatePayment() {
                 // Ambil total harga setelah diskon
-                let finalTotalAfterDiscount = parseFloat($("#totalDiscount").val().replace(/[^\d]/g, '')) || 0;
+                let finalTotalAfterDiscount = parseFloat($("#finalPrice").val().replace(/[^\d]/g, '')) || 0;
 
                 // Ambil jumlah uang yang diinputkan
                 let inputMoney = parseFloat($('#jumlahUang').val().replace(/[^\d]/g, '')) || 0;
@@ -384,9 +365,9 @@
                 // Hitung kembalian
                 let changeMoney = inputMoney - finalTotalAfterDiscount;
 
-                console.log("Total setelah diskon:", finalTotalAfterDiscount);
-                console.log("Uang dibayarkan:", inputMoney);
-                console.log("Kembalian:", changeMoney);
+                // console.log("Total setelah diskon:", finalTotalAfterDiscount);
+                // console.log("Uang dibayarkan:", inputMoney);
+                // console.log("Kembalian:", changeMoney);
 
                 // Menampilkan hasil kembalian
                 if (changeMoney >= 0) {
@@ -403,11 +384,11 @@
 
                 // Pastikan total pajak diambil dengan benar
                 let totalWithTaxRaw = $('#taxTotal').val();
-                console.log("Raw tax total:", totalWithTaxRaw);
+                // console.log("Raw tax total:", totalWithTaxRaw);
 
 
                 totalWithTax = parseFloat(totalWithTaxRaw.replace(/[^\d]/g, '')) || 0;
-                console.log("Total harga setelah pajak (parsed):", totalWithTax);
+                // console.log("Total harga setelah pajak (parsed):", totalWithTax);
 
                 let discountAmount = 0;
                 if (couponValue > 0) {
@@ -425,6 +406,8 @@
                 } else {
                     $("#totalDiscount").val("Rp " + finalTotal.toLocaleString("id-ID"));
                 }
+
+                updateFinalPrice();
                 calculatePayment();
             }
 
@@ -448,49 +431,66 @@
                 $("#purchaseForm").submit(function(e) {
                     e.preventDefault(); // Mencegah reload form
 
-                    // Ambil data dari form
                     let userId = $("#user_id").val();
-                    let memberId = $("#member_id").val();
-                    let couponId = $("#coupon_id").val();
-                    let totalPrice = parseFloat($("#total_price").val()) || 0;
-                    let totalPriceWithTax = parseFloat($("#total_price_with_tax").val()) || 0;
-                    let totalPriceWithDiscount = parseFloat($("#total_price_with_discount").val()) || 0;
-                    let finalPrice = parseFloat($("#final_price").val()) || 0;
-                    let change = parseFloat($("#change").val()) || 0;
+                    let couponId = $("#coupon_id").length ? $("#coupon_id").val() : null;
+                    let membership_id = $("#hidden-membership_id").length ? $("#hidden-membership_id").val() :
+                        null;
+                    let totalPrice = ($("#productTotal").val() || "0").replace(/[^\d]/g, '');
+                    let tax = 0.12;
+                    let totalPriceWithDiscount = $("#totalDiscount").length ? ($("#totalDiscount").val())
+                        .replace(/[^\d]/g, '') : null;
+                    let finalPrice = ($("#finalPrice").val() || "0").replace(/[^\d]/g, '');
+                    let cashReceived = ($("#jumlahUang").val() || "0").replace(/[^\d]/g, '');
+                    let change = cashReceived - finalPrice; // Hitung uang kembalian otomatis
 
-                    // Ambil data produk
-                    let products = [];
-                    $("#productTableBody tr").each(function() {
-                        let productId = $(this).find(".product-id").val();
-                        let quantity = parseInt($(this).find(".quantity").val()) || 1;
-                        let sellingPrice = parseFloat($(this).find(".selling_price").text().replace(
-                            "Rp ", "").replace(/\./g, "")) || 0;
+                    function getProductData() {
+                        let products = [];
 
-                        if (productId) {
-                            products.push({
-                                product_id: productId,
-                                quantity: quantity,
-                                selling_price: sellingPrice
-                            });
-                        }
-                    });
+                        $("#productTableBody tr").each(function() {
+                            let row = $(this);
 
-                    // Susun data dalam JSON
+                            let productId = row.find(".product_id").val().trim();
+                            let productName = row.find(".product-name").val()
+                                .trim(); // Ubah ke product_name
+                            let quantity = parseInt(row.find(".quantity").val()) || 0;
+
+                            let sellingPriceText = row.find(".selling_price").text().trim()
+                                .replace("Rp ", "").replace(/\./g, "").replace(",", ".");
+                            let sellingPrice = parseFloat(sellingPriceText) || 0;
+
+                            if (productId && productName && quantity > 0 && sellingPrice > 0) {
+                                products.push({
+                                    product_id: productId,
+                                    product_name: productName, // Ubah dari name ke product_name
+                                    quantity: quantity,
+                                    selling_price: sellingPrice // Ubah dari price ke selling_price
+                                });
+                            }
+                        });
+                        return products;
+                    }
+
+                    // Panggil fungsi ini sebelum mengirim data ke server
+                    let productData = getProductData();
+
+
                     let formData = {
                         user_id: userId,
-                        member_id: memberId,
+                        membership_id: membership_id,
                         coupon_id: couponId,
                         total_price: totalPrice,
-                        total_price_with_tax: totalPriceWithTax,
+                        tax: tax,
                         total_price_with_discount: totalPriceWithDiscount,
                         final_price: finalPrice,
+                        cash_received: cashReceived,
                         change: change,
-                        data: products
+                        data: productData
                     };
 
-                    // Kirim data ke server menggunakan AJAX
+                    // console.log(formData);
+
                     $.ajax({
-                        url: "{{ route('sales.purchaseditem') }}", // Sesuaikan dengan route Laravel
+                        url: "{{ route('sales.PurchasedProduct') }}",
                         type: "POST",
                         data: JSON.stringify(formData),
                         contentType: "application/json",
@@ -499,15 +499,16 @@
                         },
                         success: function(response) {
                             if (response.success) {
-                                alert("Transaksi berhasil!");
-                                window.location.reload(); // Reload halaman setelah transaksi sukses
-                            } else {
-                                alert("Terjadi kesalahan: " + response.message);
+                                showToast(response.message, "success");
+                                window.location.reload();
                             }
                         },
                         error: function(xhr) {
-                            alert("Gagal menyimpan transaksi. Cek kembali input Anda.");
+                            // alert("Gagal menyimpan transaksi. Cek kembali input Anda.");
+                            showToast("Gagal menyimpan transaksi. Cek kembali input Anda.",
+                            "error");
                             console.log(xhr.responseText);
+
                         }
                     });
                 });

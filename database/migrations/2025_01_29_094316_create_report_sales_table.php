@@ -11,17 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sales', function (Blueprint $table) {
+        Schema::create('report_sales', function (Blueprint $table) {
             $table->id();
+
             //connect to user 
             $table->foreignId('user_id')
                 ->constrained(
                     table: 'users'
                 );
             //connect to product
-            $table->foreignId('product_id')
+            $table->foreignId('membership_id')
+                ->nullable()
                 ->constrained(
-                    table: 'products'
+                    table: 'memberships'
                 );
             //connect to coupon (default null)
             $table->foreignId('coupon_id')
@@ -29,12 +31,13 @@ return new class extends Migration
                 ->constrained(
                     table: 'coupons'
                 );
-            $table->string('invoice_sales');
-            $table->string('payment_method');
-            $table->unsignedBigInteger('total_price');
-            $table->integer('quantity');
-            $table->float('tax');
-            $table->string('access_role')->nullable();
+            $table->string('invoice_sales')->unique();
+            $table->decimal('tax', 10, 2);
+            $table->decimal('total_product_price', 10, 2);
+            $table->decimal('total_price_discount', 10, 2)->nullable();
+            $table->decimal('final_price', 10, 2);
+            $table->decimal('cash_received', 10, 2);
+            $table->decimal('change', 10, 2);
             $table->timestamps();
         });
     }

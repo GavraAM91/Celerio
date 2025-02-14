@@ -8,13 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Activitylog\LogOptions;
 
-class Sales extends Model
+class ReportSales extends Model
 {
     /** @use HasFactory<\Database\Factories\SalesFactory> */
     use HasFactory;
 
     //table
-    protected $table = 'sales';
+    protected $table = 'report_sales';
 
     //fillable
     protected $guarded = ['id'];
@@ -35,6 +35,12 @@ class Sales extends Model
     public function coupon(): BelongsTo
     {
         return $this->belongsTo(Coupon::class, 'coupon_id');
+    }
+
+    //connect to membership
+    public function membership(): BelongsTo
+    {
+        return $this->belongsTo(Membership::class, 'membership_id');
     }
 
 

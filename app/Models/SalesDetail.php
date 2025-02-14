@@ -11,13 +11,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class SalesReport extends Model
+class SalesDetail extends Model
 {
     /** @use HasFactory<\Database\Factories\SalesDetailFactory> */
     use HasFactory;
 
     //table
-    protected $table = 'sales_report';
+    protected $table = 'sales_detail';
 
     //fillable
     protected $guarded = ['id'];
@@ -25,7 +25,7 @@ class SalesReport extends Model
     //connect to sales detail
     public function sales(): HasMany
     {
-        return $this->hasMany(Sales::class, 'sales_id');
+        return $this->hasMany(ReportSales::class, 'sales_id');
     }
 
     //connect to product

@@ -5,6 +5,7 @@ namespace App\Models;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Membership extends Model
 {
@@ -16,6 +17,12 @@ class Membership extends Model
 
     //guarded or fillable
     protected $guarded = ['id'];
+
+    //connect into report sales 
+    public function reportSales(): HasMany
+    {
+        return $this->hasmany(Reportsales::class, 'membership_id', 'id');
+    }
 
     public function getActivitylogOptions(): LogOptions
     {
