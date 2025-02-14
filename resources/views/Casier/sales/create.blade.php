@@ -279,12 +279,6 @@
                     let sellingPrice = price * sellingMultiplier;
                     let total = sellingPrice * quantity;
 
-                    // console.log("price : ", price);
-                    // console.log("margin : ", sellingMultiplier);
-                    // console.log("quantity : ", quantity);
-                    // console.log("total : ", total);
-                    // console.log("sellingprice : ", sellingPrice);
-
                     row.find(".selling_price").text("Rp " + sellingPrice.toLocaleString("id-ID"));
                     row.find(".total").text("Rp " + total.toLocaleString("id-ID"));
                 }
@@ -447,6 +441,76 @@
             // Event listener untuk total diskon agar kembalian otomatis dihitung ulang
             $('#totalDiscount').on('input', function() {
                 calculatePayment();
+            });
+
+
+            $(document).ready(function() {
+                $("#purchaseForm").submit(function(e) {
+                    e.preventDefault(); // Mencegah reload form
+
+                    // Ambil data dari form
+                    let userId = $("#user_id").val();
+                    let memberId = $("#member_id").val();
+                    let couponId = $("#coupon_id").val();
+                    let totalPrice = parseFloat($("#total_price").val()) || 0;
+                    let totalPriceWithTax = parseFloat($("#total_price_with_tax").val()) || 0;
+                    let totalPriceWithDiscount = parseFloat($("#total_price_with_discount").val()) || 0;
+                    let finalPrice = parseFloat($("#final_price").val()) || 0;
+                    let change = parseFloat($("#change").val()) || 0;
+
+                    // Ambil data produk
+                    let products = [];
+                    $("#productTableBody tr").each(function() {
+                        let productId = $(this).find(".product-id").val();
+                        let quantity = parseInt($(this).find(".quantity").val()) || 1;
+                        let sellingPrice = parseFloat($(this).find(".selling_price").text().replace(
+                            "Rp ", "").replace(/\./g, "")) || 0;
+
+                        if (productId) {
+                            products.push({
+                                product_id: productId,
+                                quantity: quantity,
+                                selling_price: sellingPrice
+                            });
+                        }
+                    });
+
+                    // Susun data dalam JSON
+                    let formData = {
+                        user_id: userId,
+                        member_id: memberId,
+                        coupon_id: couponId,
+                        total_price: totalPrice,
+                        total_price_with_tax: totalPriceWithTax,
+                        total_price_with_discount: totalPriceWithDiscount,
+                        final_price: finalPrice,
+                        change: change,
+                        data: products
+                    };
+
+                    // Kirim data ke server menggunakan AJAX
+                    $.ajax({
+                        url: "{{ route('sales.purchaseditem') }}", // Sesuaikan dengan route Laravel
+                        type: "POST",
+                        data: JSON.stringify(formData),
+                        contentType: "application/json",
+                        headers: {
+                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                alert("Transaksi berhasil!");
+                                window.location.reload(); // Reload halaman setelah transaksi sukses
+                            } else {
+                                alert("Terjadi kesalahan: " + response.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            alert("Gagal menyimpan transaksi. Cek kembali input Anda.");
+                            console.log(xhr.responseText);
+                        }
+                    });
+                });
             });
         </script>
     @endpush
