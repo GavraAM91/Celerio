@@ -96,6 +96,9 @@
                                 <label>Total Harga Barang </label>
                                 <input type="text" id="productTotal" class="form-control" readonly>
 
+                                <label>Total Pajak (PPN 12%)</label>
+                                <input type="text" id="taxTotal" class="form-control" readonly>
+
                                 <!-- Coupon Name -->
                                 <div class="row my-1 mx-0">
                                     <label class="" for="coupon-name">Coupon Name</label>
@@ -114,8 +117,6 @@
                                 <label>Total Harga Dengan Diskon</label>
                                 <input type="text" id="totalDiscount" class="form-control" readonly>
 
-                                <label>Total Akhir (PPN 12%)</label>
-                                <input type="text" id="finalTotal" class="form-control" readonly>
 
                                 <label> Jumlah Uang </label>
                                 <input type="text" class="form-control" id="jumlahUang" placeholder="Rp 100000" />
@@ -189,7 +190,6 @@
 
             //get product
             $(document).ready(function() {
-                let productList = [];
 
                 $("#addProduct").click(function() {
                     let newRow = `
@@ -263,6 +263,11 @@
                     let row = $(this).closest("tr");
                     updateRowTotal(row);
                     calculateProductTotal();
+
+                    let productTotal = parseFloat($("#productTotal").val().replace(/[^\d]/g, "")) || 0;
+                    let totalWithTax = calculateTax(productTotal);
+                    countCoupon(totalWithTax);
+                    calculatePayment();
                 });
 
                 //update total
@@ -300,11 +305,82 @@
                     });
 
                     $("#productTotal").val("Rp " + productTotal.toLocaleString("id-ID"));
+
+                    calculateTax(productTotal);
                 }
             });
 
-            //COUPON 
+            // Fungsi untuk menghitung pajak
+            function calculateTax(productTotal) {
+                let taxRate = 0.12;
+                let taxAmount = productTotal * taxRate;
+                let totalWithTax = productTotal + taxAmount;
+
+                // console.log('pajak :', totalWithTax);
+
+                // Menampilkan pajak yang dihitung
+                $("#taxAmount").val("Rp " + taxAmount.toLocaleString("id-ID"));
+
+                // Menampilkan total setelah pajak
+                $("#taxTotal").val("Rp " + totalWithTax.toLocaleString("id-ID"));
+
+                // Hitung ulang kupon berdasarkan total setelah pajak
+                countCoupon(totalWithTax);
+                return totalWithTax;
+            }
+
+            // Menghitung pembayaran berdasarkan total harga setelah diskon
+            function calculatePayment() {
+                // Ambil total harga setelah diskon
+                let finalTotalAfterDiscount = parseFloat($("#totalDiscount").val().replace(/[^\d]/g, '')) || 0;
+
+                // Ambil jumlah uang yang diinputkan
+                let inputMoney = parseFloat($('#jumlahUang').val().replace(/[^\d]/g, '')) || 0;
+
+                // Hitung kembalian
+                let changeMoney = inputMoney - finalTotalAfterDiscount;
+
+                console.log("Total setelah diskon:", finalTotalAfterDiscount);
+                console.log("Uang dibayarkan:", inputMoney);
+                console.log("Kembalian:", changeMoney);
+
+                // Menampilkan hasil kembalian
+                if (changeMoney >= 0) {
+                    $('#uangKembalian').val("Rp " + changeMoney.toLocaleString("id-ID"));
+                } else {
+                    $('#uangKembalian').val("Uang tidak cukup");
+                }
+            }
+
+            function countCoupon(totalWithTax) {
+                let couponValue = parseFloat($('#coupon-value').val()) || 0;
+                let couponPercentage = parseFloat($('#coupon-percentage').val()) || 0;
+
+                // Pastikan total pajak diambil dengan benar
+                let totalWithTaxRaw = $('#taxTotal').val();
+                console.log("Raw tax total:", totalWithTaxRaw);
+
+
+                totalWithTax = parseFloat(totalWithTaxRaw.replace(/[^\d]/g, '')) || 0;
+                console.log("Total harga setelah pajak (parsed):", totalWithTax);
+
+                let discountAmount = 0;
+                if (couponValue > 0) {
+                    discountAmount = couponValue;
+                } else if (couponPercentage > 0) {
+                    discountAmount = totalWithTax * (couponPercentage / 100);
+                }
+
+                let finalTotal = totalWithTax - discountAmount;
+                if (finalTotal < 0) finalTotal = 0;
+
+                $("#totalDiscount").val("Rp " + finalTotal.toLocaleString("id-ID"));
+                calculatePayment();
+            }
+
+            //coupon
             $(document).ready(function() {
+                // Event listener untuk input kupon
                 $('#coupon-name').on('input', function() {
                     let name = $(this).val();
                     if (name.length >= 5) {
@@ -315,32 +391,25 @@
                             success: function(response) {
                                 if (response.success) {
                                     $('#coupon-data').html(`
-                                <div class="card p-3 my-2 ">
-                                    <p><strong>Nama:</strong> ${response.data.name_coupon   }</p>
-                                    <p><strong>Minimal Penggunaan:</strong> ${response.data.minimum_usage_coupon }</p>
-                                    <p><strong>Nilai Kupon:</strong> ${response.data.value_coupon || response.data.percentage_coupon}</p>
-                                    <p><strong>Total Kupon:</strong> ${response.data.total_coupon}</p>
-                                    <p><strong>Kupon Terpakai:</strong> ${response.data.used_coupon}</p>
-                                    <p><strong>Status Kupon:</strong> ${response.data.status}</p>
-                                    <input type="hidden" id="coupon-value" value="${response.data.value_coupon || 0}">
-                                    <input type="hidden" id="coupon-percentage" value="${response.data.percentage_coupon || 0}">
-                                    <input type="hidden" id="coupon-id" value="${response.data.id || 0}">
-                                </div>
-                            `);
+                            <div class="card p-3 my-2">
+                                <p><strong>Nama:</strong> ${response.data.name_coupon}</p>
+                                <p><strong>Minimal Penggunaan:</strong> ${response.data.minimum_usage_coupon}</p>
+                                <p><strong>Nilai Kupon:</strong> ${response.data.value_coupon || response.data.percentage_coupon}</p>
+                                <p><strong>Total Kupon:</strong> ${response.data.total_coupon}</p>
+                                <p><strong>Kupon Terpakai:</strong> ${response.data.used_coupon}</p>
+                                <p><strong>Status Kupon:</strong> ${response.data.status}</p>
+                                <input type="hidden" id="coupon-value" value="${response.data.value_coupon || 0}">
+                                <input type="hidden" id="coupon-percentage" value="${response.data.percentage_coupon || 0}">
+                                <input type="hidden" id="coupon-id" value="${response.data.id || 0}">
+                            </div>
+                        `);
 
-                                    $('#coupon-value').val(response.data.value_coupon || 0);
-                                    $('#coupon-percentage').val(response.data.percentage_coupon ||
-                                        0);
-                                    $('#coupon-id').val(response.data.id || 0);
+                                    // Ambil total pajak dari #taxTotal
+                                    let totalWithTax = parseFloat($('#taxTotal').val().replace(
+                                        /[^\d.]/g, '')) || 0;
+                                    console.log("Total harga sebelum diskon:", totalWithTax);
 
-                                    // Debugging: Pastikan nilai hidden input benar
-                                    console.log("Coupon Value:", $('#coupon-value').val());
-                                    console.log("Coupon Percentage:", $('#coupon-percentage')
-                                        .val());
-                                    console.log("Coupon ID:", $('#coupon-id').val());
-
-                                    // Panggil fungsi untuk menghitung diskon setelah hidden input diperbarui
-                                    countCoupon();
+                                    countCoupon(totalWithTax);
                                 } else {
                                     $('#coupon-data').html(
                                         '<p class="text-danger">Data tidak ditemukan</p>');
@@ -353,92 +422,23 @@
                             }
                         });
                     } else {
-                        $('#membership-data').html(''); // Hapus tampilan jika input kurang dari 5 karakter
+                        $('#coupon-data').html('');
                     }
                 });
             });
 
-            // Menghitung diskon berdasarkan kupon
-            function countCoupon() {
-                let productTotal = parseFloat($('#productTotal').val().replace("Rp ", "").replace(/\./g, "")) || 0;
-                let couponValue = parseFloat($('#coupon-value').val()) || 0; // Nilai tetap
-                let couponPercentage = parseFloat($('#coupon-percentage').val()) || 0; // Persentase
-                let couponId = parseInt($('#coupon-id').val()) || 0;
-
-                let discountAmount = 0;
-
-                if (couponValue > 0) {
-                    discountAmount = couponValue;
-                } else if (couponPercentage > 0) {
-                    discountAmount = productTotal * (couponPercentage / 100);
-                }
-
-                let finalTotal = productTotal - discountAmount;
-                if (finalTotal < 0) finalTotal = 0;
-
-                // Menampilkan total setelah diskon
-                $("#totalDiscount").val("Rp " + finalTotal.toLocaleString("id-ID"));
-
-                console.log("Coupon ID:", couponId);
-                console.log("Total Setelah Diskon:", finalTotal);
-                console.log("Discount Amount:", discountAmount);
-
-                return finalTotal;
-            }
-
-
-            // Menghitung PPN 12%
-            function calculateTax() {
-                let finalTotalAfterDiscount = countCoupon(); // Ambil nilai setelah diskon
-
-                let taxRate = 0.12;
-                let taxAmount = finalTotalAfterDiscount * taxRate;
-                let totalWithTax = finalTotalAfterDiscount + taxAmount;
-
-                // Menampilkan total setelah pajak
-                $("#finalTotal").val("Rp " + totalWithTax.toLocaleString("id-ID"));
-
-                console.log("PPN (12%):", taxAmount);
-                console.log("Total Setelah Pajak:", totalWithTax);
-            }
-
+            // Event listener untuk input kupon
             $('#coupon-name').on('input', function() {
-                countCoupon(); // Hitung ulang saat input berubah
-                calculateTax(); // Hitung pajak setelahnya
+                countCoupon();
             });
 
-            //jika total harga berubah
-            $('#productTotal').on('input', function() {
-                countCoupon();
-                calculateTax();
-            })
-
-            
-
-            //menghitung pembayaran
-            function calculatePayment() {
-                let finalTotalAfterTax = parseFloat($("#finalTotal").val().replace("Rp ", "").replace(/\./g, "").replace(",",
-                    ".")) || 0;
-                let inputMoney = parseFloat($('#jumlahUang').val()) || 0;
-
-                let changeMoney = inputMoney - finalTotalAfterTax;
-
-                console.log("tax : ", finalTotalAfterTax);
-                console.log("inputMoney : ", inputMoney);
-                console.log("inputMoney : ", changeMoney);
-
-                // Menampilkan data kembalian, pastikan tidak negatif
-                if (changeMoney >= 0) {
-                    $('#uangKembalian').val("Rp " + changeMoney.toLocaleString("id-ID"));
-                } else {
-                    $('#uangKembalian').val("Uang tidak cukup");
-                }
-
-                console.log("Total Kembalian:", changeMoney);
-            }
-
-            // Event listener saat jumlah uang diinputkan
+            // Event listener untuk jumlah uang yang dimasukkan
             $('#jumlahUang').on('input', function() {
+                calculatePayment();
+            });
+
+            // Event listener untuk total diskon agar kembalian otomatis dihitung ulang
+            $('#totalDiscount').on('input', function() {
                 calculatePayment();
             });
         </script>
