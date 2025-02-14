@@ -189,6 +189,8 @@
 
             //get product
             $(document).ready(function() {
+                let productList = [];
+
                 $("#addProduct").click(function() {
                     let newRow = `
             <tr>
@@ -263,6 +265,7 @@
                     calculateProductTotal();
                 });
 
+                //update total
                 function updateRowTotal(row) {
                     let price = parseFloat(row.find(".price").text().replace("Rp ", "").replace(/\./g, "")) || 0;
                     let sellingMultiplier = parseFloat(row.find(".sellingMultiplier-input").val()) || 1;
@@ -270,6 +273,12 @@
 
                     let sellingPrice = price * sellingMultiplier;
                     let total = sellingPrice * quantity;
+
+                    // console.log("price : ", price);
+                    // console.log("margin : ", sellingMultiplier);
+                    // console.log("quantity : ", quantity);
+                    // console.log("total : ", total);
+                    // console.log("sellingprice : ", sellingPrice);
 
                     row.find(".selling_price").text("Rp " + sellingPrice.toLocaleString("id-ID"));
                     row.find(".total").text("Rp " + total.toLocaleString("id-ID"));
@@ -318,6 +327,20 @@
                                     <input type="hidden" id="coupon-id" value="${response.data.id || 0}">
                                 </div>
                             `);
+
+                                    $('#coupon-value').val(response.data.value_coupon || 0);
+                                    $('#coupon-percentage').val(response.data.percentage_coupon ||
+                                        0);
+                                    $('#coupon-id').val(response.data.id || 0);
+
+                                    // Debugging: Pastikan nilai hidden input benar
+                                    console.log("Coupon Value:", $('#coupon-value').val());
+                                    console.log("Coupon Percentage:", $('#coupon-percentage')
+                                        .val());
+                                    console.log("Coupon ID:", $('#coupon-id').val());
+
+                                    // Panggil fungsi untuk menghitung diskon setelah hidden input diperbarui
+                                    countCoupon();
                                 } else {
                                     $('#coupon-data').html(
                                         '<p class="text-danger">Data tidak ditemukan</p>');
@@ -338,21 +361,31 @@
             // Menghitung diskon berdasarkan kupon
             function countCoupon() {
                 let productTotal = parseFloat($('#productTotal').val().replace("Rp ", "").replace(/\./g, "")) || 0;
-                let couponValue = parseFloat($('#coupon-value').val()) || 0;
-                let couponPercentage = parseFloat($('#coupon-percentage').val()) || 0;
+                let couponValue = parseFloat($('#coupon-value').val()) || 0; // Nilai tetap
+                let couponPercentage = parseFloat($('#coupon-percentage').val()) || 0; // Persentase
                 let couponId = parseInt($('#coupon-id').val()) || 0;
 
-                let discountAmount = couponValue > 0 ? couponValue : (productTotal * couponPercentage / 100);
+                let discountAmount = 0;
+
+                if (couponValue > 0) {
+                    discountAmount = couponValue;
+                } else if (couponPercentage > 0) {
+                    discountAmount = productTotal * (couponPercentage / 100);
+                }
+
                 let finalTotal = productTotal - discountAmount;
+                if (finalTotal < 0) finalTotal = 0;
 
                 // Menampilkan total setelah diskon
                 $("#totalDiscount").val("Rp " + finalTotal.toLocaleString("id-ID"));
 
                 console.log("Coupon ID:", couponId);
                 console.log("Total Setelah Diskon:", finalTotal);
+                console.log("Discount Amount:", discountAmount);
 
-                return finalTotal; // Mengembalikan nilai untuk digunakan di calculateTax
+                return finalTotal;
             }
+
 
             // Menghitung PPN 12%
             function calculateTax() {
@@ -373,6 +406,14 @@
                 countCoupon(); // Hitung ulang saat input berubah
                 calculateTax(); // Hitung pajak setelahnya
             });
+
+            //jika total harga berubah
+            $('#productTotal').on('input', function() {
+                countCoupon();
+                calculateTax();
+            })
+
+            
 
             //menghitung pembayaran
             function calculatePayment() {
