@@ -1,4 +1,35 @@
 <x-app-layout>
+    @if (session('success'))
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+            <div class="toast align-items-center text-white bg-success border-0 show" role="alert" aria-live="assertive"
+                aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ session('success') }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
+            <div class="toast align-items-center text-white bg-danger border-0 show" role="alert"
+                aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ session('error') }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+
     <div class="mt-4">
         <h2>Laporan Transaksi</h2>
     </div>
@@ -67,45 +98,26 @@
                     <thead>
                         <tr>
                             <th>Invoice Sales</th>
-                            <th>Pelanggan</th>
-                            <th>Total Harga Produk</th>
-                            <th>Total dengan Diskon</th>
-                            <th>Pajak</th>
-                            <th>Total Harga Akhir</th>
-                            <th>Pembayaran</th>
-                            <th>Kembalian</th>
+                            <th>Nama Barang</th>
+                            <th>Jumlah Barang Terjual</th>
+                            <th>Total Harga </th>
                             <th>Dibuat</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody class="table-border-bottom-0">
-                        @foreach ($data_sales as $transaction)
+                        @foreach ($data_product as $transaction_product)
                             <tr>
-                                <td>{{ $transaction->invoice_sales }}</td>
-                                <td>{{ $transaction->membership_name }}</td>
-                                <td>Rp {{ number_format($transaction->total_product_price, 0, ',', '.') }}</td>
-                                <td>Rp {{ number_format($transaction->total_price_discount, 0, ',', '.') }}</td>
-                                <td>{{ $transaction->tax }}</td>
-                                <td>Rp {{ number_format($transaction->final_price, 0, ',', '.') }}</td>
-                                <td>Rp {{ number_format($transaction->cash_received, 0, ',', '.') }}</td>
-                                <td>Rp {{ number_format($transaction->change, 0, ',', '.') }}</td>
-                                <td>{{ $transaction->created_at }}</td>
-                                <td>
-                                    <a href="{{ route('sales_report.show', $transaction->id) }}" type="button"
-                                        class="btn btn-primary">Detail Transaksi</a>
-                                    {{-- <div class="dropdown">
-                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-                                            data-bs-toggle="dropdown">
-                                            <i class="bx bx-dots-vertical-rounded"></i>
-                                        </button>
-
-                                    </div> --}}
-                                </td>
+                                <td>{{ $transaction_product->invoice_sales }}</td>
+                                <td>{{ $transaction_product->product->product_name }}</td>
+                                <td>{{ $transaction_product->quantity }}</td>
+                                <td>Rp {{ number_format($transaction_product->selling_price, 0, ',', '.') }}</td>
+                                <td>{{ $transaction_product->created_at }}</td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
+
         </div>
     </div>
     @push('scripts')

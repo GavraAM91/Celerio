@@ -27,11 +27,10 @@ class SalesDetail extends Model
     {
         return $this->hasMany(ReportSales::class, 'sales_id');
     }
-
-    //connect to product
-    public function product(): HasMany
+    // SalesDetail.php
+    public function product(): BelongsTo
     {
-        return $this->hasMany(Product::class, 'product_id');
+        return $this->belongsTo(Product::class, 'product_id', 'id');
     }
 
 

@@ -503,20 +503,10 @@
                                 window.location.href =
                                     "{{ route('sales.DetailTransaction') }}?invoice_sales=" +
                                     encodeURIComponent(response.data.invoice_sales);
-                            } else {    
+                            } else {
                                 console.error("invoice_sales tidak ditemukan dalam response.data:",
                                     response.data);
                             }
-                            // Set URL cetak struk berdasarkan invoice_sales dari response
-                            // let invoiceSales = response.invoice_sales;
-                            // let printUrl = "{{ route('sales.pdfReceipt', ':invoice_sales') }}"
-                            //     .replace(':invoice_sales', invoiceSales);
-                            // $('#printReceiptBtn').attr('href', printUrl);
-
-                            // Tampilkan modal cetak struk
-                            // $('#receiptModal').modal('show');
-                            // window.location.reload();
-
                         },
                         error: function(xhr) {
                             // alert("Gagal menyimpan transaksi. Cek kembali input Anda.");

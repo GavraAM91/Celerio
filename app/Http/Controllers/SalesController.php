@@ -166,8 +166,11 @@ class SalesController extends Controller
         // Cek Membership dan Tambahkan Poin
         $pointsEarned = 0;
 
+        $membership_name = "Non Member";
         if ($membershipId) {
             $membershipInfo = Membership::where('id', $membershipId)->first();
+
+            $membership_name = $membershipInfo->name;
 
             if ($membershipInfo && in_array($membershipInfo->type, ['type1', 'type2'])) {
                 $pointsEarned = $finalPrice * 0.02;
@@ -194,6 +197,7 @@ class SalesController extends Controller
             'membership_id' => $membershipId,
             'coupon_id' => $validatedData['coupon_id'] ?? null,
             'invoice_sales' => $invoiceSales,
+            'membership_name' => $membership_name,
             'tax' => $validatedData['tax'],
             'total_product_price' => $validatedData['total_price'],
             'total_price_discount' => $validatedData['total_price_with_discount'],

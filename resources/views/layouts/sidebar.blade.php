@@ -1,4 +1,4 @@
-<aside id="layout-menu" class=" layout-menu menu-vertical min-h-screen menu bg-menu-theme">
+<aside id="layout-menu" class=" layout-menu menu-vertical max-h-screen menu bg-menu-theme">
     <div class="app-brand demo">
         <a href="{{ route('dashboard') }}" class="app-brand-link">
             <span class="app-brand-logo demo">
@@ -45,7 +45,7 @@
                     </g>
                 </svg>
             </span>
-            <span class="app-brand-text demo menu-text fw-bold ms-2">SirKasir</span>
+            <span class="app-brand-text demo menu-text fw-bold ms-2">SiRotan</span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -69,81 +69,88 @@
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">Data Master</span>
             </li>
-            <li class="menu-item {{ request()->is('product.index') ? 'active open' : '' }}">
-                <a href="{{ route('product.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-envelope"></i>
-                    <div class="text-truncate" data-i18n="Email">Data Pengguna</div>
-                </a>
-            </li>
             <li class="menu-item {{ request()->is('product.create') ? 'active open' : '' }}">
                 <a href="{{ route('product.create') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-envelope"></i>
-                    <div class="text-truncate" data-i18n="Email">Aktifitas Pengguna</div>
+                    <div class="text-truncate" data-i18n="Email">Activity Log</div>
                 </a>
             </li>
-            <li class="menu-item {{ request()->is('coupon.index') ? 'active open' : '' }}">
-                <a href="{{ route('coupon.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-envelope"></i>
-                    <div class="text-truncate" data-i18n="Email">Coupon</div>
+            <li class="menu-item">
+                <a href="javascript:void(0)" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-box"></i>
+                    <div class="text-truncate" data-i18n="Main Menu">Data Pengguna</div>
                 </a>
-            </li>
-
-            <!-- Product -->
-            <li class="menu-header small text-uppercase">
-                <span class="menu-header-text">Products</span>
-            </li>
-            <li class="menu-item {{ request()->is('product.index') ? 'active open' : '' }}">
-                <a href="{{ route('product.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-envelope"></i>
-                    <div class="text-truncate" data-i18n="Email">Table Products</div>
-                </a>
-            </li>
-            <li class="menu-item {{ request()->is('product.create') ? 'active open' : '' }}">
-                <a href="{{ route('product.create') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-envelope"></i>
-                    <div class="text-truncate" data-i18n="Email">Add Product</div>
-                </a>
-            </li>
-            <li class="menu-item {{ request()->is('coupon.index') ? 'active open' : '' }}">
-                <a href="{{ route('coupon.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-envelope"></i>
-                    <div class="text-truncate" data-i18n="Email">Coupon</div>
-                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->is('product.index') ? 'active open' : '' }}">
+                        <a href="{{ route('product.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <div class="text-truncate">Data Admin</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ request()->is('membership.index') ? 'active open' : '' }}">
+                        <a href="{{ route('membership.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                            <div class="text-truncate">Data Kasir</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ request()->is('membership.index') ? 'active open' : '' }}">
+                        <a href="{{ route('membership.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                            <div class="text-truncate">Membership Data</div>
+                        </a>
+                    </li>
+                </ul>
             </li>
 
-
-            <!-- Category  -->
-            <li class="menu-header small text-uppercase"><span class="menu-header-text">Category Product</span></li>
-
-            <li class="menu-item {{ request()->is('category.index') ? 'active open' : '' }}">
-                <a href="{{ route('category.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-home-smile"></i>
-                    <div class="text-truncate" data-i18n="category">Category Data</div>
+            <li class="menu-item">
+                <a href="javascript:void(0)" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-box"></i>
+                    <div class="text-truncate" data-i18n="Main Menu">Data Barang</div>
                 </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->is('product.index') ? 'active open' : '' }}">
+                        <a href="{{ route('product.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <div class="text-truncate" data-i18n="Email">Data Barang</div>
+                        </a>
+                    </li>
+
+                    <li class="menu-item {{ request()->is('category.index') ? 'active open' : '' }}">
+                        <a href="{{ route('category.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                            <div class="text-truncate" data-i18n="category">Data Kategori</div>
+                        </a>
+                    </li>
+
+                    <li class="menu-item {{ request()->is('coupon.index') ? 'active open' : '' }}">
+                        <a href="{{ route('coupon.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <div class="text-truncate" data-i18n="Email">Data Kupon</div>
+                        </a>
+                    </li>
+                </ul>
             </li>
 
-            <li class="menu-item {{ request()->is('category.create') ? 'active open' : '' }}">
-                <a href="{{ route('category.create') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-home-smile"></i>
-                    <div class="text-truncate" data-i18n="category">Create Category</div>
+            <li class="menu-item">
+                <a href="javascript:void(0)" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-box"></i>
+                    <div class="text-truncate" data-i18n="Main Menu">Data Laporan</div>
                 </a>
-            </li>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->is('sales_report.index') ? 'active open' : '' }}">
+                        <a href="{{ route('sales_report.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <div class="text-truncate" data-i18n="Email">Laporan Transaksi</div>
+                        </a>
+                    </li>
 
-            <!-- Coupon  -->
-            <li class="menu-header small text-uppercase"><span class="menu-header-text">Membership</span></li>
-
-            <li class="menu-item {{ request()->is('membership.index') ? 'active open' : '' }}">
-                <a href="{{ route('membership.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-home-smile"></i>
-                    <div class="text-truncate" data-i18n="Membership">Membership Data</div>
-                </a>
-            </li>
-
-            <li class="menu-item {{ request()->is('membership_benefits.index') ? 'active open' : '' }}">
-                <a href="{{ route('membership_benefits.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-home-smile"></i>
-                    <div class="text-truncate" data-i18n="Membership">Membership Benefits</div>
-                </a>
+                    <li class="menu-item {{ request()->is('sales_report.productReport') ? 'active open' : '' }}">
+                        <a href="{{ route('sales_report.productReport') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                            <div class="text-truncate" data-i18n="category">Laporan Barang</div>
+                        </a>
+                    </li>
+                </ul>
             </li>
         @endif
 

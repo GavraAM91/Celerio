@@ -81,11 +81,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
     //sales report
     Route::prefix('sales_report')->name('sales_report.')->group(function () {
-        Route::get('/', [SalesDetailController::class, 'index'])->name('index');
-        Route::get('create', [SalesDetailController::class, 'create'])->name('create');
-        Route::post('store', [SalesDetailController::class, 'store'])->name('store');
-        Route::get('show/{id?}', [SalesDetailController::class, 'view'])->name('show');
-        Route::get('destroy/{id?}', [SalesDetailController::class, 'destroy'])->name('destroy');
+        Route::get('/', [SalesReportController::class, 'index'])->name('index');
+        Route::get('show/{id?}', [SalesReportController::class, 'show'])->name('show');
+        Route::get('productReport', [SalesReportController::class, 'productReport'])->name('productReport');
+        Route::get('exportSales', [SalesReportController::class, 'exportSales'])->name('exportSales');
+        Route::get('exportProduct', [SalesReportController::class, 'exportProduct'])->name('exportProduct');
     });
 
     //category

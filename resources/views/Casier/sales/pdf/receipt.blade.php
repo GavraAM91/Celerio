@@ -80,8 +80,8 @@
 
         <div class="summary">
             <p><b>Total Harga Produk: </b>Rp {{ number_format($data_sales->total_product_price, 0, ',', '.') }}</p>
-            <p><b>Pajak (12%): </b>Rp
-                {{ number_format($data_sales->tax * $data_sales->total_product_price, 0, ',', '.') }}</p>
+            <p><b>Pajak (12%): </b>
+                {{ $data_sales->tax * 100 }}%</p>
         </div>
 
         <div class="line"></div>

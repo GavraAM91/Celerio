@@ -22,7 +22,7 @@ class ReportSales extends Model
     //connect to user
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id',  'id');
     }
 
     //connect to products
@@ -31,16 +31,22 @@ class ReportSales extends Model
         return $this->hasMany(Product::class, 'product_id');
     }
 
-    //connect to coupon
-    public function coupon(): BelongsTo
-    {
-        return $this->belongsTo(Coupon::class, 'coupon_id');
-    }
-
     //connect to membership
     public function membership(): BelongsTo
     {
-        return $this->belongsTo(Membership::class, 'membership_id');
+        return $this->belongsTo(Membership::class, 'membership_id', 'id');
+    }
+
+    //connect to coupon
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class, 'coupon_id', 'id');
+    }
+
+    //connect to salesdetails
+    public function salesDetails(): HasMany
+    {
+        return $this->hasMany(SalesDetail::class, 'sales_id', 'id');
     }
 
 
