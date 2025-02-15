@@ -55,12 +55,27 @@
                     </div>
 
                 </div>
+                <!-- Export Data di Pojok Kanan -->
+                <div class="d-flex justify-content-end mx-2">
+                    <div class="btn-group dropdown">
+                        <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Export
+                        </button>
+                        <ul class="dropdown-menu p-3">
+                            <li class="d-flex flex-row gap-3">
+                                <a class="btn btn-success" href="{{ route('sales_report.exportSales') }}">
+                                    <i class="bx bx-dots-vertical-rounded"></i> Export All
+                                </a>
 
-                <!-- Button -->
-                <a class="btn btn-success mx-4" href="{{ route('product.create') }}">
-                    <i class="bx bx-dots-vertical-rounded"></i>
-                    Export
-                </a>
+                                <hr class="dropdown-divider">
+                                <a class="btn btn-success" href="{{ route('product.create') }}">
+                                    <i class="bx bx-dots-vertical-rounded"></i> Export Filter Tanggal
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
             <div class="table-responsive text-nowrap">
                 <table class="table table-hover">
