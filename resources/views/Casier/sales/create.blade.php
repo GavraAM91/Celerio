@@ -498,15 +498,30 @@
                             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
                         },
                         success: function(response) {
-                            if (response.success) {
-                                showToast(response.message, "success");
-                                window.location.reload();
+                            // Redirect langsung ke halaman DetailTransaction dengan invoice_sales
+                            if (response.data.invoice_sales) {
+                                window.location.href =
+                                    "{{ route('sales.DetailTransaction') }}?invoice_sales=" +
+                                    encodeURIComponent(response.data.invoice_sales);
+                            } else {    
+                                console.error("invoice_sales tidak ditemukan dalam response.data:",
+                                    response.data);
                             }
+                            // Set URL cetak struk berdasarkan invoice_sales dari response
+                            // let invoiceSales = response.invoice_sales;
+                            // let printUrl = "{{ route('sales.pdfReceipt', ':invoice_sales') }}"
+                            //     .replace(':invoice_sales', invoiceSales);
+                            // $('#printReceiptBtn').attr('href', printUrl);
+
+                            // Tampilkan modal cetak struk
+                            // $('#receiptModal').modal('show');
+                            // window.location.reload();
+
                         },
                         error: function(xhr) {
                             // alert("Gagal menyimpan transaksi. Cek kembali input Anda.");
                             showToast("Gagal menyimpan transaksi. Cek kembali input Anda.",
-                            "error");
+                                "error");
                             console.log(xhr.responseText);
 
                         }

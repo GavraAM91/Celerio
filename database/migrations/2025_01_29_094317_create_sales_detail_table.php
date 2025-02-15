@@ -25,7 +25,7 @@ return new class extends Migration
                     table: 'products'
                 )->onDelete('cascade');
 
-            $table->string('invoice_sales')->unique();
+            $table->string('invoice_sales');
             $table->integer('quantity');
             $table->decimal('selling_price', 10, 2);
             $table->timestamps();

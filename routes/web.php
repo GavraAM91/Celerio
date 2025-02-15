@@ -150,6 +150,8 @@ Route::middleware(['auth', 'verified', 'role:casier'])->group(function () {
         Route::get('searchMembership', [SalesController::class, 'searchMembership'])->name('searchMembership');
         Route::get('searchCoupon', [SalesController::class, 'searchCoupon'])->name('searchCoupon');
         Route::get('searchProduct', [SalesController::class, 'searchProduct'])->name('searchProduct');
+        Route::get('DetailTransaction', [SalesController::class, 'DetailTransaction'])->name('DetailTransaction');
+        Route::get('pdfReceipt/{invoice_sales}', [SalesController::class, 'pdfReceipt'])->name('pdfReceipt');
     });
 
     //sales report

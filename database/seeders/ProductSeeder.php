@@ -60,7 +60,7 @@ class ProductSeeder extends Seeder
                 'product_price' => 250000,
                 'product_status' => 'available',
                 'stock'         => 30,
-                'sold_product'  => 5,
+                'sold_product'  => 3,
                 'access_role'   => 'admin',
                 'edited_by'     => 'Admin2',
                 'created_by'    => 'Admin2',

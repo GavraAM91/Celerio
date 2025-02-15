@@ -19,6 +19,7 @@ use App\Models\MembershipBenefits;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SalesController extends Controller
 {
@@ -118,7 +119,8 @@ class SalesController extends Controller
         if ($membership) {
             return response()->json([
                 'success' => true,
-                'data' => $membership
+                'data' => $membership,
+
             ], 200);
         }
 
@@ -174,6 +176,8 @@ class SalesController extends Controller
             }
         }
 
+
+        //save coupon and used coupon 
         if ($couponId) {
             $couponInfo = Coupon::where('id', $couponId)->first();
 
@@ -211,6 +215,7 @@ class SalesController extends Controller
             //update stock
             $productData = Product::where('id', $item['product_id'])->first();
             $productData->sold_product += $item['quantity'];
+            $productData->stock -= $item['quantity'];
             $productData->save();
         }
 
@@ -219,134 +224,84 @@ class SalesController extends Controller
 
         // Response JSON dengan PDF link
         return response()->json([
+            'success' => true,
             'message' => 'Transaksi berhasil',
-            'invoice' => $invoiceSales,
-            'points_earned' => $pointsEarned,
+            'data' => [
+                'invoice_sales' => $sales->invoice_sales,  // Pastikan ini dikirim
+                'total_price' => $sales->total
+            ]
         ], 201);
     }
+    public function DetailTransaction(Request $request)
+    {
+        $invoice_sales = $request->query('invoice_sales');
+
+        if (!$invoice_sales) {
+            return redirect()->route('sales.index')->with('error', 'Invoice tidak ditemukan.');
+        }
+
+        $data_sales = ReportSales::where('invoice_sales', $invoice_sales)->first();
+        if (!$data_sales) {
+            return redirect()->route('sales.index')->with('error', 'Transaksi tidak ditemukan.');
+        }
+
+        return view('casier.sales.detailTransaction', [
+            'data_sales' => $data_sales,
+            'invoice_sales' => $invoice_sales // Kirim invoice_sales langsung ke view
+        ]);
+    }
+
 
     public function pdfReceipt($invoice_sales)
     {
-        //search by invoice sales
-        $data_sales = ReportSales::where('invoice_sales', $invoice_sales)->firstOrFail();
-
-        //check empty
-        if ($data_sales->isEmpty()) {
-            return response()->json([
-                'message' => 'Transaksi Tidak Ada',
-            ], 404);
+        // Ambil data transaksi berdasarkan invoice
+        $data_sales = ReportSales::where('invoice_sales', $invoice_sales)->first();
+        if (!$data_sales) {
+            return response()->json(['message' => 'Transaksi Tidak Ada'], 404);
         }
 
-        //casier name
-        $user_data = User::where('user_id', Auth::user()->id);
-        $casier_name = $user_data->username;
+        // Ambil detail transaksi berdasarkan invoice
+        $sales_detail = SalesDetail::where('invoice_sales', $invoice_sales)->get();
+        if ($sales_detail->isEmpty()) {
+            return response()->json(['message' => 'Transaksi Detail Tidak Ada'], 404);
+        }
 
-        //check membership
-        $membership_data = Membership::where('id', $data_sales->membership_id)->first();
-        $membership_discount = $membership_data ? $membership_data->discount : 0;
-        $membership_text = $membership_data ? number_format($membership_discount, 0, ',', '.') : "Tidak Memakai";
+        // Ambil nama produk berdasarkan product_id
+        foreach ($sales_detail as $item) {
+            $product = Product::where('id', $item->product_id)->first();
+            $item->product_name = $product ? $product->product_name : 'Produk Tidak Diketahui';
+        }
 
-        //discount
-        $discount_data = Coupon::where('id', $data_sales->discount_id)->first();
-        $discount = $discount_data ? $discount_data->amount : 0;
+        // Ambil nama kasir dari auth 
+        $casier_name = Auth::check() ? Auth::user()->name : 'Tidak Diketahui';
 
+        // Ambil data membership jika ada
+        $membership = Membership::where('id', $data_sales->membership_id)->first();
+        $membership_name = $membership ? $membership->name : '-';
+        $membership_points = $membership ? $membership->points : '-';
 
+        // Ambil data kupon jika ada
+        $coupon = Coupon::where('id', $data_sales->coupon_id)->first();
+        $discount_display = $coupon ? ($coupon->percentage_coupon ? "{$coupon->percentage_coupon}%" : "Rp " . number_format($coupon->value_coupon, 0, ',', '.')) : '-';
 
-        //set local time
+        // Format tanggal
         Carbon::setLocale('id');
-        $hari = Carbon::parse($data_sales->created_at)->translatedFormat('1');
         $created_at = Carbon::parse($data_sales->created_at)->format('d F Y');
 
-        $html = '
-    <!DOCTYPE html>
-    <html lang="id">
-    <head>
-        <meta charset="UTF-8">
-        <title>Struk Kasir</title>
-        <style>
-            body { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5; }
-            .container { width: 400px; margin: 0 auto; padding: 20px; border: 1px dashed #000; }
-            .header { text-align: center; margin-bottom: 20px; }
-            .header h2 { margin: 0; font-size: 20px; }
-            .header p { margin: 0; font-size: 12px; }
-            hr { border: 1px dashed #000; margin: 10px 0; }
-            .content table { width: 100%; margin-top: 10px; border-collapse: collapse; }
-            .content table td { padding: 5px; vertical-align: top; }
-            .totals { margin-top: 20px; }
-            .totals table { width: 100%; }
-            .totals table td { padding: 5px; }
-            .totals table .label { text-align: left; }
-            .totals table .value { text-align: right; }
-            .footer { text-align: center; margin-top: 20px; font-size: 12px; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <!-- Header -->
-            <div class="header">
-                <h2>' . htmlspecialchars($data_sales->gugugaga) . '</h2>
-                <p>Tanggal: ' . htmlspecialchars($data_sales->created_at) . '</p>
-                <p>Kasir: ' . htmlspecialchars($casier_name) . '</p>
-            </div>
-            <hr>
+        // Render HTML ke PDF
+        $html = view('casier.sales.pdf.receipt', compact(
+            'created_at',
+            'casier_name',
+            'sales_detail',
+            'data_sales',
+            'discount_display',
+            'membership_name',
+            'membership_points'
+        ))->render();
 
-            <!-- Produk -->
-            <div class="content">
-                <table>
-                    <thead>
-                        <tr>
-                            <td><b>Produk</b></td>
-                            <td><b>Quantity</b></td>
-                            <td style="text-align:right;"><b>Harga</b></td>
-                        </tr>
-                    </thead>
-                    <tbody>';
-        foreach ($data_sales as $product) {
-            $html .= '
-                        <tr>
-                            <td>' . htmlspecialchars($product['name']) . '</td>
-                            <td>' . htmlspecialchars($product['quantity']) . '</td>
-                            <td style="text-align:right;">Rp ' . number_format($product['price'], 0, ',', '.') . '</td>
-                        </tr>';
-        }
-        $html .= '
-                    </tbody>
-                </table>
-            </div>
-            <hr>
+        // Generate PDF
+        $pdf = Pdf::loadHTML($html);
 
-            <!-- Total -->
-            <div class="totals">
-                <table>
-                    <tr>
-                        <td class="label">Jumlah:</td>
-                        <td class="value">Rp ' . number_format($data_sales->quantity,) . '</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Pajak:</td>
-                        <td class="value">Rp ' . number_format($data_sales->tax) . '</td>
-                    </tr>
-                    <tr>
-    <td class="label">Diskon:</td>
-    <td class="value">Rp ' . number_format($discount, 0, ',', '.') . '</td>
-</tr>
-<tr>
-    <td class="label">Potongan Membership:</td>
-    <td class="value">Rp ' . $membership_text . '</td>
-</tr>
-                    <tr>
-                        <td class="label"><b>Total:</b></td>
-                        <td class="value"><b>Rp ' . number_format($data_sales->total, 0, ',', '.') . '</b></td>
-                    </tr>
-                </table>
-            </div>
-
-            <!-- Footer -->
-            <div class="footer">
-                <p>Terima kasih telah berbelanja!</p>
-            </div>
-        </div>
-    </body>
-    </html>';
+        return $pdf->download("Struk_{$invoice_sales}.pdf");
     }
 }
