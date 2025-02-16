@@ -51,15 +51,15 @@
 
 <body class="font-sans text-gray-900 antialiased">
     <!-- LOGIN PAGE -->
-    <div class="container-xxl max-w-lg min-h-screen flex flex-col sm:justify-center items-center py-12 sm:py-8">
+    <div class="container-xxl max-w-3xl min-h-screen flex flex-col sm:justify-center items-center py-12 sm:py-8">
         <div class="authentication-wrapper authentication-basic container-p-y">
             <div class="authentication-inner">
                 <!-- Register -->
-                <div class="card px-sm-6 px-0">
+                <div class="card px-sm-6 px-0 ">
                     <div class="card-body">
                         <!-- Logo -->
                         <div class="app-brand justify-content-center">
-                            <a href="index.html" class="app-brand-link gap-2">
+                            <a href="#" class="app-brand-link gap-2">
                                 <span class="app-brand-logo demo">
                                     <svg width="25" viewBox="0 0 25 42" version="1.1"
                                         xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -108,18 +108,18 @@
                                         </g>
                                     </svg>
                                 </span>
-                                <span class="app-brand-text demo text-heading fw-bold">SIRKASIR</span>
+                                <span class="app-brand-text demo text-heading fw-bold">SiRotan </span>
                             </a>
                         </div>
                         <!-- /Logo -->
-                        <h4 class="mb-3 mx-2 text-gray-400 text-base text-center">Welcome to SIRKASIR! 👋</h4>
+                        <h4 class="mb-3 mx-2 text-gray-400 text-base text-center">Selamat datang di SiRotan! 👋</h4>
 
                         {{ $slot }}
 
                         <p class="text-center">
-                            <span>New on our platform?</span>
+                            <span>Support your UMKM by use </span>
                             <a href="auth-register-basic.html">
-                                <span>Create an account</span>
+                                <span>SirKasir </span>
                             </a>
                         </p>
                     </div>

@@ -95,7 +95,7 @@
                                             <i class="bx bx-dots-vertical-rounded"></i>
                                         </button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('user.edit', $admin->id) }}">
+                                            <a class="dropdown-item" href="{{ route('user.editAdmin', $admin->id) }}">
                                                 <i class="bx bx-edit-alt me-1"></i> Edit
                                             </a>
                                             <a class="dropdown-item" href="{{ route('user.showAdmin', $admin->id) }}">

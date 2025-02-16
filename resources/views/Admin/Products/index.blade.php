@@ -101,10 +101,11 @@
                     </div>
                 </div>
 
-                <!-- Button -->
-                <a class="btn btn-primary mx-4" href="{{ route('product.create') }}">
-                    Add Product
-                </a>
+                <div class="d-flex gap-3 mx-4">
+                    <a class="btn btn-danger" href="{{ route('product.trashed') }}">Data Terhapus</a>
+                    <a class="btn btn-primary" href="{{ route('product.create') }}">Tambah Product </a>
+                </div>
+
             </div>
             <div class="table-responsive text-nowrap">
                 <table class="table table-hover">
@@ -137,9 +138,10 @@
                                 <td>
                                     <span
                                         class="badge 
-                        @if ($product->product_status == 'available') bg-label-success 
+                        @if ($product->product_status == 'active') bg-label-success 
                         @elseif ($product->product_status == 'out of stock') bg-label-danger 
                         @elseif ($product->product_status == 'expired') bg-label-warning 
+                        @elseif ($product->product_status == 'deleted') bg-label-primary
                         @else bg-label-secondary @endif">
                                         {{ ucfirst($product->product_status) }}
                                     </span>
@@ -154,79 +156,6 @@
                                             <a class="dropdown-item" href="{{ route('product.edit', $product->id) }}">
                                                 <i class="bx bx-edit-alt me-1"></i> Edit
                                             </a>
-                                            {{-- <a href="javascript:void(0);" class="btn btn-info btn-detail"
-                                                data-id="{{ $product->id }}" data-bs-toggle="modal"
-                                                data-bs-target="#detailModal">
-                                                <i class="bx bx-edit-alt me-1"></i> Detail
-                                            </a> --}}
-
-                                            <!-- Button trigger modal -->
-                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                                data-bs-target="#modalCenter">
-                                                Launch modal
-                                            </button>
-
-                                            <!-- Modal -->
-                                            <div class="modal fade" id="modalCenter" tabindex="-1" aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered" role="document">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="modalCenterTitle">Modal title
-                                                            </h5>
-                                                            <button type="button" class="btn-close"
-                                                                data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <div class="row">
-                                                                <div class="col mb-6">
-                                                                    <label for="nameWithTitle"
-                                                                        class="form-label">Name</label>
-                                                                    <input type="text" id="nameWithTitle"
-                                                                        class="form-control"
-                                                                        placeholder="Enter Name" />
-                                                                </div>
-                                                            </div>
-                                                            <div class="row g-6">
-                                                                <div class="col mb-0">
-                                                                    <label for="emailWithTitle"
-                                                                        class="form-label">Email</label>
-                                                                    <input type="email" id="emailWithTitle"
-                                                                        class="form-control"
-                                                                        placeholder="xxxx@xxx.xx" />
-                                                                </div>
-                                                                <div class="col mb-0">
-                                                                    <label for="dobWithTitle"
-                                                                        class="form-label">DOB</label>
-                                                                    <input type="date" id="dobWithTitle"
-                                                                        class="form-control" />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-outline-secondary"
-                                                                data-bs-dismiss="modal">
-                                                                Close
-                                                            </button>
-                                                            <button type="button" class="btn btn-primary">Save
-                                                                changes</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-                                            {{-- 
-                                            <x-modal-detail-layouts>
-                                                <div class="row">
-                                                    <div class="col mb-6">
-                                                        <label for="nameWithTitle" class="form-label">Name</label>
-                                                        <input type="text" id="nameWithTitle" class="form-control"
-                                                            readonly />
-                                                    </div>
-                                                </div>
-                                            </x-modal-detail-layouts> --}}
-
-
                                             <form action="{{ route('product.destroy', $product->id) }}"
                                                 class="d-inline">
                                                 @csrf

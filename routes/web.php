@@ -18,7 +18,7 @@ use App\Http\Controllers\CategoryProductController;
 use App\Http\Controllers\MembershipBenefitsController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/dashboard', function () {
@@ -46,6 +46,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('show/{id?}', [ProductController::class, 'show'])->name('show');
         Route::post('update/{id?}', [ProductController::class, 'update'])->name('update');
         Route::get('destroy/{id?}', [ProductController::class, 'destroy'])->name('destroy');
+        Route::get('trashed', [ProductController::class, 'trashed'])->name('trashed');
+        Route::post('restore/{id}', [ProductController::class, 'restore'])->name('restore');
+        Route::delete('forceDelete/{id}', [ProductController::class, 'forceDelete'])->name('forceDelete');
     });
 
     //Coupon
@@ -57,6 +60,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('show/{id?}', [CouponController::class, 'show'])->name('show');
         Route::post('update/{id?}', [CouponController::class, 'update'])->name('update');
         Route::get('destroy/{id?}', [CouponController::class, 'destroy'])->name('destroy');
+        Route::get('trashed', [CouponController::class, 'trashed'])->name('trashed');
+        Route::post('restore/{id}', [CouponController::class, 'restore'])->name('restore');
+        Route::delete('forceDelete/{id}', [CouponController::class, 'forceDelete'])->name('forceDelete');
     });
 
     //membership

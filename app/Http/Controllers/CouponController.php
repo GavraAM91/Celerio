@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Coupon;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
 
 class CouponController extends Controller
@@ -42,9 +45,9 @@ class CouponController extends Controller
             $query->where('coupon_name', 'like', '%' . $request->search . '%');
         }
 
-        $data_product = $query->get();
+        $data_coupon = $query->get();
 
-        return view('admin.coupon.index', compact('data_coupon'), ['title => Coupon']);
+        return view('admin.coupons.index', compact('data_coupon'), ['title => Coupon']);
     }
 
     /**
@@ -60,14 +63,14 @@ class CouponController extends Controller
      */
     public function store(Request $request)
     {
-        $request = request()->all();
+        $requestData = $request->all();
 
-        //validate
-        $validator = FacadesValidator::make($request, [
+        // Validasi input
+        $validator = Validator::make($requestData, [
             'name_coupon' => 'required',
             'coupon_description' => 'required',
-            'value_coupon' => 'required',
-            'percentage_coupon' => 'required',
+            'value_coupon' => 'nullable',
+            'percentage_coupon' => 'nullable',
             'minimum_usage_coupon' => 'required',
             'expired_at' => 'required',
             'total_coupon' => 'required',
@@ -75,33 +78,27 @@ class CouponController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Error in input',
-                'errors' => $validator->errors()
-            ], 400);
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $data_request = [
-            'name_coupon' => request()->name_coupon,
-            'coupon_description' => request()->coupon_description,
-            'value_coupon' => request()->value_coupon,
-            'percentage_coupon' => request()->percentage_coupon,
-            'minimum_usage_coupon' => request()->minimum_usage_coupon,
-            'expired_at' => request()->expired_at,
-            'total_coupon' => request()->total_coupon,
-            'status' => request()->status,
-        ];
-
-        $dataCoupon = Coupon::create($data_request);
-
+        // Simpan data
+        $dataCoupon = Coupon::create($requestData);
 
         if ($dataCoupon) {
-            return redirect()->route('coupon.index')->with('success', 'New coupon Added Successfully!');
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($dataCoupon)
+                ->event('created')
+                ->withProperties($requestData)
+                ->log("Admin dengan nama " . Auth::user()->name . " membuat kupon {$dataCoupon->name_coupon}.");
+
+            return redirect()->route('coupon.index')
+                ->with('success', 'New Coupon Added Successfully!');
         } else {
-            return redirect()->back()->with('error', 'Failed to Add coupon');
+            return redirect()->back()
+                ->with('error', 'Failed to Add Coupon');
         }
     }
-
     /**
      * Display the specified resource.
      */
@@ -129,9 +126,9 @@ class CouponController extends Controller
     public function edit($id)
     {
 
-        $data_coupon = Coupon::findOrFail($id);
+        $coupon = Coupon::findOrFail($id);
 
-        return view('admin.coupons.edit', compact('data_coupon'), ['title => edit coupon']);
+        return view('admin.coupons.edit', compact('coupon'), ['title' => 'edit coupon']);
     }
 
 
@@ -140,14 +137,17 @@ class CouponController extends Controller
      */
     public function update(Request $request)
     {
-        $request = request()->all();
+        $requestData = $request->all();
 
-        $data_coupon = Coupon::findOrFail($request['id']);
-        $validator = FacadesValidator::make($request, [
+        // Temukan data berdasarkan ID
+        $data_coupon = Coupon::findOrFail($requestData['id']);
+
+        // Validasi input
+        $validator = Validator::make($requestData, [
             'name_coupon' => 'required',
             'coupon_description' => 'required',
-            'value_coupon' => 'required',
-            'percentage_coupon' => 'required',
+            'value_coupon' => 'sometimes|nullable',
+            'percentage_coupon' => 'sometimes|nullable',
             'minimum_usage_coupon' => 'required',
             'expired_at' => 'required',
             'total_coupon' => 'required',
@@ -155,56 +155,86 @@ class CouponController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Error in input',
-                'errors' => $validator->errors()
-            ], 400);
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
-
-        $data_request = [
-            'name_coupon' => request()->name_coupon,
-            'coupon_description' => request()->coupon_description,
-            'value_coupon' => request()->value_coupon,
-            'percentage_coupon' => request()->percentage_coupon,
-            'minimum_usage_coupon' => request()->minimum_usage_coupon,
-            'expired_at' => request()->expired_at,
-            'total_coupon' => request()->total_coupon,
-            'status' => request()->status,
-        ];
-
-        $data_coupon->update($data_request);
+        // Update data
+        $data_coupon->update($requestData);
 
         if ($data_coupon) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Data update succesfully!',
-                'data' => $data_coupon
-            ]);
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($data_coupon)
+                ->event('updated')
+                ->withProperties($requestData)
+                ->log("Admin dengan nama " . Auth::user()->name . " mengedit kupon {$data_coupon->name_coupon}.");
+
+            return redirect()->route('coupon.index')
+                ->with('success', 'Update Coupon Success!');
         } else {
-            return response()->json([
-                'message' => 'Data update failed!',
-                'data' => $data_coupon
-            ]);
+            return redirect()->route('coupon.index')
+                ->with('error', 'Failed to Update Coupon!');
         }
     }
-
 
     /**
      * Remove the specified resource from storage.
      */
+    // Soft Delete Coupon
     public function destroy($id)
     {
+        $coupon = Coupon::findOrFail($id);
 
-        $data_coupon = Coupon::findOrFail($id);
-        if ($data_coupon) {
-            if ($data_coupon->delete()) {
-                return redirect()->route('product.index')->with('success', 'Delete Coupon  Successfully!');
-            } else {
-                return redirect()->back()->with('error', 'Failed to Delete Coupon');
-            }
-        } else {
-            return redirect()->back()->with('error', 'Data Coupon Not Found');
+        if ($coupon->delete()) {
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($coupon)
+                ->event('deleted')
+                ->withProperties(['name_coupon' => $coupon->name_coupon])
+                ->log("Admin dengan nama " . Auth::user()->name . " menghapus kupon {$coupon->name_coupon}.");
+
+            return redirect()->route('coupon.index')->with('success', 'Coupon deleted successfully!');
         }
+        return redirect()->back()->with('error', 'Failed to delete coupon');
+    }
+
+    // View Trashed Coupons
+    public function trashed()
+    {
+        $trashedCoupons = Coupon::onlyTrashed()->get();
+        return view('admin.trashed.coupons', compact('trashedCoupons'));
+    }
+
+    // Restore Coupon
+    public function restore($id)
+    {
+        $coupon = Coupon::onlyTrashed()->findOrFail($id);
+        $coupon->restore();
+
+        activity()
+            ->causedBy(Auth::user())
+            ->performedOn($coupon)
+            ->event('restored')
+            ->withProperties(['name_coupon' => $coupon->name_coupon])
+            ->log("Admin dengan nama " . Auth::user()->name . " memulihkan kupon {$coupon->name_coupon}.");
+
+        return redirect()->route('coupon.trashed')->with('success', 'Coupon restored successfully!');
+    }
+
+    // Force Delete (Permanent Delete)
+    public function forceDelete($id)
+    {
+        $coupon = Coupon::onlyTrashed()->findOrFail($id);
+
+        $coupon->forceDelete();
+
+        activity()
+            ->causedBy(Auth::user())
+            ->performedOn($coupon)
+            ->event('force_deleted')
+            ->withProperties(['name_coupon' => $coupon->name_coupon])
+            ->log("Admin dengan nama " . Auth::user()->name . " menghapus permanen kupon {$coupon->name_coupon}.");
+
+        return redirect()->route('coupon.trashed')->with('success', 'Coupon permanently deleted!');
     }
 }

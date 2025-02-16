@@ -60,12 +60,15 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //category
-        $data_category = CategoryProduct::all();
+        // Ambil hanya kolom yang diperlukan (optimasi query)
+        $data_category = CategoryProduct::select('id', 'category_name')->get();
 
-        return view('admin.Products.create', compact('data_category'), ['title => Product']);
+        // Kirim data ke view
+        return view('admin.Products.create', [
+            'data_category' => $data_category,
+            'title' => 'Product'
+        ]);
     }
-
     /**
      * Store a newly created resource in storage.
      */
@@ -110,7 +113,7 @@ class ProductController extends Controller
 
 
         //productCode
-        $productCode = 'PRD-' . strtoupper(substr(request()->product_name, 0, 4)) . time();
+        $productCode = 'PRD' . strtoupper(substr(request()->product_name, 0, 4)) . now()->format('Ymd');
 
         //created_at
         $created_at = now();
@@ -134,6 +137,13 @@ class ProductController extends Controller
         activity()->log(Auth::user()->name . 'has add product');
 
         if ($data_product) {
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($data_product)
+                ->event('created')
+                ->withProperties($data_request)
+                ->log("Admin dengan nama " . Auth::user()->name . " menambahkan produk {$data_product->product_name}.");
+
             return redirect()->route('product.index')->with('success', 'New Product Added Successfully!');
         } else {
             return redirect()->back()->with('error', 'Failed to Add Product');
@@ -159,23 +169,12 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        // if (request()->ajax()) {
-        // $id = request()->id;
 
         $data_product = Product::find($id);
-        // var_dump($data_product);
 
         $data_category = CategoryProduct::orderBy('category_name', 'asc')->get();
 
         return view('admin.Products.edit', compact('data_product', 'data_category'), ['title' => 'Product Edit']);
-
-        //response json use this
-        // return response()->json([
-        //     'message' => 'data for edit',
-        //     'data_product' => $data_product,
-        //     'category' => $category,
-        // ], 200);
-        // }
     }
 
     /**
@@ -252,43 +251,85 @@ class ProductController extends Controller
         $data_product->update($data_request);
 
         if ($data_product) {
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($data_product)
+                ->event('updated')
+                ->withProperties($data_request)
+                ->log("Admin dengan nama " . Auth::user()->name . " edit produk {$data_product->product_name}.");
+
             return redirect()->route('product.index')
                 ->with('success', 'Update Product Success!');
         } else {
             return redirect()->route('product.index')
                 ->with('error', 'Failed to Update Product!');
         }
-
-        // if ($data_product) {
-        //     return response()->json([
-        //         'response' => '200',
-        //         'success' => true,
-        //         'message' => 'Update Proposal Success',
-        //     ], 200);
-        // } else {
-        //     return response()->json([
-        //         'response' => 422,
-        //         'success' => false,
-        //         'message' => 'Failed to Update Product',
-        //     ], 422);
-        // }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // Soft Delete Product
     public function destroy($id)
     {
-        $data_product = Product::find($id);
-        if ($data_product) {
-            if ($data_product->delete()) {
-                return redirect()->route('product.index')->with('success', 'Delete Product  Successfully!');
-            } else {
-                return redirect()->back()->with('error', 'Failed to Delete Product');
-            }
-        } else {
-            return redirect()->back()->with('error', 'Data Product Not Found');
+        $product = Product::find($id);
+        if (!$product) {
+            return redirect()->back()->with('error', 'Product not found');
         }
+
+        if ($product->delete()) {
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($product)
+                ->event('deleted')
+                ->withProperties(['product_name' => $product->product_name])
+                ->log("Admin dengan nama " . Auth::user()->name . " menghapus produk {$product->product_name}.");
+
+            return redirect()->route('product.index')->with('success', 'Product deleted successfully!');
+        } else {
+            return redirect()->back()->with('error', 'Failed to delete product');
+        }
+    }
+
+    // View Trashed Products
+    public function trashed()
+    {
+        $trashedProducts = Product::onlyTrashed()->get();
+        return view('admin.trashed.product', compact('trashedProducts'));
+    }
+
+    // Restore Product
+    public function restore($id)
+    {
+        $product = Product::onlyTrashed()->find($id);
+        if ($product) {
+            $product->restore();
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($product)
+                ->event('restored')
+                ->withProperties(['product_name' => $product->product_name])
+                ->log("Admin dengan nama " . Auth::user()->name . " memulihkan produk {$product->product_name}.");
+
+            return redirect()->route('product.trashed')->with('success', 'Product restored successfully!');
+        }
+        return redirect()->back()->with('error', 'Product not found');
+    }
+
+    // Force Delete (Permanent Delete)
+    public function forceDelete($id)
+    {
+        $product = Product::onlyTrashed()->find($id);
+
+        if ($product) {
+            $product->forceDelete();
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($product)
+                ->event('force_deleted')
+                ->withProperties(['product_name' => $product->product_name])
+                ->log("Admin dengan nama " . Auth::user()->name . " menghapus permanen produk {$product->product_name}.");
+
+            return redirect()->route('product.trashed')->with('success', 'Product permanently deleted!');
+        }
+        return redirect()->back()->with('error', 'Product not found');
     }
 
     public function addStock(Request $request)
@@ -299,7 +340,6 @@ class ProductController extends Controller
             'stock' => 'required',
         ]);
 
-        //if fail
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Error in input',
@@ -307,25 +347,21 @@ class ProductController extends Controller
             ], 400);
         }
 
-        //all inn the data 
         $data_stock = $request->all();
-
-        //check into database 
         $data_stock_db = Product::findOrFail($data_stock['product_id']);
 
-        //update into database 
-        $data_stock_db->update($data_stock['stock'], $data_stock['stock']);
+        $data_stock_db->increment('stock', $data_stock['stock']);
 
-        if ($data_stock_db) {
-            return response()->json([
-                'message' => 'data stock updated',
-                'data' => $data_stock_db
-            ], 200);
-        } else {
-            return response()->json([
-                'message' => 'data stock error in update',
-                'data' => $data_stock_db
-            ], 400);
-        }
+        activity()
+            ->causedBy(Auth::user())
+            ->performedOn($data_stock_db)
+            ->event('updated')
+            ->withProperties(['product_name' => $data_stock_db->product_name, 'added_stock' => $data_stock['stock']])
+            ->log("Admin dengan nama " . Auth::user()->name . " menambahkan stok {$data_stock['stock']} untuk produk {$data_stock_db->product_name}.");
+
+        return response()->json([
+            'message' => 'data stock updated',
+            'data' => $data_stock_db
+        ], 200);
     }
 }

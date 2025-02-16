@@ -113,10 +113,12 @@
                     </div>
                 </div>
 
-                <!-- Button -->
-                <a class="btn btn-primary mx-4" href="{{ route('membership.create') }}">
-                    Tambah Member
-                </a>
+
+                <div class="d-flex gap-3 mx-4">
+                    <a class="btn btn-danger" href="{{ route('membership.trashed') }}">Data Terhapus</a>
+                    <a class="btn btn-primary" href="{{ route('membership.createAdmin') }}">TambahMembership</a>
+                </div>
+
             </div>
             <div class="table-responsive text-nowrap">
                 <table class="table table-hover">
