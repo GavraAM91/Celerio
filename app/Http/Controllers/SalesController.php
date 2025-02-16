@@ -85,19 +85,19 @@ class SalesController extends Controller
     {
         $product_name = $request->query('productName');
         $membershipType = $request->query('membershipType');
-        // var_dump($product_name);
 
-        $product = Product::where('product_name', 'LIKE', "%$product_name%")->first();
+        // Cari produk berdasarkan nama dan status aktif
+        // $product = Product::where('product_name', 'LIKE', "%$product_name%")
+        //     ->where('status', 'active')
+        //     ->first();
+        $product = Product::where('product_name', 'LIKE', "%$product_name%")
+            ->first();
 
         if (!$product) {
             return response()->json(['success' => false, 'message' => 'Produk tidak ditemukan']);
         }
 
         $selling_price = SellingPrice::where('type_buyer', $membershipType)->first();
-
-        // if (!$selling_price) {
-        //     return response()->json(['success' => false, 'message' => 'Membership tidak ditemukan']);
-        // }
 
         return response()->json([
             'success' => true,
@@ -107,6 +107,7 @@ class SalesController extends Controller
             ],
         ]);
     }
+
 
     //search membership
     public function searchMembership(Request $request)
@@ -226,6 +227,10 @@ class SalesController extends Controller
 
         activity()->log(Auth::user()->name . 'has doing transaction with code ' . $invoiceSales);
 
+        // if ($productData->sold_product > $productData->stock) {
+        //     $productData->status = 'out of stock';
+        //     $productData->save();
+        // }
         // Response JSON dengan PDF link
         return response()->json([
             'success' => true,
@@ -236,6 +241,7 @@ class SalesController extends Controller
             ]
         ], 201);
     }
+
     public function DetailTransaction(Request $request)
     {
         $invoice_sales = $request->query('invoice_sales');

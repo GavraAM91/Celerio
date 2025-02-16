@@ -10,6 +10,7 @@ use App\Http\Controllers\CasierController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\SalesDetailController;
@@ -21,9 +22,9 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Route::get('/dashboard', function () {
+//     return view('dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -31,11 +32,21 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::prefix('dashboard')->name('dashboard.')->group(function () {
+    Route::get('admin', [DashboardController::class, 'dashboardAdmin'])
+        ->name('admin')
+        ->middleware(['auth', 'verified', 'role:admin']);
+
+    Route::get('casier', [DashboardController::class, 'dashboardCasier'])
+        ->name('casier')
+        ->middleware(['auth', 'verified', 'role:casier']);
+});
+
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     //dashboard
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+    // Route::prefix('dashboard')->name('dashboard.')->group(function () {
+    //     Route::get('dashboardAdmin', [DashboardController::class, 'dashboardAdmin'])->name('admin');
+    // });
 
     //Products
     Route::prefix('product')->name('product.')->group(function () {
@@ -164,10 +175,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
 Route::middleware(['auth', 'verified', 'role:casier'])->group(function () {
     //dashboard
-    Route::get('/casier/dashboard', function () {
-        return view('casier.dashboard');
-    })->name('casier.dashboard');
-
+    // Route::prefix('dashboard')->name('dashboard.')->group(function () {
+    //     Route::get('dashboardCasier', [DashboardController::class, 'dashboardCasier'])->name('casier');
+    // });
 
     //sales 
     Route::prefix('sales')->name('sales.')->group(function () {

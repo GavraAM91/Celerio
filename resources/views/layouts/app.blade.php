@@ -18,6 +18,9 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('template/assets/img/favicon/favicon.ico') }}" />
 
+    <!-- ICON GOOGLE-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -107,9 +110,10 @@
     <div class="flex h-screen bg-gray-100 ">
 
         <!-- Sidebar -->
-        <aside class="w-64 min-h-screen bg-white border-r border-gray-200 h-full overflow-y-auto flex-shrink-0">
+        <div class="w-64 h-screen bg-white border-r border-gray-200 overflow-y-auto flex-shrink-0">
             @include('layouts.sidebar')
-        </aside>
+        </div>
+
 
         <!-- Content Wrapper -->
         <div class="flex-1 overflow-auto">
@@ -139,6 +143,7 @@
 
     <!-- Ajax -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="{{ asset('template/assets/vendor/libs/jquery/jquery.js') }}"></script>
     <script src="{{ asset('template/assets/vendor/libs/popper/popper.js') }}"></script>

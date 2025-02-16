@@ -38,7 +38,7 @@
                                     <table class="table table-hover">
                                         <thead>
                                             <tr>
-                                                <th>Id Produk</th>
+                                                <th>Id</th>
                                                 <th>Produk</th>
                                                 <th>Stock Tersedia</th>
                                                 <th>Jumlah</th>
@@ -53,36 +53,46 @@
                                 </div>
                             </div>
 
-                            <div class="mt-3">
-                                <label>Total Harga Barang </label>
-                                <input type="text" id="productTotal" class="form-control" readonly>
+                            <div class="mt-8">
+                                <div class="row">
+                                    <!-- Kolom Kiri -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="coupon-name" class="form-label">Coupon Name</label>
+                                            <input type="text" class="form-control" id="coupon-name"
+                                                placeholder="#BELANJATERUS" />
+                                        </div>
+                                        <div id="coupon-data" class="mt-3"></div>
+                                    </div>
 
-                                <label>Total Pajak (PPN 12%)</label>
-                                <input type="text" id="taxTotal" class="form-control" readonly>
+                                    <!-- Kolom Kanan -->
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded">
+                                            <strong><label class="form-label">Total Harga Dengan Diskon</label></strong>
+                                            <input id="totalDiscount" class="form-control-plaintext"></p>
 
-                                <div class="row my-1 mx-0">
-                                    <label for="coupon-name">Coupon Name</label>
-                                    <input type="text" class="form-control" id="coupon-name"
-                                        placeholder="#BELANJATERUS" />
+                                            <strong><label class="form-label">Total Harga Barang</label></strong>
+                                            <input id="productTotal" class="form-control-plaintext"></p>
+
+                                            <strong><label class="form-label">Total Pajak (PPN 12%)</label></strong>
+                                            <input id="taxTotal" class="form-control-plaintext"></p>
+
+                                            <strong><label class="form-label">Harga Final</label></strong>
+                                            <input id="finalPrice" class="form-control-plaintext"></p>
+
+                                            <strong><label class="form-label">Jumlah Uang</label></strong>
+                                            <input type="text" class="form-control" id="jumlahUang"
+                                                placeholder="Rp 100000" / required>
+
+                                            <strong><label class="form-label">Uang Kembalian</label></strong>
+                                            <input id="uangKembalian" class="form-control-plaintext"></p>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div id="coupon-data" class="mt-3"></div>
-
-                                <label>Harga Final</label>
-                                <input type="text" id="finalPrice" class="form-control" readonly>
-
-                                <label>Total Harga Dengan Diskon</label>
-                                <input type="text" id="totalDiscount" class="form-control" readonly>
-
-                                <label>Jumlah Uang</label>
-                                <input type="text" class="form-control" id="jumlahUang" placeholder="Rp 100000" />
-
-                                <label>Uang Kembalian</label>
-                                <input type="text" class="form-control" id="uangKembalian" />
-
-                                <input type="hidden" class="form-control" id="user_id"
-                                    value="{{ Auth::user()->id }}">
+                                <input type="hidden" id="user_id" value="{{ Auth::user()->id }}">
                             </div>
+
 
                             <button type="submit" class="btn btn-success mt-3">Simpan</button>
                         </form>
@@ -181,7 +191,7 @@
                     let productName = $(this).val();
                     let membershipType = $("#hidden-membership-type").val() || "type3"; // Default jika kosong
 
-                    if (productName.length >= 4) {
+                    if (productName.length >= 1) {
                         let url = "{{ route('sales.searchProduct') }}?productName=" + encodeURIComponent(
                             productName) + "&membershipType=" + encodeURIComponent(membershipType);
 
@@ -200,13 +210,14 @@
                                     let sellingPrice = price * sellingMultiplier;
                                     let total = sellingPrice * quantity;
 
-                                    row.find(".product_id").val(product_id); // Perbaikan dari "id"
+                                    row.find(".product_id").val(product_id);
                                     row.find(".stock").val(stock);
                                     row.find(".price").text("Rp " + price.toLocaleString("id-ID"));
                                     row.find(".sellingMultiplier-input").val(sellingMultiplier);
                                     row.find(".selling_price").text("Rp " + sellingPrice
                                         .toLocaleString("id-ID"));
                                     row.find(".total").text("Rp " + total.toLocaleString("id-ID"));
+
                                     calculateProductTotal();
                                 } else {
                                     resetRow(row);
@@ -220,6 +231,7 @@
                         resetRow(row);
                     }
                 });
+
 
                 //update total saat quantity berubah
                 $(document).on("input", ".quantity", function() {

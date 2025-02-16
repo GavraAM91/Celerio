@@ -1,6 +1,6 @@
-<aside id="layout-menu" class=" layout-menu menu-vertical max-h-screen menu bg-menu-theme">
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme" data-bg-class="bg-menu-theme">
     <div class="app-brand demo">
-        <a href="{{ route('dashboard') }}" class="app-brand-link">
+        <a href="#" class="app-brand-link">
             <span class="app-brand-logo demo">
                 <svg width="25" viewBox="0 0 25 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
                     xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -55,11 +55,11 @@
 
     <div class="menu-inner-shadow"></div>
 
-    <ul class="menu-inner py-1">
+    <ul class="menu-inner h-screen">
         @if (Auth::user()->role == 'admin')
             <!-- Dashboards -->
-            <li class="menu-item {{ request()->is('admin.dashboard') ? 'active open' : '' }}">
-                <a href="{{ route('admin.dashboard') }}" class="menu-link">
+            <li class="menu-item {{ request()->is('dashboard.admin') ? 'active-open' : '' }}">
+                <a href="{{ route('dashboard.admin') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-home-smile"></i>
                     <div class="text-truncate" data-i18n="Dashboards">Dashboards</div>
                 </a>
@@ -192,8 +192,8 @@
 
         @if (Auth::user()->role == 'casier')
             <!-- Dashboards -->
-            <li class="menu-item {{ request()->is('casier.dashboard') ? 'active open' : '' }}">
-                <a href="{{ route('casier.dashboard') }}" class="menu-link">
+            <li class="menu-item {{ request()->is('dashboard.casier') ? 'active open' : '' }}">
+                <a href="{{ route('dashboard.casier') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-home-smile"></i>
                     <div class="text-truncate" data-i18n="Dashboards">Dashboards</div>
                 </a>
@@ -213,12 +213,6 @@
                 <a href="{{ route('sales.create') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-envelope"></i>
                     <div class="text-truncate" data-i18n="Email">Penjualan</div>
-                </a>
-            </li>
-            <li class="menu-item {{ request()->is('coupon.index') ? 'active open' : '' }}">
-                <a href="{{ route('coupon.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-envelope"></i>
-                    <div class="text-truncate" data-i18n="Email">Laporan</div>
                 </a>
             </li>
         @endif
