@@ -64,10 +64,13 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('/', [MembershipController::class, 'index'])->name('index');
         Route::get('create', [MembershipController::class, 'create'])->name('create');
         Route::post('store', [MembershipController::class, 'store'])->name('store');
-        Route::get('edit', [MembershipController::class, 'edit'])->name('edit');
+        Route::get('edit/{id}', [MembershipController::class, 'edit'])->name('edit');
         Route::get('show/{id?}', [MembershipController::class, 'view'])->name('show');
-        Route::post('update/{id?}', [MembershipController::class, 'update'])->name('update');
+        Route::post('update/{id}', [MembershipController::class, 'update'])->name('update');
         Route::get('destroy/{id?}', [MembershipController::class, 'destroy'])->name('destroy');
+        Route::get('trashed', [MembershipController::class, 'trashed'])->name('trashed');
+        Route::post('restore/{id}', [MembershipController::class, 'restore'])->name('restore');
+        Route::delete('forceDelete/{id}', [MembershipController::class, 'forceDelete'])->name('forceDelete');
     });
 
     Route::prefix('user')->name('user.')->group(function () {

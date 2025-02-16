@@ -152,6 +152,42 @@
                     </li>
                 </ul>
             </li>
+
+            <li class="menu-item">
+                <a href="javascript:void(0)" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-box"></i>
+                    <div class="text-truncate" data-i18n="Main Menu">Arsip</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->is('user.trashed') ? 'active open' : '' }}">
+                        <a href="{{ route('user.trashed') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <div class="text-truncate" data-i18n="Email">Arsip User</div>
+                        </a>
+                    </li>
+
+                    <li class="menu-item {{ request()->is('membership.trashed') ? 'active open' : '' }}">
+                        <a href="{{ route('membership.trashed') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <div class="text-truncate" data-i18n="Email">Arsip Member</div>
+                        </a>
+                    </li>
+
+                    <li class="menu-item {{ request()->is('sales_report.index') ? 'active open' : '' }}">
+                        <a href="{{ route('sales_report.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <div class="text-truncate" data-i18n="Email">Arsip Produk</div>
+                        </a>
+                    </li>
+
+                    <li class="menu-item {{ request()->is('sales_report.index') ? 'active open' : '' }}">
+                        <a href="{{ route('sales_report.index') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <div class="text-truncate" data-i18n="Email">Arsip Kupon</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
         @endif
 
         @if (Auth::user()->role == 'casier')
