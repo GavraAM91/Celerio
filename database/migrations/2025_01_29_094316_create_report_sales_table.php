@@ -39,6 +39,7 @@ return new class extends Migration
             $table->decimal('final_price', 10, 2);
             $table->decimal('cash_received', 10, 2);
             $table->decimal('change', 10, 2);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

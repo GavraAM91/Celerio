@@ -4,16 +4,18 @@ use App\Models\Product;
 use App\Models\MembershipBenefits;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\CasierController;
+use App\Http\Controllers\CouponController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PermissionsController;
+use App\Http\Controllers\SalesDetailController;
 use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\CategoryProductController;
-use App\Http\Controllers\CouponController;
 use App\Http\Controllers\MembershipBenefitsController;
-use App\Http\Controllers\SalesDetailController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -68,16 +70,33 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('destroy/{id?}', [MembershipController::class, 'destroy'])->name('destroy');
     });
 
-    //membership benefitsx
-    Route::prefix('membership_benefits')->name('membership_benefits.')->group(function () {
-        Route::get('/', [MembershipBenefitsController::class, 'index'])->name('index');
-        Route::get('create', [MembershipBenefitsController::class, 'create'])->name('create');
-        Route::post('store', [MembershipBenefitsController::class, 'store'])->name('store');
-        Route::get('edit', [MembershipBenefitsController::class, 'edit'])->name('edit');
-        Route::get('view/{id?}', [MembershipBenefitsController::class, 'view'])->name('show');
-        Route::post('update/{id?}', [MembershipBenefitsController::class, 'update'])->name('update');
-        Route::get('destroy/{id?}', [MembershipBenefitsController::class, 'destroy'])->name('destroy');
+    Route::prefix('user')->name('user.')->group(function () {
+        Route::get('indexAdmin', [UserController::class, 'indexAdmin'])->name('indexAdmin');
+        Route::get('indexCasier', [UserController::class, 'indexCasier'])->name('indexCasier');
+        Route::get('create', [UserController::class, 'createCasier'])->name('createCasier');
+        Route::get('createAdmin', [UserController::class, 'createAdmin'])->name('createAdmin');
+        Route::post('register', [UserController::class, 'register'])->name('register');
+        Route::get('editAdmin/{id}', [UserController::class, 'editAdmin'])->name('editAdmin');
+        Route::get('editCasier/{id}', [UserController::class, 'editCasier'])->name('editCasier');
+        Route::get('showCasier/{id}', [UserController::class, 'showCasier'])->name('showCasier');
+        Route::get('showAdmin/{id}', [UserController::class, 'showAdmin'])->name('showAdmin');
+        Route::post('update/{id}', [UserController::class, 'update'])->name('update');
+        Route::delete('destroy/{id}', [UserController::class, 'destroy'])->name('destroy');
+        Route::get('trashed', [UserController::class, 'trashedUser'])->name('trashed');
+        Route::post('restore/{id}', [UserController::class, 'restore'])->name('restore');
+        Route::delete('forceDelete/{id}', [UserController::class, 'forceDelete'])->name('forceDelete');
     });
+
+    //membership benefitsx
+    // Route::prefix('membership_benefits')->name('membership_benefits.')->group(function () {
+    //     Route::get('/', [MembershipBenefitsController::class, 'index'])->name('index');
+    //     Route::get('create', [MembershipBenefitsController::class, 'create'])->name('create');
+    //     Route::post('store', [MembershipBenefitsController::class, 'store'])->name('store');
+    //     Route::get('edit', [MembershipBenefitsController::class, 'edit'])->name('edit');
+    //     Route::get('view/{id?}', [MembershipBenefitsController::class, 'view'])->name('show');
+    //     Route::post('update/{id?}', [MembershipBenefitsController::class, 'update'])->name('update');
+    //     Route::get('destroy/{id?}', [MembershipBenefitsController::class, 'destroy'])->name('destroy');
+    // });
 
     //sales report
     Route::prefix('sales_report')->name('sales_report.')->group(function () {

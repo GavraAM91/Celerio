@@ -24,10 +24,11 @@ return new class extends Migration
                 ->constrained(
                     table: 'products'
                 )->onDelete('cascade');
-                    
+
             $table->string('invoice_sales');
             $table->integer('quantity');
             $table->decimal('selling_price', 10, 2);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

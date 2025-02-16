@@ -81,14 +81,14 @@
                     <div class="text-truncate" data-i18n="Main Menu">Data Pengguna</div>
                 </a>
                 <ul class="menu-sub">
-                    <li class="menu-item {{ request()->is('product.index') ? 'active open' : '' }}">
-                        <a href="{{ route('product.index') }}" class="menu-link">
+                    <li class="menu-item {{ request()->is('user.indexAdmin') ? 'active open' : '' }}">
+                        <a href="{{ route('user.indexAdmin') }}" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-envelope"></i>
                             <div class="text-truncate">Data Admin</div>
                         </a>
                     </li>
-                    <li class="menu-item {{ request()->is('membership.index') ? 'active open' : '' }}">
-                        <a href="{{ route('membership.index') }}" class="menu-link">
+                    <li class="menu-item {{ request()->is('user.indexCasier') ? 'active open' : '' }}">
+                        <a href="{{ route('user.indexCasier') }}" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-home-smile"></i>
                             <div class="text-truncate">Data Kasir</div>
                         </a>

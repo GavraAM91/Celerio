@@ -6,11 +6,12 @@ use App\Models\Product;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SellingPrice extends Model
 {
     /** @use HasFactory<\Database\Factories\SellingPriceFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     //table 
     protected $table = "selling_prices";

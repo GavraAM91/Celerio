@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('type_buyer');
             $table->float('selling_price');
+         
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

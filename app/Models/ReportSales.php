@@ -43,7 +43,7 @@ class ReportSales extends Model
         return $this->belongsTo(Coupon::class, 'coupon_id', 'id');
     }
 
-    //connect to salesdetails
+//connect to salesdetails
     public function salesDetails(): HasMany
     {
         return $this->hasMany(SalesDetail::class, 'sales_id', 'id');

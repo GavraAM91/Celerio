@@ -15,24 +15,12 @@ class MembershipController extends Controller
     {
         $query = Membership::query();
 
-        //if has filter
-        // if (request()->has('filter')) {
-        //     if ($request->filter === 'sold') {
-        //         $query->where('sold_product', '>', 0);
-        //     } else if ($request->filter === 'stock') {
-        //         $query->where('stock', '>', 0);
-        //     } else if ($request->filter === 'expired') {
-        //         $query->where('created_at', '<', now());
-        //     }
-        // }
-
-
         //if has sorting type
         if (request()->has('sort')) {
             if ($request->sort === 'asc') {
-                $query->orderby('name', 'asc');
+                $query->orderby('created_at', 'asc');
             } else if ($request->sort === 'desc') {
-                $query->orderby('name', 'desc');
+                $query->orderby('created_at', 'desc');
             }
         }
 

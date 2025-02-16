@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('edited_by')->nullable();
             $table->string('created_by')->nullable();
             $table->timestamp('expired_at');
-
+            $table->softDeletes();
             $table->timestamps();
         });
     }

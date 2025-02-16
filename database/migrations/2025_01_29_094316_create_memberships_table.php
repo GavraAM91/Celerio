@@ -21,6 +21,7 @@ return new class extends Migration
             $table->text('address');
             $table->unsignedBigInteger('point');
             $table->string('type');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

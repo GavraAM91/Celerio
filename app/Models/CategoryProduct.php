@@ -6,11 +6,12 @@ use App\Models\Product;
 use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CategoryProduct extends Model
 {
     /** @use HasFactory<\Database\Factories\CategoryProductFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'category_products';
 
