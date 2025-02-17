@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Carbon\Carbon;
 use App\Models\Product;
+use App\Models\UnitOfGoods;
 use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -15,59 +16,30 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        //insert into db 
-        // Product::create(
-        //     [
-        //         'category_id'   => 1,
-        //         'product_code'  => Str::upper(Str::random(10)),
-        //         'product_name'  => 'Product A',
-        //         'product_image' => 'images/product_a.jpg',
-        //         'product_price' => 150000,
-        //         'product_status' => 'available',
-        //         'stock'         => 50,
-        //         'sold_product'  => 10,
-        //         'access_role'   => 'admin',
-        //         'edited_by'     => 'Admin1',
-        //         'created_by'    => 'Admin1',
-        //         'expired_at'    => Carbon::now()->addMonths(6),
-        //         'created_at'    => now(),
-        //         'updated_at'    => now(),
-        //     ],
-        //     [
-        //         'category_id'   => 2,
-        //         'product_code'  => Str::upper(Str::random(10)),
-        //         'product_name'  => 'Product B',
-        //         'product_image' => 'images/product_b.jpg',
-        //         'product_price' => 250000,
-        //         'product_status' => 'available',
-        //         'stock'         => 30,
-        //         'sold_product'  => 5,
-        //         'access_role'   => 'admin',
-        //         'edited_by'     => 'Admin2',
-        //         'created_by'    => 'Admin2',
-        //         'expired_at'    => Carbon::now()->addMonths(3),
-        //         'created_at'    => now(),
-        //         'updated_at'    => now(),
-        //     ]
-        // );
+        $products = [
+            ['name' => 'Mie Instan', 'category_id' => 1, 'unit_id' => '1', 'price' => 3000],
+            ['name' => 'Beras Premium', 'category_id' => 1, 'unit_id' => '2', 'price' => 12000],
+            ['name' => 'Minyak Goreng', 'category_id' => 1, 'unit_id' => '3', 'price' => 18000],
+            ['name' => 'Susu UHT', 'category_id' => 1, 'unit_id' => '2', 'price' => 15000]
+        ];
 
-        Product::create(
-            [
-                'category_id'   => 2,
-                'product_code'  => Str::upper(Str::random(10)),
-                'product_name'  => 'Lapis Legit',
-                'product_image' => 'images/product_b.jpg',
-                'product_price' => 250000,
+        foreach ($products as $product) {
+            $unit = UnitOfGoods::where('id', $product['unit_id'])->first();
+
+            // Membuat kode produk otomatis PRD + 3 huruf pertama dari nama + tanggal expired
+            $productCode = 'PRD' . strtoupper(Str::substr($product['name'], 0, 3)) . now()->format('Ymd')
+                . Carbon::now()->addMonth()->format('Ymd'); // Menambahkan tanggal expired 1 bulan ke depan
+
+            $newProduct = Product::create([
+                'category_id' => $product['category_id'],
+                'unit_id' => $product['unit_id'],
+                'product_code' => $productCode, // Menggunakan kode produk yang baru
+                'product_name' => $product['name'],
+                'product_price' => $product['price'],
                 'product_status' => 'available',
-                'stock'         => 30,
-                'sold_product'  => 3,
-                'access_role'   => 'admin',
-                'edited_by'     => 'Admin2',
-                'created_by'    => 'Admin2',
-                'expired_at'    => Carbon::now()->addMonths(3),
-                'created_at'    => now(),
-                'updated_at'    => now(),
-            ]
-        );
+                'access_role' => 'admin',
+                'created_by' => 'Seeder',
+            ]);
+        }
     }
 }

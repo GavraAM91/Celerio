@@ -17,7 +17,7 @@
                                 <label class="form-label" for="name">Name</label>
                                 <input type="text" class="form-control" id="name" name="name"
                                     value="{{ old('name', $membership_data->name) }}" required />
-                                <input type="hidden" name="id" id="id" value={{ $membership->id }}>
+                                <input type="hidden" name="id" id="id" value={{ $membership_data->id }}>
                             </div>
 
                             <!-- Username -->

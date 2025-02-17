@@ -299,7 +299,7 @@ class UserController extends Controller
                 ])
                 ->log(Auth::user()->name . " mengembalikan user {$user->name} ({$user->email}).");
 
-            return view('admin.trashed.user')->with('success', 'User berhasil dikembalikan!');
+            return redirect()->route('user.trashed')->with('success', 'User berhasil dikembalikan!');
         }
         return redirect()->back()->with('error', 'User tidak ditemukan');
     }

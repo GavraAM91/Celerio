@@ -14,13 +14,14 @@ class CategoryProductSeeder extends Seeder
     public function run(): void
     {
         CategoryProduct::insert([
-            'category_name' => 'category 1',
-            'access_role' => 'admin'
+            'category_code' => 'CTG0001',
+            'category_name' => 'Furnitur',
         ]);
 
         CategoryProduct::insert([
-            'category_name' => 'category 2',
-            'access_role' => 'admin'
+
+            'category_code' => 'CTG002',
+            'category_name' => 'Pernak Pernik'
         ]);
     }
 }

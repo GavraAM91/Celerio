@@ -11,10 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('category_products', function (Blueprint $table) {
+        Schema::create('stock_products', function (Blueprint $table) {
             $table->id();
-            $table->string('category_code')->unique();
-            $table->string('category_name');
+
+            //foreig id
+            $table->foreignId('product_id')
+                ->constrained(
+                    table: 'products'
+                )->onDelete('restrict');
+
+            $table->integer('stock');
+            $table->timestamp('expired_at');
             $table->softDeletes();
             $table->timestamps();
         });
@@ -25,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('category_products');
+        Schema::dropIfExists('stock_products');
     }
 };

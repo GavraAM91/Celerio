@@ -20,17 +20,24 @@ return new class extends Migration
                     table: 'category_products'
                 )->onDelete('cascade');
 
+
+            //connect to Unit Of Goods
+            $table->foreignId('unit_id')
+                ->constrained(
+                    table: 'unit_of_goods'
+                )->onDelete('restrict');
+
+            // $table->foreignId('')
             $table->string('product_code')->unique();
             $table->string('product_name');
             $table->string('product_image', 500)->nullable();
             $table->unsignedBigInteger('product_price');
             $table->string('product_status');
-            $table->integer('stock');
             $table->integer('sold_product')->default(0);
+            $table->integer('minimum_stock')->default(1);
             $table->string('access_role');
             $table->string('edited_by')->nullable();
             $table->string('created_by')->nullable();
-            $table->timestamp('expired_at');
             $table->softDeletes();
             $table->timestamps();
         });

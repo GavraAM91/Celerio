@@ -116,7 +116,7 @@
 
                 <div class="d-flex gap-3 mx-4">
                     <a class="btn btn-danger" href="{{ route('membership.trashed') }}">Data Terhapus</a>
-                    <a class="btn btn-primary" href="{{ route('membership.createAdmin') }}">TambahMembership</a>
+                    <a class="btn btn-primary" href="{{ route('membership.create') }}">TambahMembership</a>
                 </div>
 
             </div>

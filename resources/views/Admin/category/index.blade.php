@@ -103,13 +103,15 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>category name</th>
+                            <th>Kode Kategori</th>
+                            <th>Nama Kategori</th>
                             <th>option</th>
                         </tr>
                     </thead>
                     <tbody class="table-border-bottom-0">
                         @foreach ($data_category as $category)
                             <tr>
+                                <td>{{ $category->category_code }}</td>
                                 <td>{{ $category->category_name }}</td>
                                 <td>
                                     <div class="dropdown">

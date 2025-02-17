@@ -116,6 +116,7 @@
                             <th>Product</th>
                             <th>Price</th>
                             <th>Stock</th>
+                            <th>Categoryk</th>
                             <th>Sold Product</th>
                             <th>Expired Date</th>
                             <th>Status</th>

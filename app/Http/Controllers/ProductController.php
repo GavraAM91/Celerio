@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\Product;
+use App\Models\UnitOfGoods;
 use Illuminate\Http\Request;
 use App\Models\CategoryProduct;
+use App\Models\StockProduct;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -64,9 +66,12 @@ class ProductController extends Controller
         // Ambil hanya kolom yang diperlukan (optimasi query)
         $data_category = CategoryProduct::select('id', 'category_name')->get();
 
+        $data_UnitOfGoods = UnitOfGoods::select('id', 'unit');
+
         // Kirim data ke view
         return view('admin.Products.create', [
             'data_category' => $data_category,
+            'data_UnitOfGoods' => $data_UnitOfGoods,
             'title' => 'Product'
         ]);
     }
@@ -77,26 +82,30 @@ class ProductController extends Controller
     {
         $request = request()->all();
 
+
+        // Validasi input
         $validator = FacadesValidator::make($request, [
             'category_id' => 'required',
             'product_name' => 'required',
-            'product_image' => 'nullable|mimes:png,jgp,jpeg|max:10240',
+            'product_image' => 'nullable|mimes:png,jpg,jpeg|max:10240',
             'product_price' => 'required',
             'product_status' => 'required',
             'stock' => 'required',
-            'expired_at' => 'required|date_format:Y-m-d',
+            'expired_at' => 'required|date_format:Y-m-d', // Format tanggal expired
             'access_role' => 'required',
+            'unit_id' => 'required|exists:unit_of_goods,id', // Menambahkan validasi untuk unit_id
         ], [
             'product_image.max' => 'The product image must not exceed 10 MB.',
             'product_image.mimes' => 'The product image must be in PNG, JPG, or JPEG format.',
         ]);
 
+        // Jika validasi gagal
         if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Error in input',
-                'errors' => $validator->errors()
-            ], 400);
+            return redirect()->route('product.index') // Menyuruh kembali ke route index
+                ->withErrors($validator) // Mengirim error ke view
+                ->withInput(); // Menyertakan input yang sebelumnya
         }
+
 
         // Initialize file variables
         $imageName = null;
@@ -114,28 +123,38 @@ class ProductController extends Controller
 
 
         //productCode
-        $productCode = 'PRD' . strtoupper(substr(request()->product_name, 0, 4)) . now()->format('Ymd');
+        $productCode = 'PRD' . strtoupper(substr($request['product_name'], 0, 4)) . Carbon::parse($request['expired_at'])->format('Ymd');
 
         //created_at
         $created_at = now();
 
+
+        // Menyiapkan data untuk produk
         $data_request = [
-            'category_id' => request()->category_id,
+            'category_id' => $request['category_id'],
             'product_code' => $productCode,
-            'product_name' => request()->product_name,
+            'product_name' => $request['product_name'],
             'product_image' => $imageName,
-            'product_price' => request()->product_price,
-            'product_status' => request()->product_status,
-            'expired_at' => request()->expired_at,
-            'stock' => request()->stock,
-            'access_role' => request()->access_role,
+            'product_price' => $request['product_price'],
+            'product_status' => $request['product_status'],
+            'expired_at' => $request['expired_at'],
+            'access_role' => $request['access_role'],
+            'unit_id' => $request['unit_id'],
             'created_by' => $created_by,
-            'created_at' => $created_at
         ];
 
+        // Menyimpan produk baru
         $data_product = Product::create($data_request);
 
-        activity()->log(Auth::user()->name . 'has add product');
+        // Menyimpan data stok
+        $data_stock = [
+            'product_id' => $data_product->id,
+            'expired_at' => Carbon::parse($request['expired_at'])->format('Y-m-d'),
+            'stock' => $request['stock'],
+        ];
+
+        // Menambahkan stok ke StockProduct
+        $data_stock = StockProduct::create($data_stock);
 
         if ($data_product) {
             activity()
@@ -170,13 +189,21 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-
         $data_product = Product::find($id);
-
         $data_category = CategoryProduct::orderBy('category_name', 'asc')->get();
+        $data_unitOfGoods = UnitOfGoods::orderBy('category_name', 'asc')->get();
+        $data_stock = StockProduct::orderBy('category_name', 'asc')->get();
+        $data = [
+            'data_product' => $data_product,
+            'data_category' => $data_category,
+            'data_unitOfGoods' => $data_unitOfGoods,
+            'data_stock' => $data_stock,
+        ];
 
-        return view('admin.Products.edit', compact('data_product', 'data_category'), ['title' => 'Product Edit']);
+        // Menampilkan view dengan mengirimkan data yang sudah digabung
+        return view('admin.Products.edit', compact('data'))->with(['title' => 'Product Edit']);
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -185,86 +212,107 @@ class ProductController extends Controller
     {
         $request = request()->all();
 
+        // Mencari produk berdasarkan ID
         $data_product = Product::findOrFail($id);
 
+        // Validasi input
         $validator = FacadesValidator::make($request, [
             'category_id' => 'required',
             'product_name' => 'required',
-            'product_image' => 'nullable|mimes:png,jgp,jpeg|max:10240',
+            'product_image' => 'nullable|mimes:png,jpg,jpeg|max:10240',
             'product_price' => 'required',
             'stock' => 'required',
             'access_role' => 'required',
-            // 'expired_at' => 'required|date_format:Y-m-d',
-            'product_status' => 'nullable '
+            'product_status' => 'nullable',
         ], [
             'product_image.max' => 'The product image must not exceed 10 MB.',
             'product_image.mimes' => 'The product image must be in PNG, JPG, or JPEG format.',
         ]);
 
+        // Jika validasi gagal, redirect ke route index dengan pesan error
         if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Error in input',
-                'errors' => $validator->errors()
-            ], 400);
+            return redirect()->route('product.index')->with('error', 'Error in input: ' . $validator->errors()->first());
         }
 
-        //update the update at
+        // Update timestamp
         $updated_at = now();
 
-        //who's update the data 
+        // Siapa yang mengupdate data
         $edited_by = Auth::user()->name;
 
+        // Data request untuk produk
         $data_request = [
             'category_id' => request()->category_id,
             'product_name' => request()->product_name,
             'product_price' => request()->product_price,
-            'stock' => request()->stock,
             'access_role' => request()->access_role,
             'edited_by' => $edited_by,
             'product_status' => request()->product_status,
-            'expired_date' => request()->expired_date,
             'updated_at' => $updated_at
         ];
 
-        //jika data mengandung files atau gambar    
+        // Jika gambar produk diupdate
         if (request()->hasFile('product_image')) {
 
-            //new image
+            // Gambar baru
             $product_image = request()->file('product_image');
             $imageName = 'Product_Image_' . date('Y-m-d') . $product_image->getClientOriginalName();
             $imagePath = 'Product/product_image/' . $imageName;
 
-            //old image 
+            // Gambar lama
             $oldImageName = 'Archive_' . $data_product->product_image;
             $oldFilePath = 'Product/product_image/' . $oldImageName;
             $archiveImagePath = 'Product/product_image/product_image_archive/' . $data_product->product_image;
 
-            //upload new image
+            // Upload gambar baru
             Storage::disk('public')->put($imagePath, file_get_contents($product_image));
 
-            // if old file exist move to archive
+            // Jika gambar lama ada, pindahkan ke arsip
             if (Storage::disk('public')->exists($oldFilePath)) {
                 Storage::disk('public')->move($oldFilePath, $archiveImagePath);
             }
+
+            // Tambahkan gambar baru ke data request
+            $data_request['product_image'] = $imageName;
         }
 
-        //update the data
-        $data_product->update($data_request);
+        // Mengecek apakah yang diupdate adalah stock
+        $isStockUpdated = request()->has('stock');
 
-        if ($data_product) {
-            activity()
-                ->causedBy(Auth::user())
-                ->performedOn($data_product)
-                ->event('updated')
-                ->withProperties($data_request)
-                ->log("Admin dengan nama " . Auth::user()->name . " edit produk {$data_product->product_name}.");
+        if ($isStockUpdated) {
+            // Jika stock diupdate, buat entri baru di produk dengan product_code baru dan sold_product 0
+            $new_product_code = 'PRD' . strtoupper(substr($request['product_name'], 0, 4)) . Carbon::parse($request['expired_at'])->format('Ymd');
+            $data_request['product_code'] = $new_product_code;
+            $data_request['sold_product'] = 0; // Set sold_product ke 0
 
-            return redirect()->route('product.index')
-                ->with('success', 'Update Product Success!');
+            // Membuat entri baru di tabel product
+            $new_product = Product::create($data_request);
+
+            // Membuat array untuk entri baru di tabel stock_products
+            $stock_data = [
+                'product_id' => $new_product->id,
+                'stock' => $request['stock'],
+                'expired_at' => $request['expired_at'], // expired_at dari request
+            ];
+
+            // Membuat entri baru di tabel stock_products
+            StockProduct::create($stock_data);
         } else {
-            return redirect()->route('product.index')
-                ->with('error', 'Failed to Update Product!');
+            // Jika stock tidak diupdate, hanya update data produk yang ada
+            $data_product->update($data_request);
         }
+
+        // Log aktivitas
+        activity()
+            ->causedBy(Auth::user())
+            ->performedOn($data_product)
+            ->event('updated')
+            ->withProperties($data_request)
+            ->log("Admin dengan nama " . Auth::user()->name . " edit produk {$data_product->product_name}.");
+
+        // Redirect dengan pesan sukses
+        return redirect()->route('product.index')
+            ->with('success', 'Update Product Success!');
     }
 
     // Soft Delete Product
@@ -335,35 +383,49 @@ class ProductController extends Controller
 
     public function addStock(Request $request)
     {
-        $validator = FacadesValidator::make($request, [
+        // Validasi input
+        $validator = FacadesValidator::make($request->all(), [
             'user_id' => 'required',
             'product_id' => 'required',
-            'stock' => 'required',
+            'stock' => 'required|integer|min:1', // Pastikan stock yang ditambahkan lebih dari 0
+            'expired_at' => 'required|date_format:Y-m-d', // Pastikan expired_at ada
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Error in input',
-                'errors' => $validator->errors()
-            ], 400);
+            // Jika validasi gagal, arahkan ke halaman index dengan pesan error
+            return redirect()->route('product.index')->withErrors($validator)->with('error', 'Error in input');
         }
 
-        $data_stock = $request->all();
-        $data_stock_db = Product::findOrFail($data_stock['product_id']);
+        // Ambil data produk berdasarkan product_id yang dikirim
+        $data_stock_db = Product::findOrFail($request->product_id);
 
-        $data_stock_db->increment('stock', $data_stock['stock']);
+        // Buat product_code baru berdasarkan nama produk dan expired_at
+        $new_product_code = 'PRD' . strtoupper(substr($data_stock_db->product_name, 0, 4)) . Carbon::parse($request->expired_at)->format('Ymd');
 
+        $new_product_data = $data_stock_db->replicate();
+        $new_product_data->product_code = $new_product_code;
+        $new_product_data->sold_product = 0;
+        $new_product_data->save();
+
+        $stock_data = [
+            'product_id' => $new_product_data->id,
+            'stock' => $request->stock,
+            'expired_at' => $request->expired_at,
+        ];
+
+        // Simpan entri baru di tabel StockProduct
+        StockProduct::create($stock_data);
+
+        // Log aktivitas admin yang menambahkan stok
         activity()
             ->causedBy(Auth::user())
-            ->performedOn($data_stock_db)
-            ->event('updated')
-            ->withProperties(['product_name' => $data_stock_db->product_name, 'added_stock' => $data_stock['stock']])
-            ->log("Admin dengan nama " . Auth::user()->name . " menambahkan stok {$data_stock['stock']} untuk produk {$data_stock_db->product_name}.");
+            ->performedOn($new_product_data)
+            ->event('created')
+            ->withProperties(['product_name' => $new_product_data->product_name, 'added_stock' => $request->stock])
+            ->log("Admin dengan nama " . Auth::user()->name . " menambahkan stok {$request->stock} untuk produk {$new_product_data->product_name}.");
 
-        return response()->json([
-            'message' => 'data stock updated',
-            'data' => $data_stock_db
-        ], 200);
+        // Arahkan kembali ke halaman index dengan pesan sukses
+        return redirect()->route('product.index')->with('success', 'Data stock added successfully');
     }
 
     public function checkExpiredProducts(Request $request)

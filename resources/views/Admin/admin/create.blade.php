@@ -59,4 +59,19 @@
             </div>
         </div>
     </div>
+    @push('script')
+        <script>
+            document.getElementById('password').addEventListener('input', function() {
+                let password = this.value;
+                let regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+                if (!regex.test(password)) {
+                    this.setCustomValidity(
+                        "Password harus memiliki minimal 8 karakter, 1 huruf besar, 1 huruf kecil, dan 1 angka.");
+                } else {
+                    this.setCustomValidity("");
+                }
+            });
+        </script>
+    @endpush
 </x-app-layout>

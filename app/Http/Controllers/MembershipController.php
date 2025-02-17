@@ -80,6 +80,7 @@ class MembershipController extends Controller
 
 
         $point = 100;
+        $membership_code = 'kosong';
 
         // Tambahkan data member baru
         $data_request = [
@@ -88,6 +89,7 @@ class MembershipController extends Controller
             'email' => $request->email,
             'type' => $request->type,
             'point' => $point,
+            'membership_code' => $membership_code,
             'phone_numbber' => $request->phone_number,
             'address' => $request->address,
             'status' => $request->status

@@ -66,7 +66,6 @@ class CategoryProductController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'category_name' => 'required',
-            'access_role' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -76,9 +75,26 @@ class CategoryProductController extends Controller
             ], 400);
         }
 
+        // Ambil kategori terakhir berdasarkan kode
+        $lastCategory = CategoryProduct::latest('category_code')->first();
+
+        if ($lastCategory) {
+            // Ambil angka terakhir dari kode kategori (misal CTG-001 → ambil 1)
+            $lastNumber = (int) substr($lastCategory->category_code, 4);
+
+            // Tingkatkan angka dan format menjadi 3 digit (misal 2 → 002)
+            $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+        } else {
+            // Jika tidak ada data, mulai dari 001
+            $newNumber = '001';
+        }
+
+        // Gabungkan dengan format kode kategori
+        $category_code = 'CTG-' . $newNumber;
+
         $data_category = CategoryProduct::create([
             'category_name' => $request->category_name,
-            'access_role' => $request->access_role,
+            'category_product' => $category_code,
         ]);
 
         if ($data_category) {
@@ -127,7 +143,6 @@ class CategoryProductController extends Controller
     {
         $validator = FacadesValidator::make($request->all(), [
             'category_name' => 'required',
-            'access_role' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -140,7 +155,6 @@ class CategoryProductController extends Controller
 
         $category->update([
             'category_name' => $request->category_name,
-            'access_role' => $request->access_role,
         ]);
 
         // Tambahkan activity log

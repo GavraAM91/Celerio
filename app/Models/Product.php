@@ -36,6 +36,17 @@ class Product extends Model
         return $this->hasMany(SalesDetail::class, 'product_id', 'id');
     }
 
+    // Connect to unit_of_goods
+    public function unitOfGoods(): BelongsTo
+    {
+        return $this->belongsTo(UnitOfGoods::class, 'unit_id', 'id');
+    }
+
+    public function stocks()
+    {
+        return $this->hasMany(StockProduct::class, 'product_id', 'id');
+    }
+
     //log activity
     public function getActivitylogOptions(): LogOptions
     {
