@@ -42,9 +42,9 @@ class Product extends Model
         return $this->belongsTo(UnitOfGoods::class, 'unit_id', 'id');
     }
 
-    public function stocks()
+    public function stockProducts(): HasMany
     {
-        return $this->hasMany(StockProduct::class, 'product_id', 'id');
+        return $this->hasMany(StockProduct::class, 'product_code', 'product_code');
     }
 
     //log activity

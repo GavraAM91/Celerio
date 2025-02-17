@@ -6,6 +6,7 @@ use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockProduct extends Model
 {
@@ -16,9 +17,9 @@ class StockProduct extends Model
     protected $guarded = ['id'];
 
     // Relasi ke produk
-    public function product()
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class, 'product_id', 'id');
+        return $this->belongsTo(Product::class, 'product_code', 'product_code');
     }
 
     //log activity

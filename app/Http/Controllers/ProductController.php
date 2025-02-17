@@ -22,8 +22,11 @@ class ProductController extends Controller
     {
         $query = Product::query();
 
-        //if has filter
-        if (request()->has('filter')) {
+        // Eager Load Relasi stockproduct dan unitofgoods   
+        $query->with(['stockProducts', 'unitOfGoods', 'categoryProduct']);
+
+        // Filter jika ada
+        if ($request->has('filter')) {
             if ($request->filter === 'sold') {
                 $query->where('sold_product', '>', 0);
             } else if ($request->filter === 'stock') {
@@ -33,27 +36,27 @@ class ProductController extends Controller
             }
         }
 
-
-        //if has sorting type
-        if (request()->has('sort')) {
+        // Sorting
+        if ($request->has('sort')) {
             if ($request->sort === 'asc') {
-                $query->orderby('product_name', 'asc');
+                $query->orderBy('product_name', 'asc');
             } else if ($request->sort === 'desc') {
-                $query->orderby('product_name', 'desc');
+                $query->orderBy('product_name', 'desc');
             }
         }
 
-        //if search
         // Search by Product Name
         if ($request->has('search') && !empty($request->search)) {
             $query->where('product_name', 'like', '%' . $request->search . '%');
         }
 
+        // Ambil data produk dengan relasi
         $data_product = $query->get();
 
-        return view('admin.Products.index', compact('data_product'), ['title => Product']);
-    }
+        // dd($data_product);
 
+        return view('admin.Products.index', compact('data_product'), ['title' => 'Product']);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -66,7 +69,7 @@ class ProductController extends Controller
         // Ambil hanya kolom yang diperlukan (optimasi query)
         $data_category = CategoryProduct::select('id', 'category_name')->get();
 
-        $data_UnitOfGoods = UnitOfGoods::select('id', 'unit');
+        $data_UnitOfGoods = UnitOfGoods::select('id', 'unit')->get();
 
         // Kirim data ke view
         return view('admin.Products.create', [
@@ -91,7 +94,7 @@ class ProductController extends Controller
             'product_price' => 'required',
             'product_status' => 'required',
             'stock' => 'required',
-            'expired_at' => 'required|date_format:Y-m-d', // Format tanggal expired
+            'expired_at' => 'required|date_format:Y-m-d\TH:i',
             'access_role' => 'required',
             'unit_id' => 'required|exists:unit_of_goods,id', // Menambahkan validasi untuk unit_id
         ], [
@@ -99,11 +102,16 @@ class ProductController extends Controller
             'product_image.mimes' => 'The product image must be in PNG, JPG, or JPEG format.',
         ]);
 
-        // Jika validasi gagal
+        // dd($validator);
+
+        //jika gagal 
         if ($validator->fails()) {
-            return redirect()->route('product.index') // Menyuruh kembali ke route index
-                ->withErrors($validator) // Mengirim error ke view
-                ->withInput(); // Menyertakan input yang sebelumnya
+            // Ambil error pertama atau gabungan error
+            $errorMessages = $validator->errors()->all();
+            $errorString = implode("\n", $errorMessages);
+
+            // Redirect ke route 'product.index' dengan flash session 'alert_error'
+            return redirect()->route('product.index')->with('error', $errorString);
         }
 
 
@@ -121,9 +129,7 @@ class ProductController extends Controller
         //created_by
         $created_by = Auth::user()->username;
 
-
-        //productCode
-        $productCode = 'PRD' . strtoupper(substr($request['product_name'], 0, 4)) . Carbon::parse($request['expired_at'])->format('Ymd');
+        $productCode = 'PRD' . strtoupper(substr(request()->product_name, 0, 4)) . Carbon::parse(request()->expired_at)->format('YmdHi');
 
         //created_at
         $created_at = now();
@@ -140,7 +146,7 @@ class ProductController extends Controller
             'expired_at' => $request['expired_at'],
             'access_role' => $request['access_role'],
             'unit_id' => $request['unit_id'],
-            'created_by' => $created_by,
+            'created_at' => $created_at,
         ];
 
         // Menyimpan produk baru
@@ -148,15 +154,19 @@ class ProductController extends Controller
 
         // Menyimpan data stok
         $data_stock = [
-            'product_id' => $data_product->id,
+            'product_code' => $productCode,
             'expired_at' => Carbon::parse($request['expired_at'])->format('Y-m-d'),
             'stock' => $request['stock'],
         ];
 
+        // var_dump($data_stock);
+
         // Menambahkan stok ke StockProduct
         $data_stock = StockProduct::create($data_stock);
 
-        if ($data_product) {
+        // dd($data_stock);
+
+        if ($data_product && $data_stock) {
             activity()
                 ->causedBy(Auth::user())
                 ->performedOn($data_product)
@@ -187,12 +197,13 @@ class ProductController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit($product_code)
     {
-        $data_product = Product::find($id);
+        $data_product = Product::where('product_code', $product_code)->firstOrFail();
         $data_category = CategoryProduct::orderBy('category_name', 'asc')->get();
-        $data_unitOfGoods = UnitOfGoods::orderBy('category_name', 'asc')->get();
-        $data_stock = StockProduct::orderBy('category_name', 'asc')->get();
+        $data_unitOfGoods = UnitOfGoods::orderBy('unit', 'asc')->get();
+        $data_stock = StockProduct::where('product_code', $product_code)->firstOrFail();
+
         $data = [
             'data_product' => $data_product,
             'data_category' => $data_category,
@@ -200,10 +211,8 @@ class ProductController extends Controller
             'data_stock' => $data_stock,
         ];
 
-        // Menampilkan view dengan mengirimkan data yang sudah digabung
         return view('admin.Products.edit', compact('data'))->with(['title' => 'Product Edit']);
     }
-
 
     /**
      * Update the specified resource in storage.
@@ -217,27 +226,26 @@ class ProductController extends Controller
 
         // Validasi input
         $validator = FacadesValidator::make($request, [
-            'category_id' => 'required',
-            'product_name' => 'required',
+            'category_id' => 'sometimes',
+            'product_name' => 'sometimes',
             'product_image' => 'nullable|mimes:png,jpg,jpeg|max:10240',
-            'product_price' => 'required',
-            'stock' => 'required',
-            'access_role' => 'required',
+            'product_price' => 'sometimes',
+            'stock' => 'sometimes|integer|min:0',
+            'expired_at' => 'required|date_format:Y-m-d\TH:i',
+            'access_role' => 'sometimes',
             'product_status' => 'nullable',
+            'unit_id' => 'required|exists:unit_of_goods,id',
         ], [
             'product_image.max' => 'The product image must not exceed 10 MB.',
             'product_image.mimes' => 'The product image must be in PNG, JPG, or JPEG format.',
         ]);
 
-        // Jika validasi gagal, redirect ke route index dengan pesan error
         if ($validator->fails()) {
             return redirect()->route('product.index')->with('error', 'Error in input: ' . $validator->errors()->first());
         }
 
         // Update timestamp
         $updated_at = now();
-
-        // Siapa yang mengupdate data
         $edited_by = Auth::user()->name;
 
         // Data request untuk produk
@@ -248,23 +256,20 @@ class ProductController extends Controller
             'access_role' => request()->access_role,
             'edited_by' => $edited_by,
             'product_status' => request()->product_status,
-            'updated_at' => $updated_at
+            'updated_at' => $updated_at,
+            'unit_id' => request()->unit_id,
         ];
 
         // Jika gambar produk diupdate
         if (request()->hasFile('product_image')) {
-
-            // Gambar baru
             $product_image = request()->file('product_image');
             $imageName = 'Product_Image_' . date('Y-m-d') . $product_image->getClientOriginalName();
             $imagePath = 'Product/product_image/' . $imageName;
 
             // Gambar lama
-            $oldImageName = 'Archive_' . $data_product->product_image;
-            $oldFilePath = 'Product/product_image/' . $oldImageName;
+            $oldFilePath = 'Product/product_image/' . $data_product->product_image;
             $archiveImagePath = 'Product/product_image/product_image_archive/' . $data_product->product_image;
 
-            // Upload gambar baru
             Storage::disk('public')->put($imagePath, file_get_contents($product_image));
 
             // Jika gambar lama ada, pindahkan ke arsip
@@ -272,33 +277,30 @@ class ProductController extends Controller
                 Storage::disk('public')->move($oldFilePath, $archiveImagePath);
             }
 
-            // Tambahkan gambar baru ke data request
             $data_request['product_image'] = $imageName;
         }
 
-        // Mengecek apakah yang diupdate adalah stock
-        $isStockUpdated = request()->has('stock');
+        // Cek stok dari database
+        $data_stock = StockProduct::where('product_code', $data_product->product_code)->firstOrFail();
 
-        if ($isStockUpdated) {
-            // Jika stock diupdate, buat entri baru di produk dengan product_code baru dan sold_product 0
-            $new_product_code = 'PRD' . strtoupper(substr($request['product_name'], 0, 4)) . Carbon::parse($request['expired_at'])->format('Ymd');
+        // Jika stok diubah, buat entri baru
+        if (isset($request['stock']) && $request['stock'] != $data_stock->stock) {
+            $new_product_code = 'PRD' . strtoupper(substr(request()->product_name, 0, 4)) . Carbon::parse(request()->expired_at)->format('YmdHi');
+
             $data_request['product_code'] = $new_product_code;
-            $data_request['sold_product'] = 0; // Set sold_product ke 0
+            $data_request['sold_product'] = 0;
 
-            // Membuat entri baru di tabel product
+            // Buat entri baru di tabel products
             $new_product = Product::create($data_request);
 
-            // Membuat array untuk entri baru di tabel stock_products
-            $stock_data = [
-                'product_id' => $new_product->id,
+            // Buat entri baru di tabel stock_products
+            StockProduct::create([
+                'product_code' => $new_product_code,
                 'stock' => $request['stock'],
-                'expired_at' => $request['expired_at'], // expired_at dari request
-            ];
-
-            // Membuat entri baru di tabel stock_products
-            StockProduct::create($stock_data);
+                'expired_at' => $request['expired_at'],
+            ]);
         } else {
-            // Jika stock tidak diupdate, hanya update data produk yang ada
+            // Jika stok tidak diupdate, hanya update data produk yang ada
             $data_product->update($data_request);
         }
 
@@ -310,10 +312,9 @@ class ProductController extends Controller
             ->withProperties($data_request)
             ->log("Admin dengan nama " . Auth::user()->name . " edit produk {$data_product->product_name}.");
 
-        // Redirect dengan pesan sukses
-        return redirect()->route('product.index')
-            ->with('success', 'Update Product Success!');
+        return redirect()->route('product.index')->with('success', 'Update Product Success!');
     }
+
 
     // Soft Delete Product
     public function destroy($id)
@@ -385,8 +386,7 @@ class ProductController extends Controller
     {
         // Validasi input
         $validator = FacadesValidator::make($request->all(), [
-            'user_id' => 'required',
-            'product_id' => 'required',
+            'product_code' => 'required',
             'stock' => 'required|integer|min:1', // Pastikan stock yang ditambahkan lebih dari 0
             'expired_at' => 'required|date_format:Y-m-d', // Pastikan expired_at ada
         ]);

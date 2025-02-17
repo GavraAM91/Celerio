@@ -73,7 +73,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('/', [CouponController::class, 'index'])->name('index');
         Route::get('create', [CouponController::class, 'create'])->name('create');
         Route::post('store', [CouponController::class, 'store'])->name('store');
-        Route::get('edit/{id}', [CouponController::class, 'edit'])->name('edit');
+        Route::get('edit/{product_code}', [CouponController::class, 'edit'])->name('edit');
         Route::get('show/{id?}', [CouponController::class, 'show'])->name('show');
         Route::post('update/{id?}', [CouponController::class, 'update'])->name('update');
         Route::get('destroy/{id?}', [CouponController::class, 'destroy'])->name('destroy');

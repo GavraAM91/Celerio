@@ -116,9 +116,10 @@
                             <th>Product</th>
                             <th>Price</th>
                             <th>Stock</th>
-                            <th>Categoryk</th>
-                            <th>Sold Product</th>
                             <th>Expired Date</th>
+                            <th>Sold Product</th>
+                            <th>Unit</th>
+                            <th>Category</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -133,9 +134,20 @@
                                 <td>{{ $product->product_code }}</td>
                                 <td>{{ $product->product_name }}</td>
                                 <td>Rp {{ number_format($product->product_price, 0, ',', '.') }}</td>
-                                <td>{{ $product->stock }}</td>
-                                <td>{{ $product->sold_product }}</td>
-                                <td>{{ $product->expired_at }}</td>
+                                @foreach ($product->stockProducts as $stock)
+                                    <td>
+                                        {{ $stock->stock }}
+                                    </td>
+                                    <td>
+                                        {{ $stock->expired_at }}
+                                    </td>
+                                    <td>
+                                        {{ $stock->sold_product }}
+                                    </td>
+                                @endforeach
+                                <td>{{ optional($product->unitOfGoods)->unit ?? 'Unit tidak tersedia' }}</td>
+                                <td>{{ optional($product->categoryProduct)->category_name ?? 'kategori tidak tersedia' }}
+                                </td>
                                 <td>
                                     <span
                                         class="badge 
@@ -154,7 +166,8 @@
                                             <i class="bx bx-dots-vertical-rounded"></i>
                                         </button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('product.edit', $product->id) }}">
+                                            <a class="dropdown-item"
+                                                href="{{ route('product.edit', $product->product_code) }}">
                                                 <i class="bx bx-edit-alt me-1"></i> Edit
                                             </a>
                                             <form action="{{ route('product.destroy', $product->id) }}"

@@ -14,14 +14,11 @@ return new class extends Migration
         Schema::create('stock_products', function (Blueprint $table) {
             $table->id();
 
-            //foreig id
-            $table->foreignId('product_id')
-                ->constrained(
-                    table: 'products'
-                )->onDelete('restrict');
-
+            $table->string('product_code');
             $table->integer('stock');
+            $table->integer('sold_product')->default(0);
             $table->timestamp('expired_at');
+            $table->string('status')->default('active');
             $table->softDeletes();
             $table->timestamps();
         });

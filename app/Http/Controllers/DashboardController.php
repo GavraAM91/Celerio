@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Membership;
 use App\Models\ActivityLog;
 use App\Models\ReportSales;
+use App\Models\StockProduct;
 use Illuminate\Http\Request;
 use App\Models\CategoryProduct;
 use Illuminate\Support\Facades\DB;
@@ -19,11 +20,28 @@ class DashboardController extends Controller
         $product = Product::all()->count();
         $membership = Membership::all()->count();
         $category = CategoryProduct::all()->count();
-        // Ambil produk yang akan kedaluwarsa dalam 7 hari
-        $expiredSoonProducts = Product::where('expired_at', '<=', now()->addDays(7))
-            ->orderBy('expired_at', 'asc')
+
+
+        // Produk dengan stok rendah
+        $lowStockProducts = StockProduct::whereHas('product', function ($query) {
+            $query->where('stock', '<=', DB::raw('minimum_stock'));
+        })
+            ->orderBy('stock', 'asc')
+            ->with('product')
             ->get();
-            
+
+        // Produk yang sudah expired
+        $expiredProducts = StockProduct::where('expired_at', '<', now())
+            ->orderBy('expired_at', 'desc')
+            ->with('product')
+            ->get();
+
+        // Produk yang akan kedaluwarsa dalam 7 hari
+        $expiredSoonProducts = StockProduct::where('expired_at', '<=', now()->addDays(7))
+            ->orderBy('expired_at', 'asc')
+            ->with('product')
+            ->get();
+
         // Ambil total penjualan per hari selama 7 hari terakhir
         $salesData = ReportSales::select(
             DB::raw('DATE(created_at) as date'),
@@ -34,17 +52,16 @@ class DashboardController extends Controller
             ->orderBy('date', 'asc')
             ->get();
 
-        // Format data penjualan untuk Chart.js
         $salesByDay = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i)->toDateString();
-            $salesByDay[$date] = 0; // Default 0 jika tidak ada penjualan
+            $salesByDay[$date] = 0;
         }
         foreach ($salesData as $data) {
             $salesByDay[$data->date] = $data->total_sales;
         }
 
-        return view('admin.dashboard', compact('product', 'membership', 'category', 'expiredSoonProducts', 'salesByDay'));
+        return view('admin.dashboard', compact('product', 'membership', 'category', 'lowStockProducts', 'expiredProducts', 'expiredSoonProducts', 'salesByDay'));
     }
 
 
@@ -62,6 +79,4 @@ class DashboardController extends Controller
 
         return view('admin.activityLog.index', compact('logs'));
     }
-
 }
-

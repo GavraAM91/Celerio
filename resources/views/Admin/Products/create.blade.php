@@ -52,12 +52,10 @@
                                     placeholder="Enter stock quantity" required />
                             </div>
 
-                            <div class="mb-4">
-                                <label for="expired_at" class="block text-sm font-medium text-gray-700">Expired
-                                    Date</label>
-                                <input type="date" id="expired_at" name="expired_at"
-                                    value="{{ old('expired_at', isset($data) ? \Carbon\Carbon::parse($data->expired_date)->format('Y-m-d') : '') }}"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            <div class="mb-6">
+                                <label for="expired_at">Expired Date & Time:</label>
+                                <input type="datetime-local" class="form-control" id="expired_at" name="expired_at"
+                                    required>
                             </div>
 
                             <!-- Product Status -->
@@ -67,6 +65,17 @@
                                     <option value="" disabled selected>Select status</option>
                                     <option value="active">Active</option>
                                     <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+
+                            <!-- satuan -->
+                            <div class="mb-6">
+                                <label class="form-label" for="unit_id">Jenis Satuan</label>
+                                <select class="form-control" id="unit_id" name="unit_id" required>
+                                    <option value="" disabled selected>Select category</option>
+                                    @foreach ($data_UnitOfGoods as $unitOfGoods)
+                                        <option value="{{ $unitOfGoods->id }}">{{ $unitOfGoods->unit }}</option>
+                                    @endforeach
                                 </select>
                             </div>
 

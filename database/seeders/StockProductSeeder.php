@@ -19,8 +19,9 @@ class StockProductSeeder extends Seeder
 
         foreach ($products as $product) {
             StockProduct::create([
-                'product_id' => $product->id,
+                'product_code' => $product->product_code,
                 'stock' => 100, // Jumlah stok, misalnya 100
+                'sold_product' => 1,
                 'expired_at' => Carbon::now()->addMonth(), // Tanggal expired 1 bulan ke depan
             ]);
         }

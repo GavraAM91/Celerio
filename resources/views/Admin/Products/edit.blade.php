@@ -10,7 +10,7 @@
                         <small class="text-body float-end">Default label</small>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('product.update', $data_product->id) }}" method="POST"
+                        <form action="{{ route('product.update', $data['data_product']->id) }}" method="POST"
                             enctype="multipart/form-data">
                             @csrf
 
@@ -18,18 +18,18 @@
                             <div class="mb-6">
                                 <label class="form-label" for="product_name">Product Name</label>
                                 <input type="text" class="form-control" id="product_name" name="product_name"
-                                    value="{{ old('product_name', $data_product->product_name) }}"
-                                    placeholder="Enter product name" required />
+                                    value="{{ old('product_name', $data['data_product']->product_name) }}"
+                                    placeholder="Enter product name" />
                             </div>
 
                             <!-- Category -->
                             <div class="mb-6">
                                 <label class="form-label" for="category_id">Category</label>
-                                <select class="form-control" id="category_id" name="category_id" required>
+                                <select class="form-control" id="category_id" name="category_id">
                                     <option value="" disabled>Select category</option>
-                                    @foreach ($data_category as $category)
+                                    @foreach ($data['data_category'] as $category)
                                         <option value="{{ $category->id }}"
-                                            {{ $category->id == $data_product->category_id ? 'selected' : '' }}>
+                                            {{ $category->id == $data['data_product']->category_id ? 'selected' : '' }}>
                                             {{ $category->category_name }}
                                         </option>
                                     @endforeach
@@ -41,9 +41,9 @@
                                 <label class="form-label" for="product_image">Product Image</label>
                                 <input type="file" class="form-control" id="product_image" name="product_image"
                                     accept="image/*" />
-                                @if ($data_product->product_image)
-                                    <img src="{{ asset('storage/' . $data_product->product_image) }}" width="100"
-                                        class="mt-2" />
+                                @if ($data['data_product']->product_image)
+                                    <img src="{{ asset('storage/' . $data['data_product']->product_image) }}"
+                                        width="100" class="mt-2" />
                                 @endif
                             </div>
 
@@ -51,47 +51,62 @@
                             <div class="mb-6">
                                 <label class="form-label" for="product_price">Product Price</label>
                                 <input type="text" class="form-control" id="product_price" name="product_price"
-                                    value="{{ old('product_price', $data_product->product_price) }}"
-                                    placeholder="Enter product price" required />
+                                    value="{{ old('product_price', $data['data_product']->product_price) }}"
+                                    placeholder="Enter product price" />
                             </div>
 
                             <!-- Stock -->
                             <div class="mb-6">
                                 <label class="form-label" for="stock">Stock</label>
-                                <input type="number" class="form-control" id="stock" name="stock"
-                                    value="{{ old('stock', $data_product->stock) }}" placeholder="Enter stock quantity"
-                                    required />
+                                <input type="text" class="form-control" id="stock" name="stock"
+                                    value="{{ old('stock', $data['data_stock']->stock ?? '') }}"
+                                    placeholder="Enter stock quantity" />
                             </div>
 
-                            <!-- Expired Date -->
-                            <div class="mb-4">
-                                <label for="expired_at" class="block text-sm font-medium text-gray-700">Expired
-                                    Date</label>
-                                <input type="date" id="expired_at" name="expired_at"
-                                    value="{{ old('expired_at', $data_product->expired_at ? \Carbon\Carbon::parse($data_product->expired_at)->format('Y-m-d') : '') }}"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            <!-- Expired Date (Initially Hidden) -->
+                            <div class="mb-6">
+                                <label class="form-label" for="expired_at">Expired Date and Time</label>
+                                <input type="datetime-local" class="form-control" id="expired_at" name="expired_at"
+                                    value="{{ old('expired_at', isset($data['data_stock']) ? \Carbon\Carbon::parse($data['data_stock']->expired_at)->format('Y-m-d\TH:i') : '') }}" />
                             </div>
+                            s
 
                             <!-- Product Status -->
                             <div class="mb-6">
                                 <label class="form-label" for="product_status">Product Status</label>
-                                <select class="form-control" id="product_status" name="product_status" required>
+                                <select class="form-control" id="product_status" name="product_status">
                                     <option value="" disabled>Select status</option>
                                     <option value="active"
-                                        {{ $data_product->product_status == 'active' ? 'selected' : '' }}>Active
+                                        {{ $data['data_product']->product_status == 'active' ? 'selected' : '' }}>
+                                        Active
                                     </option>
                                     <option value="inactive"
-                                        {{ $data_product->product_status == 'inactive' ? 'selected' : '' }}>Inactive
+                                        {{ $data['data_product']->product_status == 'inactive' ? 'selected' : '' }}>
+                                        Inactive
                                     </option>
                                 </select>
                             </div>
+
+                            <div class="mb-6">
+                                <label class="form-label" for="unit_id">Jenis Satuan</label>
+                                <select class="form-control" id="unit_id" name="unit_id">
+                                    <option value="" disabled>Select unit</option>
+                                    @foreach ($data['data_unitOfGoods'] as $unitOfGoods)
+                                        <option value="{{ $unitOfGoods->id }}"
+                                            {{ $unitOfGoods->id == $data['data_product']->unit_id ? 'selected' : '' }}>
+                                            {{ $unitOfGoods->unit }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
 
                             <!-- Access Role -->
                             <div class="mb-6">
                                 <label class="form-label" for="access_role">Access Role</label>
                                 <input type="text" class="form-control" id="access_role" name="access_role"
-                                    value="{{ old('access_role', $data_product->access_role) }}"
-                                    placeholder="Enter access role" required />
+                                    value="{{ old('access_role', $data['data_product']->access_role) }}"
+                                    placeholder="Enter access role" />
                             </div>
 
                             <button type="submit" class="btn btn-primary">Update</button>
@@ -101,4 +116,18 @@
             </div>
         </div>
     </div>
+    @push('scripts')
+        <!-- JavaScript -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                let stockInput = document.getElementById("stock");
+                let expiredDateContainer = document.getElementById("expiredDateContainer");
+
+                stockInput.addEventListener("input", function() {
+                    // Jika stock tidak kosong, tampilkan expired_date, jika kosong, sembunyikan
+                    expiredDateContainer.style.display = stockInput.value.trim() !== "" ? "block" : "none";
+                });
+            });
+        </script>
+    @endpush
 </x-app-layout>
