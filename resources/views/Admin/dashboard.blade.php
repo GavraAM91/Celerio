@@ -56,7 +56,7 @@
                                         <div class="card-body">
                                             <div class="d-flex align-items-center justify-content-center mb-2">
                                                 <span class="material-icons"
-                                                    style="font-size: 25px; color: coral">category</span>
+                                                    style="font-size: 40px; color: coral">category</span>
                                             </div>
                                             <p class="mb-1">Total Kategori</p>
                                             <h4 class="card-title mb-0">{{ $category }}</h4>
@@ -206,6 +206,32 @@
                                 }
                             }
                         }
+                    });
+                </script>
+
+                <script>
+                    $(document).ready(function() {
+                        function checkExpiredProducts() {
+                            $.ajax({
+                                url: "{{ route('product.checkExpired') }}",
+                                type: "POST",
+                                data: {
+                                    _token: "{{ csrf_token() }}"
+                                },
+                                success: function(response) {
+                                    console.log("Produk yang diperbarui:", response.updated);
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error("Terjadi kesalahan:", error);
+                                }
+                            });
+                        }
+
+                        // Panggil fungsi saat halaman dimuat
+                        checkExpiredProducts();
+
+                        // Set interval untuk menjalankan pengecekan setiap 5 menit
+                        setInterval(checkExpiredProducts, 300000); // 300000 ms = 5 menit
                     });
                 </script>
             @endpush

@@ -55,7 +55,7 @@
 
 </head>
 
-<body class="font-sans antialiased min-h-screen">
+<body class="font-sans antialiased h-screen">
     {{-- <div class="col-lg-4 col-md-6">
         <small class="text-light fw-medium">Vertically centered</small>
         <div class="mt-4">

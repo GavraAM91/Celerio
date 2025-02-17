@@ -60,6 +60,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('trashed', [ProductController::class, 'trashed'])->name('trashed');
         Route::post('restore/{id}', [ProductController::class, 'restore'])->name('restore');
         Route::delete('forceDelete/{id}', [ProductController::class, 'forceDelete'])->name('forceDelete');
+        Route::post('checkExpiredProducts', [ProductController::class, 'checkExpiredProducts'])->name('checkExpired');
     });
 
     //Coupon
@@ -132,7 +133,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('/', [CategoryProductController::class, 'index'])->name('index');
         Route::get('create', [CategoryProductController::class, 'create'])->name('create');
         Route::post('store', [CategoryProductController::class, 'store'])->name('store');
-        Route::get('edit', [CategoryProductController::class, 'edit'])->name('edit');
+        Route::get('edit/{id?}', [CategoryProductController::class, 'edit'])->name('edit');
         Route::get('show/{id?}', [CategoryProductController::class, 'view'])->name('show');
         Route::post('update/{id?}', [CategoryProductController::class, 'update'])->name('update');
         Route::get('destroy/{id?}', [CategoryProductController::class, 'destroy'])->name('destroy');

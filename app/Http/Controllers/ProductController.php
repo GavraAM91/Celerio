@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\CategoryProduct;
@@ -363,5 +364,17 @@ class ProductController extends Controller
             'message' => 'data stock updated',
             'data' => $data_stock_db
         ], 200);
+    }
+
+    public function checkExpiredProducts(Request $request)
+    {
+        $now = Carbon::now();
+
+        // Update status produk yang sudah expired
+        $expiredProducts = Product::where('expired_at', '<', $now)
+            ->where('product_status', '!=', 'expired')
+            ->update(['product_status' => 'expired']);
+
+        return response()->json(['success' => true, 'updated' => $expiredProducts]);
     }
 }

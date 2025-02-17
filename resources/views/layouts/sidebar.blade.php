@@ -205,14 +205,14 @@
             </li>
             <li class="menu-item {{ request()->is('product.index') ? 'active open' : '' }}">
                 <a href="{{ route('membership.create') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-envelope"></i>
+                    <span class="material-icons " style="">card_membership</span>
                     <div class="text-truncate" data-i18n="Email">Membership</div>
                 </a>
             </li>
             <li class="menu-item {{ request()->is('sales.create') ? 'active open' : '' }}">
                 <a href="{{ route('sales.create') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-envelope"></i>
-                    <div class="text-truncate" data-i18n="Email">Penjualan</div>
+                    <span class="material-icons" style="">point_of_sales</span>
+                    <div class="text-truncate" data-i18n="Email">Transaksi</div>
                 </a>
             </li>
         @endif

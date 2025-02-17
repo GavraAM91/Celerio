@@ -98,9 +98,9 @@
                                             <a class="dropdown-item" href="{{ route('user.editAdmin', $admin->id) }}">
                                                 <i class="bx bx-edit-alt me-1"></i> Edit
                                             </a>
-                                            <a class="dropdown-item" href="{{ route('user.showAdmin', $admin->id) }}">
+                                            {{-- <a class="dropdown-item" href="{{ route('user.showAdmin', $admin->id) }}">
                                                 <i class="bx bx-edit-alt me-1"></i> Detail
-                                            </a>
+                                            </a> --}}
                                             <form action="{{ route('user.destroy', $admin->id) }}" method="POST"
                                                 class="d-inline">
                                                 @csrf

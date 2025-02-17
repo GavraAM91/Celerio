@@ -87,11 +87,17 @@ class SalesController extends Controller
         $membershipType = $request->query('membershipType');
 
         // Cari produk berdasarkan nama dan status aktif
-        // $product = Product::where('product_name', 'LIKE', "%$product_name%")
-        //     ->where('status', 'active')
-        //     ->first();
         $product = Product::where('product_name', 'LIKE', "%$product_name%")
+            ->where('product_status', 'active')
             ->first();
+        if (!$product) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data probably out of stock or deleted'
+            ]);
+        }
+        // $product = Product::where('product_name', 'LIKE', "%$product_name%")
+        //     ->first();
 
         if (!$product) {
             return response()->json(['success' => false, 'message' => 'Produk tidak ditemukan']);
@@ -227,10 +233,10 @@ class SalesController extends Controller
 
         activity()->log(Auth::user()->name . 'has doing transaction with code ' . $invoiceSales);
 
-        // if ($productData->sold_product > $productData->stock) {
-        //     $productData->status = 'out of stock';
-        //     $productData->save();
-        // }
+        if ($productData->sold_product > $productData->stock) {
+            $productData->product_status = 'out of stock';
+            $productData->save();
+        }
         // Response JSON dengan PDF link
         return response()->json([
             'success' => true,

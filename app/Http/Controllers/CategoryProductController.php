@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CategoryProduct;
 use Illuminate\Http\Request;
+use App\Models\CategoryProduct;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
 
 class CategoryProductController extends Controller
@@ -61,9 +64,7 @@ class CategoryProductController extends Controller
      */
     public function store(Request $request)
     {
-        $request = request()->all();
-
-        $validator = FacadesValidator::make($request, [
+        $validator = Validator::make($request->all(), [
             'category_name' => 'required',
             'access_role' => 'required'
         ]);
@@ -75,29 +76,24 @@ class CategoryProductController extends Controller
             ], 400);
         }
 
-        $data_request = [
-            'category_name' => request()->category_name,
-            'access_role' => request()->access_role,
-        ];
-
-        $data_category = CategoryProduct::create($data_request);
+        $data_category = CategoryProduct::create([
+            'category_name' => $request->category_name,
+            'access_role' => $request->access_role,
+        ]);
 
         if ($data_category) {
-            return redirect()->route('category.index')->with('success', 'New Product Added Successfully!');
+            // Logging activity using Spatie
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($data_category)
+                ->event('created')
+                ->withProperties(['category_name' => $data_category->category_name])
+                ->log('Admin dengan nama [' . Auth::user()->name . '] menambahkan kategori [' . $data_category->category_name . '].');
+
+            return redirect()->route('category.index')->with('success', 'New Category Added Successfully!');
         } else {
-            return redirect()->back()->with('error', 'Failed to Add Product');
+            return redirect()->back()->with('error', 'Failed to Add Category');
         }
-        // if ($data_category) {
-        //     return response()->json([
-        //         'success' => true,
-        //         'message' => 'New Category Added',
-        //     ], 200);
-        // } else {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Failed to add Category',
-        //     ], 422);
-        // }
     }
 
     /**
@@ -119,7 +115,7 @@ class CategoryProductController extends Controller
      */
     public function edit($id)
     {
-        $data_category = CategoryProduct::findOrFail();
+        $data_category = CategoryProduct::findOrFail($id);
 
         return view('admin.category.edit', compact('data_category'), ['title' => 'Category edit']);
     }
@@ -127,53 +123,38 @@ class CategoryProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request)
+    public function update(Request $request, $id)
     {
-        $request = request()->all();
-
-        $data_category = CategoryProduct::findOrFail($request['id']);
-
-        $validator = FacadesValidator::make($request, [
+        $validator = FacadesValidator::make($request->all(), [
             'category_name' => 'required',
             'access_role' => 'required'
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Error in input',
-                'errors' => $validator->errors()
-            ], 400);
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $data_request = [
-            'category_name' => request()->category_name,
-            'access_role' => request()->access_role
-        ];
+        $category = CategoryProduct::findOrFail($id);
 
-        //update the data
-        $data_category->update($data_request);
+        $oldData = $category->getOriginal(); // Data sebelum diubah
 
-        if ($data_category) {
-            return redirect()->route('category.index')
-                ->with('success', 'Update Product Success!');
-        } else {
-            return redirect()->route('category.index')
-                ->with('error', 'Failed to Update Product!');
-        }
+        $category->update([
+            'category_name' => $request->category_name,
+            'access_role' => $request->access_role,
+        ]);
 
-        // if ($data_category) {
-        //     return response()->json([
-        //         'response' => '200',
-        //         'success' => true,
-        //         'message' => 'Update Category Success',
-        //     ], 200);
-        // } else {
-        //     return response()->json([
-        //         'response' => 422,
-        //         'success' => false,
-        //         'message' => 'Failed to Category Proposal',
-        //     ], 422);
-        // }
+        // Tambahkan activity log
+        activity()
+            ->performedOn($category)
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'old' => $oldData,
+                'new' => $category->toArray()
+            ])
+            ->event('created')
+            ->log('Updated Category: ' . $category->category_name);
+
+        return redirect()->route('category.index')->with('success', 'Category updated successfully!');
     }
 
     /**

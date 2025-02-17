@@ -22,6 +22,7 @@ class DashboardController extends Controller
         $expiredSoonProducts = Product::where('expired_at', '<=', now()->addDays(7))
             ->orderBy('expired_at', 'asc')
             ->get();
+            
         // Ambil total penjualan per hari selama 7 hari terakhir
         $salesData = ReportSales::select(
             DB::raw('DATE(created_at) as date'),
@@ -45,8 +46,12 @@ class DashboardController extends Controller
         return view('admin.dashboard', compact('product', 'membership', 'category', 'expiredSoonProducts', 'salesByDay'));
     }
 
+
     public function dashboardCasier(Request $request)
     {
         return view('casier.dashboard');
     }
+
+    
 }
+

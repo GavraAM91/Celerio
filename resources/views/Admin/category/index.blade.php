@@ -119,55 +119,6 @@
                                             <a class="dropdown-item" href="{{ route('category.edit', $category->id) }}">
                                                 <i class="bx bx-edit-alt me-1"></i> Edit
                                             </a>
-                                            {{-- <a href="javascript:void(0);" class="btn btn-info btn-detail"
-                                                data-id="{{ $category->id }}" data-bs-toggle="modal"
-                                                data-bs-target="#detailModal">
-                                                <i class="bx bx-edit-alt me-1"></i> Detail
-                                            </a> --}}
-
-                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                                data-bs-target="#modalCenter">
-                                                Detail Data
-                                            </button>
-
-                                            <div class="modal fade" id="modalCenter" tabindex="-1" aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title">Detail Data</h5>
-                                                            <button type="button" class="btn-close"
-                                                                data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <div class="row">
-                                                                <div class="col mb-6">
-                                                                    <label for="nameWithTitle"
-                                                                        class="form-label">Name</label>
-                                                                    <input type="text" id="nameWithTitle"
-                                                                        class="form-control" readonly />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary"
-                                                                data-bs-dismiss="modal">Close</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {{-- 
-                                            <x-modal-detail-layouts>
-                                                <div class="row">
-                                                    <div class="col mb-6">
-                                                        <label for="nameWithTitle" class="form-label">Name</label>
-                                                        <input type="text" id="nameWithTitle" class="form-control"
-                                                            readonly />
-                                                    </div>
-                                                </div>
-                                            </x-modal-detail-layouts> --}}
-
-
                                             <form action="{{ route('category.destroy', $category->id) }}"
                                                 class="d-inline">
                                                 @csrf
