@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\Product;
 use App\Models\Membership;
+use App\Models\ActivityLog;
 use App\Models\ReportSales;
 use Illuminate\Http\Request;
 use App\Models\CategoryProduct;
@@ -52,6 +53,15 @@ class DashboardController extends Controller
         return view('casier.dashboard');
     }
 
-    
+    public function activitylogindex(Request $request)
+    {
+        // Ambil data activity log dengan pagination (10 per halaman)
+        $logs = ActivityLog::with('user') // Ambil relasi user
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('admin.activityLog.index', compact('logs'));
+    }
+
 }
 

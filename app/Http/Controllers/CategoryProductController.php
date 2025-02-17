@@ -163,14 +163,74 @@ class CategoryProductController extends Controller
     public function destroy($id)
     {
         $category_data = CategoryProduct::find($id);
-        if ($category_data) {
-            if ($category_data->delete()) {
-                return redirect()->route('category.index')->with('success', 'Delete Product  Successfully!');
-            } else {
-                return redirect()->back()->with('error', 'Failed to Delete Product');
-            }
-        } else {
+
+        if (!$category_data) {
             return redirect()->back()->with('error', 'Data Product Not Found');
         }
+
+        // Soft delete kategori produk
+        if ($category_data->delete()) {
+            // Mencatat aktivitas penghapusan kategori
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($category_data)
+                ->event('deleted')
+                ->withProperties(['category_name' => $category_data->category_name])
+                ->log("Admin dengan nama " . Auth::user()->name . " menghapus kategori produk {$category_data->category_name}.");
+
+            // Redirect ke halaman daftar kategori dengan pesan sukses
+            return redirect()->route('category.index')->with('success', 'Delete Category Successfully!');
+        } else {
+            // Jika gagal menghapus, kembali dengan pesan error
+            return redirect()->back()->with('error', 'Failed to Delete Category');
+        }
+    }
+
+    public function trashed()
+    {
+        $trashedCategories = CategoryProduct::onlyTrashed()->get();
+        return view('admin.trashed.category', compact('trashedCategories'));
+    }
+
+    public function restore($id)
+    {
+        $category_data = CategoryProduct::onlyTrashed()->find($id);
+
+        if ($category_data) {
+            $category_data->restore();
+
+            // Mencatat aktivitas pemulihan kategori
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($category_data)
+                ->event('restored')
+                ->withProperties(['category_name' => $category_data->category_name])
+                ->log("Admin dengan nama " . Auth::user()->name . " memulihkan kategori produk {$category_data->category_name}.");
+
+            return redirect()->route('category.trashed')->with('success', 'Category restored successfully!');
+        }
+
+        return redirect()->back()->with('error', 'Category not found');
+    }
+
+    public function forceDelete($id)
+    {
+        $category_data = CategoryProduct::onlyTrashed()->find($id);
+
+        if ($category_data) {
+            $category_data->forceDelete();
+
+            // Mencatat aktivitas penghapusan permanen kategori
+            activity()
+                ->causedBy(Auth::user())
+                ->performedOn($category_data)
+                ->event('force_deleted')
+                ->withProperties(['category_name' => $category_data->category_name])
+                ->log("Admin dengan nama " . Auth::user()->name . " menghapus permanen kategori produk {$category_data->category_name}.");
+
+            return redirect()->route('category.trashed')->with('success', 'Category permanently deleted!');
+        }
+
+        return redirect()->back()->with('error', 'Category not found');
     }
 }

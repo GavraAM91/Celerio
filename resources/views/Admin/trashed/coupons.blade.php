@@ -98,9 +98,8 @@
                         @endforeach
                     </tbody>
                 </table>
-
-                <button type="button" class="btn btn-secondary my-2" onclick="window.history.back();">Kembali</button>
             </div>
         </div>
+        <button type="button" class="btn btn-secondary my-2" onclick="window.history.back();">Kembali</button>
     </div>
 </x-app-layout>

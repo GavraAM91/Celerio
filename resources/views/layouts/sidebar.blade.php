@@ -69,8 +69,8 @@
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">Data Master</span>
             </li>
-            <li class="menu-item {{ request()->is('product.create') ? 'active open' : '' }}">
-                <a href="{{ route('product.create') }}" class="menu-link">
+            <li class="menu-item {{ request()->is('dashboard.activitylog') ? 'active open' : '' }}">
+                <a href="{{ route('dashboard.activitylog') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-envelope"></i>
                     <div class="text-truncate" data-i18n="Email">Activity Log</div>
                 </a>
@@ -173,17 +173,24 @@
                         </a>
                     </li>
 
-                    <li class="menu-item {{ request()->is('sales_report.index') ? 'active open' : '' }}">
-                        <a href="{{ route('sales_report.index') }}" class="menu-link">
+                    <li class="menu-item {{ request()->is('product.trashed') ? 'active open' : '' }}">
+                        <a href="{{ route('product.trashed') }}" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-envelope"></i>
                             <div class="text-truncate" data-i18n="Email">Arsip Produk</div>
                         </a>
                     </li>
 
-                    <li class="menu-item {{ request()->is('sales_report.index') ? 'active open' : '' }}">
-                        <a href="{{ route('sales_report.index') }}" class="menu-link">
+                    <li class="menu-item {{ request()->is('coupon.trashed') ? 'active open' : '' }}">
+                        <a href="{{ route('coupon.trashed') }}" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-envelope"></i>
                             <div class="text-truncate" data-i18n="Email">Arsip Kupon</div>
+                        </a>
+                    </li>
+
+                    <li class="menu-item {{ request()->is('coupon.trashed') ? 'active open' : '' }}">
+                        <a href="{{ route('coupon.trashed') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <div class="text-truncate" data-i18n="Email">Arsip Kategori</div>
                         </a>
                     </li>
                 </ul>

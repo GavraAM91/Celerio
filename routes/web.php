@@ -40,6 +40,11 @@ Route::prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('casier', [DashboardController::class, 'dashboardCasier'])
         ->name('casier')
         ->middleware(['auth', 'verified', 'role:casier']);
+
+    // Route untuk menampilkan Activity Log dengan pagination
+    Route::get('activitylogindex', [DashboardController::class, 'activitylogindex'])
+        ->name('activitylog')
+        ->middleware('role:admin');
 });
 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
@@ -137,6 +142,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('show/{id?}', [CategoryProductController::class, 'view'])->name('show');
         Route::post('update/{id?}', [CategoryProductController::class, 'update'])->name('update');
         Route::get('destroy/{id?}', [CategoryProductController::class, 'destroy'])->name('destroy');
+        Route::get('trashed', [CategoryProductController::class, 'trashed'])->name('trashed');
+        Route::post('restore/{id}', [CategoryProductController::class, 'restore'])->name('restore');
+        Route::delete('forceDelete/{id}', [CategoryProductController::class, 'forceDelete'])->name('forceDelete');
     });
 
 

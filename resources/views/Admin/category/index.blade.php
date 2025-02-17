@@ -93,9 +93,11 @@
                 </div>
 
                 <!-- Button -->
-                <a class="btn btn-primary mx-4" href="{{ route('category.create') }}">
-                    Add Category
-                </a>
+                <div class="d-flex gap-3 mx-4">
+                    <a class="btn btn-danger" href="{{ route('category.trashed') }}">Data Terhapus</a>
+                    <a class="btn btn-primary" href="{{ route('category.create') }}">Add Admin</a>
+                </div>
+
             </div>
             <div class="table-responsive text-nowrap">
                 <table class="table table-hover">
@@ -116,7 +118,8 @@
                                             <i class="bx bx-dots-vertical-rounded"></i>
                                         </button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="{{ route('category.edit', $category->id) }}">
+                                            <a class="dropdown-item"
+                                                href="{{ route('category.edit', $category->id) }}">
                                                 <i class="bx bx-edit-alt me-1"></i> Edit
                                             </a>
                                             <form action="{{ route('category.destroy', $category->id) }}"

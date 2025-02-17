@@ -230,13 +230,29 @@ class SalesController extends Controller
             $productData->save();
         }
 
+        // Logging Aktivitas dengan Detail
+        activity()
+            ->causedBy(Auth::user()) // Menentukan siapa yang melakukan transaksi
+            ->performedOn($sales) // Menandai transaksi yang dilakukan
+            ->event('transaction') // Menandai jenis event
+            ->withProperties([
+                'invoice_sales' => $invoiceSales,
+                'membership' => $membership_name,
+                'total_price' => $validatedData['total_price'],
+                'final_price' => $finalPrice,
+                'cash_received' => $validatedData['cash_received'],
+                'change' => $validatedData['change'],
+                'tax' => $validatedData['tax'],
+                'products' => $validatedData['data'], // Menyimpan detail produk yang dibeli
+            ])
+            ->log("Admin dengan nama " . Auth::user()->name . " melakukan transaksi dengan kode {$invoiceSales}.");
 
-        activity()->log(Auth::user()->name . 'has doing transaction with code ' . $invoiceSales);
 
         if ($productData->sold_product > $productData->stock) {
             $productData->product_status = 'out of stock';
             $productData->save();
         }
+
         // Response JSON dengan PDF link
         return response()->json([
             'success' => true,
