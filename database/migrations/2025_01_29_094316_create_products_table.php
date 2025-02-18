@@ -34,7 +34,7 @@ return new class extends Migration
             $table->unsignedBigInteger('product_price');
             $table->string('product_status');
             $table->integer('sold_product')->default(0);
-            $table->integer('minimum_stock')->default(1);
+            $table->integer('minimum_stock')->default(10);
             $table->string('access_role');
             $table->string('edited_by')->nullable();
             $table->string('created_by')->nullable();

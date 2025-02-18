@@ -64,12 +64,19 @@
                             </div>
 
                             <!-- Expired Date (Initially Hidden) -->
-                            <div class="mb-6">
+                            <div class="mb-6" id="expired_at" style="display: none;">
                                 <label class="form-label" for="expired_at">Expired Date and Time</label>
                                 <input type="datetime-local" class="form-control" id="expired_at" name="expired_at"
                                     value="{{ old('expired_at', isset($data['data_stock']) ? \Carbon\Carbon::parse($data['data_stock']->expired_at)->format('Y-m-d\TH:i') : '') }}" />
                             </div>
-                            s
+
+
+                            <!-- Stock -->
+                            <div class="mb-6">
+                                <label class="form-label" for="minimum_stock">Stock</label>
+                                <input type="number" class="form-control" id="minimum_stock" name="minimum_stock"
+                                    placeholder="Enter minimum stock " required />
+                            </div>
 
                             <!-- Product Status -->
                             <div class="mb-6">
@@ -121,11 +128,11 @@
         <script>
             document.addEventListener("DOMContentLoaded", function() {
                 let stockInput = document.getElementById("stock");
-                let expiredDateContainer = document.getElementById("expiredDateContainer");
+                let expired_at = document.getElementById("expired_at");
 
                 stockInput.addEventListener("input", function() {
                     // Jika stock tidak kosong, tampilkan expired_date, jika kosong, sembunyikan
-                    expiredDateContainer.style.display = stockInput.value.trim() !== "" ? "block" : "none";
+                    expired_at.style.display = stockInput.value.trim() !== "" ? "block" : "none";
                 });
             });
         </script>

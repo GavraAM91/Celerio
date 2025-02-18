@@ -13,13 +13,14 @@ use App\Models\SalesDetail;
 use Illuminate\Support\Str;
 use App\Models\SellingPrice;
 // use Illuminate\Support\Carbon as SupportCarbon;
+use App\Models\StockProduct;
 use Illuminate\Http\Request;
 use App\Models\selling_price;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\MembershipBenefits;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class SalesController extends Controller
 {
@@ -81,6 +82,39 @@ class SalesController extends Controller
     }
 
     //search product
+    // public function searchProduct(Request $request)
+    // {
+    //     $product_name = $request->query('productName');
+    //     $membershipType = $request->query('membershipType');
+
+    //     // Cari produk berdasarkan nama dan status aktif
+    //     $product = Product::where('product_name', 'LIKE', "%$product_name%")
+    //         ->where('product_status', 'active')
+    //         ->first();
+    //     if (!$product) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Data probably out of stock or deleted'
+    //         ]);
+    //     }
+    //     // $product = Product::where('product_name', 'LIKE', "%$product_name%")
+    //     //     ->first();
+
+    //     if (!$product) {
+    //         return response()->json(['success' => false, 'message' => 'Produk tidak ditemukan']);
+    //     }
+
+    //     $selling_price = SellingPrice::where('type_buyer', $membershipType)->first();
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'data' => [
+    //             'product' => $product,
+    //             'sellingPrice' => $selling_price,
+    //         ],
+    //     ]);
+    // }
+
     public function searchProduct(Request $request)
     {
         $product_name = $request->query('productName');
@@ -90,19 +124,23 @@ class SalesController extends Controller
         $product = Product::where('product_name', 'LIKE', "%$product_name%")
             ->where('product_status', 'active')
             ->first();
+
+        // dd($product);
+
         if (!$product) {
             return response()->json([
                 'success' => false,
                 'message' => 'Data probably out of stock or deleted'
             ]);
         }
-        // $product = Product::where('product_name', 'LIKE', "%$product_name%")
-        //     ->first();
 
-        if (!$product) {
-            return response()->json(['success' => false, 'message' => 'Produk tidak ditemukan']);
-        }
+        // Ambil data stok produk berdasarkan product_code yang memiliki expired_time paling dekat
+        $stockProduct = StockProduct::where('product_code', $product->product_code)
+            ->whereDate('expired_at', '>=', now())
+            ->orderBy('expired_at', 'asc')
+            ->first();
 
+        // Ambil harga jual berdasarkan jenis membership
         $selling_price = SellingPrice::where('type_buyer', $membershipType)->first();
 
         return response()->json([
@@ -110,9 +148,11 @@ class SalesController extends Controller
             'data' => [
                 'product' => $product,
                 'sellingPrice' => $selling_price,
+                'stockProduct' => $stockProduct,
             ],
         ]);
     }
+
 
 
     //search membership
@@ -143,12 +183,14 @@ class SalesController extends Controller
             'user_id' => 'required|exists:users,id',
             'membership_id' => 'nullable|exists:memberships,id',
             'coupon_id' => 'nullable|exists:coupons,id',
-            'total_price' => 'required',
+            'total_price' => 'required|numeric',
             'tax' => 'required|numeric',
-            'total_price_with_discount' => 'nullable',
-            'final_price' => 'required',
-            'cash_received' => 'required|min:0',
+            'total_price_with_discount' => 'nullable|numeric',
+            'final_price' => 'required|numeric',
+            'cash_received' => 'required|numeric|min:0',
             'change' => 'required|numeric',
+            'use_all_points' => 'boolean',  // Menentukan apakah semua poin digunakan
+            'use_points' => 'nullable|numeric|min:0', // Jumlah poin yang ingin digunakan
             'data' => 'required|array',
             'data.*.product_id' => 'required|exists:products,id',
             'data.*.product_name' => 'required',
@@ -156,7 +198,6 @@ class SalesController extends Controller
             'data.*.selling_price' => 'required|numeric|min:0'
         ]);
 
-        // Jika validasi gagal
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validasi gagal',
@@ -164,45 +205,52 @@ class SalesController extends Controller
             ], 400);
         }
 
-        //ambil data tervalidasi
         $validatedData = $validator->validate();
         $membershipId = $validatedData['membership_id'] ?? null;
         $finalPrice = $validatedData['final_price'];
         $couponId = $validatedData['coupon_id'] ?? null;
-
-        // Cek Membership dan Tambahkan Poin
-        $pointsEarned = 0;
+        $useAllPoints = $validatedData['use_all_points'] ?? false;
+        $usePoints = $validatedData['use_points'] ?? 0;
 
         $membership_name = "Non Member";
+        $availablePoints = 0;
+
         if ($membershipId) {
             $membershipInfo = Membership::where('id', $membershipId)->first();
-
             $membership_name = $membershipInfo->name;
+            $availablePoints = $membershipInfo->point;
 
-            if ($membershipInfo && in_array($membershipInfo->type, ['type1', 'type2'])) {
-                $pointsEarned = $finalPrice * 0.02;
-                $membershipInfo->point += $pointsEarned;
-                $membershipInfo->save();
+            // Jika user memilih menggunakan seluruh poin
+            if ($useAllPoints) {
+                $usePoints = $availablePoints;
             }
+
+            // Pastikan user tidak menggunakan lebih banyak poin dari yang tersedia
+            $usePoints = min($usePoints, $availablePoints);
+
+            // Kurangi total harga dengan jumlah poin yang digunakan
+            $finalPrice -= $usePoints;
+
+            // Pastikan harga final tidak negatif
+            $finalPrice = max($finalPrice, 0);
+
+            // Kurangi poin dari akun member
+            $membershipInfo->point -= $usePoints;
+            $membershipInfo->save();
         }
 
-
-        //save coupon and used coupon 
         if ($couponId) {
             $couponInfo = Coupon::where('id', $couponId)->first();
-
             $couponInfo->used_coupon += 1;
             $couponInfo->save();
         }
 
-        // Generate Invoice
         $invoiceSales = 'INV-' . date('Ymd') . '-' . strtoupper(Str::random(6));
 
-        // Simpan ke Report Sales
         $sales = ReportSales::create([
             'user_id' => Auth::id(),
             'membership_id' => $membershipId,
-            'coupon_id' => $validatedData['coupon_id'] ?? null,
+            'coupon_id' => $couponId,
             'invoice_sales' => $invoiceSales,
             'membership_name' => $membership_name,
             'tax' => $validatedData['tax'],
@@ -211,9 +259,9 @@ class SalesController extends Controller
             'final_price' => $finalPrice,
             'cash_received' => $validatedData['cash_received'],
             'change' => $validatedData['change'],
+            'points_used' => $usePoints, // Simpan jumlah poin yang digunakan
         ]);
 
-        // Simpan Detail Penjualan
         foreach ($validatedData['data'] as $item) {
             SalesDetail::create([
                 'sales_id' => $sales->id,
@@ -223,18 +271,16 @@ class SalesController extends Controller
                 'selling_price' => $item['selling_price'],
             ]);
 
-            //update stock
             $productData = Product::where('id', $item['product_id'])->first();
             $productData->sold_product += $item['quantity'];
             $productData->stock -= $item['quantity'];
             $productData->save();
         }
 
-        // Logging Aktivitas dengan Detail
         activity()
-            ->causedBy(Auth::user()) // Menentukan siapa yang melakukan transaksi
-            ->performedOn($sales) // Menandai transaksi yang dilakukan
-            ->event('transaction') // Menandai jenis event
+            ->causedBy(Auth::user())
+            ->performedOn($sales)
+            ->event('transaction')
             ->withProperties([
                 'invoice_sales' => $invoiceSales,
                 'membership' => $membership_name,
@@ -243,23 +289,25 @@ class SalesController extends Controller
                 'cash_received' => $validatedData['cash_received'],
                 'change' => $validatedData['change'],
                 'tax' => $validatedData['tax'],
-                'products' => $validatedData['data'], // Menyimpan detail produk yang dibeli
+                'points_used' => $usePoints,
+                'products' => $validatedData['data'],
             ])
-            ->log("Admin dengan nama " . Auth::user()->name . " melakukan transaksi dengan kode {$invoiceSales}.");
-
+            ->log("Admin " . Auth::user()->name . " melakukan transaksi dengan kode {$invoiceSales}.");
 
         if ($productData->sold_product > $productData->stock) {
             $productData->product_status = 'out of stock';
             $productData->save();
         }
 
-        // Response JSON dengan PDF link
         return response()->json([
             'success' => true,
             'message' => 'Transaksi berhasil',
             'data' => [
-                'invoice_sales' => $sales->invoice_sales,  // Pastikan ini dikirim
-                'total_price' => $sales->total
+                'invoice_sales' => $sales->invoice_sales,
+                'total_price' => $sales->total_product_price,
+                'final_price' => $finalPrice,
+                'points_used' => $usePoints,
+                'remaining_points' => $membershipInfo->point ?? 0,
             ]
         ], 201);
     }

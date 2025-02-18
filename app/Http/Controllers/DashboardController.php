@@ -17,27 +17,31 @@ class DashboardController extends Controller
 {
     public function dashboardAdmin(Request $request)
     {
-        $product = Product::all()->count();
-        $membership = Membership::all()->count();
-        $category = CategoryProduct::all()->count();
+        $productData = Product::all()->count();
+        $membershipData = Membership::all()->count();
+        $categoryData = CategoryProduct::all()->count();
 
 
         // Produk dengan stok rendah
         $lowStockProducts = StockProduct::whereHas('product', function ($query) {
-            $query->where('stock', '<=', DB::raw('minimum_stock'));
+            $query->whereRaw('stock_products.stock <= products.minimum_stock');
         })
             ->orderBy('stock', 'asc')
             ->with('product')
             ->get();
 
-        // Produk yang sudah expired
-        $expiredProducts = StockProduct::where('expired_at', '<', now())
-            ->orderBy('expired_at', 'desc')
+        // dd($lowStockProducts);
+
+        $expiredTodayProducts = StockProduct::whereDate('expired_at', now())
+            ->whereNull('deleted_at')
+            ->whereHas('product')
+            ->orderBy('expired_at', 'asc')
             ->with('product')
             ->get();
 
         // Produk yang akan kedaluwarsa dalam 7 hari
-        $expiredSoonProducts = StockProduct::where('expired_at', '<=', now()->addDays(7))
+        $expiredSoonProducts = StockProduct::whereBetween('expired_at', [now(), now()->addDays(7)])
+            ->whereNull('deleted_at')  // Tambahkan kondisi untuk deleted_at null
             ->orderBy('expired_at', 'asc')
             ->with('product')
             ->get();
@@ -61,7 +65,7 @@ class DashboardController extends Controller
             $salesByDay[$data->date] = $data->total_sales;
         }
 
-        return view('admin.dashboard', compact('product', 'membership', 'category', 'lowStockProducts', 'expiredProducts', 'expiredSoonProducts', 'salesByDay'));
+        return view('admin.dashboard', compact('productData', 'membershipData', 'categoryData', 'lowStockProducts', 'expiredTodayProducts', 'expiredSoonProducts', 'salesByDay'));
     }
 
 

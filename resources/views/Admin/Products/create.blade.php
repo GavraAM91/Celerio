@@ -58,6 +58,14 @@
                                     required>
                             </div>
 
+
+                            <!-- Stock -->
+                            <div class="mb-6">
+                                <label class="form-label" for="minimum_stock">Minimum Stock</label>
+                                <input type="number" class="form-control" id="minimum_stock" name="minimum_stock"
+                                    placeholder="Enter minimum stock " required />
+                            </div>
+
                             <!-- Product Status -->
                             <div class="mb-6">
                                 <label class="form-label" for="product_status">Product Status</label>

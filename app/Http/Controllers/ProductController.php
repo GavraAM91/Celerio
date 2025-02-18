@@ -95,6 +95,7 @@ class ProductController extends Controller
             'product_status' => 'required',
             'stock' => 'required',
             'expired_at' => 'required|date_format:Y-m-d\TH:i',
+            'minimum_stock' => 'required',
             'access_role' => 'required',
             'unit_id' => 'required|exists:unit_of_goods,id', // Menambahkan validasi untuk unit_id
         ], [
@@ -144,6 +145,7 @@ class ProductController extends Controller
             'product_price' => $request['product_price'],
             'product_status' => $request['product_status'],
             'expired_at' => $request['expired_at'],
+            'minimum_stock' => $request['minimum_stock'],
             'access_role' => $request['access_role'],
             'unit_id' => $request['unit_id'],
             'created_at' => $created_at,
@@ -232,6 +234,7 @@ class ProductController extends Controller
             'product_price' => 'sometimes',
             'stock' => 'sometimes|integer|min:0',
             'expired_at' => 'required|date_format:Y-m-d\TH:i',
+            'minimum_stock' => 'required',
             'access_role' => 'sometimes',
             'product_status' => 'nullable',
             'unit_id' => 'required|exists:unit_of_goods,id',
@@ -256,6 +259,7 @@ class ProductController extends Controller
             'access_role' => request()->access_role,
             'edited_by' => $edited_by,
             'product_status' => request()->product_status,
+            'minimum_stock' => request()->minimum_stock,
             'updated_at' => $updated_at,
             'unit_id' => request()->unit_id,
         ];
@@ -382,38 +386,54 @@ class ProductController extends Controller
         return redirect()->back()->with('error', 'Product not found');
     }
 
-    public function addStock(Request $request)
+    public function addStockView($product_code)
     {
-        // Validasi input
-        $validator = FacadesValidator::make($request->all(), [
-            'product_code' => 'required',
-            'stock' => 'required|integer|min:1', // Pastikan stock yang ditambahkan lebih dari 0
-            'expired_at' => 'required|date_format:Y-m-d', // Pastikan expired_at ada
-        ]);
+        $data_product = Product::where('product_code', $product_code)->firstOrFail();
+        $data_category = CategoryProduct::orderBy('category_name', 'asc')->get();
+        $data_unitOfGoods = UnitOfGoods::orderBy('unit', 'asc')->get();
+        $data_stock = StockProduct::where('product_code', $product_code)->firstOrFail();
 
+        $data = [
+            'data_product' => $data_product,
+            'data_category' => $data_category,
+            'data_unitOfGoods' => $data_unitOfGoods,
+            'data_stock' => $data_stock,
+        ];
+
+        return view('admin.Products.addStock', compact('data'))->with(['title' => 'Product Edit']);
+    }
+
+
+    public function addStock($id)
+    {
+        $request = request()->all();
+
+        $data_product = Product::findOrFail($id);
+
+        // Validasi input
+        $validator = FacadesValidator::make($request, [
+            'stock' => 'required|min:1',
+            'expired_at' => 'required|date_format:Y-m-d\TH:i',
+        ]);
         if ($validator->fails()) {
-            // Jika validasi gagal, arahkan ke halaman index dengan pesan error
-            return redirect()->route('product.index')->withErrors($validator)->with('error', 'Error in input');
+            return redirect()->route('product.index')->with('error', 'Error in input: ' . $validator->errors()->first());
         }
 
-        // Ambil data produk berdasarkan product_id yang dikirim
-        $data_stock_db = Product::findOrFail($request->product_id);
+        $data_stock = StockProduct::findORFail($data_product->product_code);
 
-        // Buat product_code baru berdasarkan nama produk dan expired_at
-        $new_product_code = 'PRD' . strtoupper(substr($data_stock_db->product_name, 0, 4)) . Carbon::parse($request->expired_at)->format('Ymd');
+        $new_product_code = 'PRD' . strtoupper(substr($data_stock->product_name, 0, 4)) . Carbon::parse(request()->expired_at)->format('YmdHi');
 
-        $new_product_data = $data_stock_db->replicate();
+        $new_product_data = $data_stock->replicate();
         $new_product_data->product_code = $new_product_code;
         $new_product_data->sold_product = 0;
         $new_product_data->save();
 
         $stock_data = [
             'product_id' => $new_product_data->id,
-            'stock' => $request->stock,
-            'expired_at' => $request->expired_at,
+            'stock' => request()->stock,
+            'expired_at' => $request()->expired_at,
         ];
 
-        // Simpan entri baru di tabel StockProduct
         StockProduct::create($stock_data);
 
         // Log aktivitas admin yang menambahkan stok
@@ -421,22 +441,50 @@ class ProductController extends Controller
             ->causedBy(Auth::user())
             ->performedOn($new_product_data)
             ->event('created')
-            ->withProperties(['product_name' => $new_product_data->product_name, 'added_stock' => $request->stock])
-            ->log("Admin dengan nama " . Auth::user()->name . " menambahkan stok {$request->stock} untuk produk {$new_product_data->product_name}.");
+            ->withProperties(['product_name' => $new_product_data->product_name, 'added_stock' => request()->stock])
+            ->log("Admin dengan nama " . Auth::user()->name . " menambahkan stok {request()->stock} untuk produk {$new_product_data->product_name}.");
 
         // Arahkan kembali ke halaman index dengan pesan sukses
         return redirect()->route('product.index')->with('success', 'Data stock added successfully');
     }
 
-    public function checkExpiredProducts(Request $request)
+    public function checkAllProducts()
     {
-        $now = Carbon::now();
+        $lowStockProducts = StockProduct::whereColumn('stock', '<=', 'minimum_stock')->with('product')->get();
+        $expiredProducts = StockProduct::whereDate('expired_at', '<', now())
+            ->orWhereBetween('expired_at', [now(), now()->addDays(7)])
+            ->with('product')
+            ->get();
 
-        // Update status produk yang sudah expired
-        $expiredProducts = Product::where('expired_at', '<', $now)
-            ->where('product_status', '!=', 'expired')
-            ->update(['product_status' => 'expired']);
+        return response()->json([
+            'lowStockProducts' => $lowStockProducts,
+            'expiredProducts' => $expiredProducts,
+        ]);
+    }
 
-        return response()->json(['success' => true, 'updated' => $expiredProducts]);
+    public function updateAllStocks()
+    {
+        $updatedCount = StockProduct::whereHas('product', function ($query) {
+            $query->whereColumn('stock_products.stock', '<=', 'products.minimum_stock');
+        })
+            ->get()
+            ->each(function ($stockProduct) {
+                $stockProduct->stock = $stockProduct->product->minimum_stock;
+                $stockProduct->save();
+            });
+
+        return response()->json([
+            'success' => true,
+            'message' => count($updatedCount) . " produk diperbarui!"
+        ]);
+    }
+
+
+    public function updateAllStatuses()
+    {
+        $updatedCount = StockProduct::whereDate('expired_at', '<', now())
+            ->update(['status' => 'Expired']);
+
+        return response()->json(['success' => true, 'message' => "$updatedCount produk diubah menjadi Expired!"]);
     }
 }

@@ -170,6 +170,10 @@
                                                 href="{{ route('product.edit', $product->product_code) }}">
                                                 <i class="bx bx-edit-alt me-1"></i> Edit
                                             </a>
+                                            <a class="dropdown-item"
+                                                href="{{ route('product.addStockView', $product->product_code) }}">
+                                                <i class="bx bx-edit-alt me-1"></i> Add Stock
+                                            </a>
                                             <form action="{{ route('product.destroy', $product->id) }}"
                                                 class="d-inline">
                                                 @csrf

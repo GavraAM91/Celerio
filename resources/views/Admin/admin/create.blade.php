@@ -19,19 +19,44 @@
                                     placeholder="Enter full name" required />
                             </div>
 
-                            <!-- Email -->
                             <div class="mb-6">
                                 <label class="form-label" for="email">Email Address</label>
-                                <input type="email" class="form-control" id="email" name="email"
-                                    placeholder="Enter email" required />
+                                <input type="email" class="form-control" id="email" name="email" required
+                                    pattern="[a-zA-Z0-9._%+-]+@gmail\.com"
+                                    title="Masukkan alamat Gmail yang valid, misalnya user@gmail.com"
+                                    placeholder="Enter your Gmail address">
                             </div>
 
-                            <!-- Password -->
                             <div class="mb-6">
                                 <label class="form-label" for="password">Password</label>
-                                <input type="password" class="form-control" id="password" name="password"
-                                    placeholder="Enter password" required />
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" name="password" required
+                                        minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                                        title="Minimal 8 karakter, 1 huruf besar, 1 huruf kecil, dan 1 angka"
+                                        placeholder="Enter password">
+                                    <button class="btn btn-outline-secondary toggle-password" type="button"
+                                        data-target="password">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                </div>
                             </div>
+
+                            <script>
+                                // Toggle password visibility
+                                document.querySelectorAll('.toggle-password').forEach(button => {
+                                    button.addEventListener('click', function() {
+                                        let target = document.getElementById(this.getAttribute('data-target'));
+                                        if (target.type === "password") {
+                                            target.type = "text";
+                                            this.innerHTML = '<i class="fa fa-eye-slash"></i>';
+                                        } else {
+                                            target.type = "password";
+                                            this.innerHTML = '<i class="fa fa-eye"></i>';
+                                        }
+                                    });
+                                });
+                            </script>
+
 
                             <!-- Confirm Password -->
                             <div class="mb-6">

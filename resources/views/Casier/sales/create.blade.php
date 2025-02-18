@@ -139,6 +139,11 @@
                             <p><strong>Tipe Member:</strong> ${response.data.type}</p>
                             <input type="hidden" name="membership_type" id="hidden-membership-type" value="${response.data.type}">
                             <input type="hidden" name="membership_id" id="hidden-membership_id" value="${response.data.id}">
+                                <div class="form-group">
+                                    <label for="use-points">Gunakan Poin:</label>
+                                    <input type="number" id="use-points" class="form-control" min="0" max="${response.data.point}" value="0">
+                                </div>
+                                <button id="apply-points" class="btn btn-primary mt-2">Gunakan</button>
                         </div>
                     `);
                             } else {
@@ -157,6 +162,22 @@
                     $('#membership-data').html('<p class="text-warning">Masukkan kode minimal 5 karakter</p>');
                     $('#hidden-membership-type').val(""); // Reset jika input kurang dari 5 karakter
                 }
+            });
+
+            // Event listener untuk tombol "Gunakan"
+            $(document).on('click', '#apply-points', function() {
+                let availablePoints = parseInt($('#membership-points').val()) || 0;
+                let usedPoints = parseInt($('#use-points').val()) || 0;
+
+                if (usedPoints > availablePoints) {
+                    alert("Poin yang dimasukkan melebihi jumlah yang tersedia.");
+                    return;
+                }
+
+                let discountAmount = usedPoints * 100; // Contoh konversi poin ke nilai diskon
+                $('#totalDiscount').val("Rp " + discountAmount.toLocaleString("id-ID"));
+                updateFinalPrice();
+                calculatePayment();
             });
 
             //get product
@@ -447,6 +468,9 @@
                     let couponId = $("#coupon_id").length ? $("#coupon_id").val() : null;
                     let membership_id = $("#hidden-membership_id").length ? $("#hidden-membership_id").val() :
                         null;
+                    let usedPoints = parseInt($('#use-points').val()) || 0;
+                    let membershipId = $('#hidden-membership_id').val() || null;
+
                     let totalPrice = ($("#productTotal").val() || "0").replace(/[^\d]/g, '');
                     let tax = 0.12;
                     let totalPriceWithDiscount = $("#totalDiscount").length ? ($("#totalDiscount").val())
@@ -489,6 +513,8 @@
                     let formData = {
                         user_id: userId,
                         membership_id: membership_id,
+                        membership_id: membershipId,
+                    used_points: usedPoints,
                         coupon_id: couponId,
                         total_price: totalPrice,
                         tax: tax,

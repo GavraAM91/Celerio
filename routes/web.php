@@ -58,14 +58,18 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('/', [ProductController::class, 'index'])->name('index');
         Route::get('create', [ProductController::class, 'create'])->name('create');
         Route::post('store', [ProductController::class, 'store'])->name('store');
-        Route::get('edit/{id}', [ProductController::class, 'edit'])->name('edit');
+        Route::get('edit/{product_code}', [ProductController::class, 'edit'])->name('edit');
         Route::get('show/{id?}', [ProductController::class, 'show'])->name('show');
         Route::post('update/{id?}', [ProductController::class, 'update'])->name('update');
+        Route::get('addStockView/{product_code}', [ProductController::class, 'addStockView'])->name('addStockView');
+        Route::post('addStock/{id?}', [ProductController::class, 'addStock'])->name('addStock');
         Route::get('destroy/{id?}', [ProductController::class, 'destroy'])->name('destroy');
         Route::get('trashed', [ProductController::class, 'trashed'])->name('trashed');
         Route::post('restore/{id}', [ProductController::class, 'restore'])->name('restore');
         Route::delete('forceDelete/{id}', [ProductController::class, 'forceDelete'])->name('forceDelete');
-        Route::post('checkExpiredProducts', [ProductController::class, 'checkExpiredProducts'])->name('checkExpired');
+        Route::post('checkAllProducts', [ProductController::class, 'checkAllProducts'])->name('checkAllProducts');
+        Route::post('updateAllStocks', [ProductController::class, 'updateAllStocks'])->name('updateAllStocks');
+        Route::post('updateAllStatuses', [ProductController::class, 'updateAllStatuses'])->name('updateAllStatuses');
     });
 
     //Coupon
@@ -73,7 +77,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('/', [CouponController::class, 'index'])->name('index');
         Route::get('create', [CouponController::class, 'create'])->name('create');
         Route::post('store', [CouponController::class, 'store'])->name('store');
-        Route::get('edit/{product_code}', [CouponController::class, 'edit'])->name('edit');
+        Route::get('edit/{id?}', [CouponController::class, 'edit'])->name('edit');
         Route::get('show/{id?}', [CouponController::class, 'show'])->name('show');
         Route::post('update/{id?}', [CouponController::class, 'update'])->name('update');
         Route::get('destroy/{id?}', [CouponController::class, 'destroy'])->name('destroy');

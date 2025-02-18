@@ -33,6 +33,7 @@ return new class extends Migration
                 );
             $table->string('invoice_sales')->unique();
             $table->string('membership_name');
+            $table->string('used_point')->nullable();
             $table->decimal('tax', 10, 2);
             $table->decimal('total_product_price', 10, 2);
             $table->decimal('total_price_discount', 10, 2)->nullable();

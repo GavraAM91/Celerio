@@ -1,3 +1,4 @@
+
 <x-app-layout>
     <div class="mt-4">
         <h2>Laporan Transaksi</h2>

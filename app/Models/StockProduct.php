@@ -16,7 +16,7 @@ class StockProduct extends Model
     protected $tables = 'stock_products';
     protected $guarded = ['id'];
 
-    // Relasi ke produk
+    // Relasi ke produk 
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_code', 'product_code');
