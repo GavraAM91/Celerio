@@ -150,13 +150,14 @@ class MembershipController extends Controller
         $membership_data = Membership::findOrFail($id);
 
         $validator = FacadesValidator::make($request->all(), [
-            'name' => 'required|string',
-            'username' => 'required|string',
-            'email' => 'required|email',
-            'type' => 'required|string',
-            'phone_number' => 'required|string',
-            'address' => 'required|string',
-            'status' => 'required|string|in:active,inactive'
+            'name' => 'sometimes|string',
+            'username' => 'sometimes|string',
+            'email' => 'sometimes|email',
+            'type' => 'sometimes|string',
+            'point' => 'sometimes',
+            'phone_number' => 'sometimes',
+            'address' => 'sometimes|string',
+            'status' => 'sometimes|string|in:active,inactive'
         ]);
 
         if ($validator->fails()) {
@@ -166,7 +167,7 @@ class MembershipController extends Controller
             ], 400);
         }
 
-        $data_request = $request->only(['name', 'username', 'email', 'type', 'phone_number', 'address', 'status']);
+        $data_request = $request->only(['name', 'username', 'email', 'type', 'point', 'phone_number', 'address', 'status']);
 
         $update = $membership_data->update($data_request);
 

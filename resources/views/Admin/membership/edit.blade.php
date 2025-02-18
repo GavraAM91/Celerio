@@ -16,7 +16,7 @@
                             <div class="mb-6">
                                 <label class="form-label" for="name">Name</label>
                                 <input type="text" class="form-control" id="name" name="name"
-                                    value="{{ old('name', $membership_data->name) }}" required />
+                                    value="{{ old('name', $membership_data->name) }}" />
                                 <input type="hidden" name="id" id="id" value={{ $membership_data->id }}>
                             </div>
 
@@ -24,20 +24,20 @@
                             <div class="mb-6">
                                 <label class="form-label" for="username">Username</label>
                                 <input type="text" class="form-control" id="username" name="username"
-                                    value="{{ old('username', $membership_data->username) }}" required />
+                                    value="{{ old('username', $membership_data->username) }}" />
                             </div>
 
                             <!-- Email -->
                             <div class="mb-6">
                                 <label class="form-label" for="email">Email</label>
                                 <input type="email" class="form-control" id="email" name="email"
-                                    value="{{ old('email', $membership_data->email) }}" required />
+                                    value="{{ old('email', $membership_data->email) }}" />
                             </div>
 
                             <!-- Type -->
                             <div class="mb-6">
                                 <label class="form-label" for="type">Type</label>
-                                <select class="form-control" id="type" name="type" required>
+                                <select class="form-control" id="type" name="type">
                                     <option value="type1" {{ $membership_data->type == 'type1' ? 'selected' : '' }}>
                                         Type 1</option>
                                     <option value="type2" {{ $membership_data->type == 'type2' ? 'selected' : '' }}>
@@ -45,25 +45,34 @@
                                 </select>
                             </div>
 
+
+                            <!-- Point Member -->
+                            <div class="mb-6">
+                                <label class="form-label" for="point">Point Member</label>
+                                <input type="text" class="form-control" id="point" name="point"
+                                    value="{{ old('point', $membership_data->point) }}" />
+                            </div>
+
                             <!-- Phone Number -->
                             <div class="mb-6">
                                 <label class="form-label" for="phone_number">Phone Number</label>
                                 <input type="text" class="form-control" id="phone_number" name="phone_number"
-                                    value="{{ old('phone_number', $membership_data->phone_number) }}" required />
+                                    value="{{ old('phone_number', $membership_data->phone_number) }}" />
                             </div>
 
                             <!-- Address -->
                             <div class="mb-6">
                                 <label class="form-label" for="address">Address</label>
                                 <input type="text" class="form-control" id="address" name="address"
-                                    value="{{ old('address', $membership_data->address) }}" required />
+                                    value="{{ old('address', $membership_data->address) }}" />
                             </div>
 
                             <!-- Status -->
                             <div class="mb-6">
                                 <label class="form-label" for="status">Status</label>
-                                <select class="form-control" id="status" name="status" required>
-                                    <option value="active" {{ $membership_data->status == 'active' ? 'selected' : '' }}>
+                                <select class="form-control" id="status" name="status">
+                                    <option value="active"
+                                        {{ $membership_data->status == 'active' ? 'selected' : '' }}>
                                         Active</option>
                                     <option value="inactive"
                                         {{ $membership_data->status == 'inactive' ? 'selected' : '' }}>Inactive

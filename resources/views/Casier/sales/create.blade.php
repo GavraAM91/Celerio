@@ -69,23 +69,28 @@
                                     <div class="col-md-6">
                                         <div class="p-3 border rounded">
                                             <strong><label class="form-label">Total Harga Dengan Diskon</label></strong>
-                                            <input id="totalDiscount" class="form-control-plaintext"></p>
+                                            <input id="totalDiscount" class="form-control-plaintext" readonly></p>
+
+                                            <div id="formDiscountPoint" style="display: none;">
+                                                <strong><label class="form-label">Potongan PointMember</label></strong>
+                                                <input id="discountByPoint" class="form-control-plaintext" readonly></p>
+                                            </div>
 
                                             <strong><label class="form-label">Total Harga Barang</label></strong>
-                                            <input id="productTotal" class="form-control-plaintext"></p>
+                                            <input id="productTotal" class="form-control-plaintext" readonly></p>
 
                                             <strong><label class="form-label">Total Pajak (PPN 12%)</label></strong>
-                                            <input id="taxTotal" class="form-control-plaintext"></p>
+                                            <input id="taxTotal" class="form-control-plaintext" readonly></p>
 
                                             <strong><label class="form-label">Harga Final</label></strong>
-                                            <input id="finalPrice" class="form-control-plaintext"></p>
+                                            <input id="finalPrice" class="form-control-plaintext" readonly></p>
 
                                             <strong><label class="form-label">Jumlah Uang</label></strong>
                                             <input type="text" class="form-control" id="jumlahUang"
                                                 placeholder="Rp 100000" / required>
 
                                             <strong><label class="form-label">Uang Kembalian</label></strong>
-                                            <input id="uangKembalian" class="form-control-plaintext"></p>
+                                            <input id="uangKembalian" class="form-control-plaintext" readonly></p>
                                         </div>
                                     </div>
                                 </div>
@@ -100,7 +105,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div>~~~~~~
     </div>
 
     @push('scripts')
@@ -118,6 +123,20 @@
                     membershipSection.style.display = "none";
                     document.getElementById("membership-data").innerHTML = "";
                     hiddenMembershipType.value = "type3";
+                }
+            });
+
+            // Event listener untuk input pada #use-points
+            $(document).on("input", "#use-points", function() {
+                let usePointsVal = $(this).val().trim();
+
+                if (usePointsVal !== "") {
+                    $("#formDiscountPoint").show();
+                    let discount = calculateMembershipDiscount();
+                    $("#discountByPoint").val("Rp " + discount.toLocaleString("id-ID"));
+                } else {
+                    // Sembunyikan form jika input kosong
+                    $("#formDiscountPoint").hide();
                 }
             });
 
@@ -164,18 +183,12 @@
                 }
             });
 
-            // Event listener untuk tombol "Gunakan"
             $(document).on('click', '#apply-points', function() {
-                let availablePoints = parseInt($('#membership-points').val()) || 0;
-                let usedPoints = parseInt($('#use-points').val()) || 0;
+                //get nilai diskon
+                let discountAmount = calculateMembershipDiscount();
 
-                if (usedPoints > availablePoints) {
-                    alert("Poin yang dimasukkan melebihi jumlah yang tersedia.");
-                    return;
-                }
+                $('#discountByPoint').val("Rp " + discountAmount.toLocaleString("id-ID"));
 
-                let discountAmount = usedPoints * 100; // Contoh konversi poin ke nilai diskon
-                $('#totalDiscount').val("Rp " + discountAmount.toLocaleString("id-ID"));
                 updateFinalPrice();
                 calculatePayment();
             });
@@ -376,32 +389,102 @@
                 });
             });
 
-            function updateFinalPrice() {
-                let totalDiscount = $("#totalDiscount").val();
-                let finalPrice;
+            //final price function
+            // function updateFinalPrice() {
+            //     let totalDiscount = $("#totalDiscount").val();
+            //     let pointDiscount = $("#discountByPoint").val();
+            //     let finalPrice;
 
-                if (totalDiscount === "TIDAK ADA KUPON") {
-                    finalPrice = $("#taxTotal").val(); // Gunakan harga setelah pajak jika tidak ada kupon
-                } else {
-                    finalPrice = totalDiscount; // Gunakan harga setelah diskon jika ada kupon
+            //     if (totalDiscount === "TIDAK ADA KUPON") {
+            //         finalPrice = $("#taxTotal").val(); // Gunakan harga setelah pajak jika tidak ada kupon
+            //     } else {
+            //         finalPrice = totalDiscount; // Gunakan harga setelah diskon jika ada kupon
+            //     }
+
+            //     $("#finalPrice").val(finalPrice);
+            // }
+
+            function updateFinalPrice() {
+                // Fungsi untuk konversi string mata uang ke angka float
+                function parseCurrency(input) {
+                    if (!input) return 0; // Pastikan input tidak kosong
+                    input = input.trim(); // Hilangkan spasi tersembunyi
+                    let processed = input.replace(/[^\d,]/g, '').replace(',', '.'); // Hanya simpan angka dan koma
+                    return parseFloat(processed) || 0;
                 }
 
-                $("#finalPrice").val(finalPrice);
+                let totalDiscount = $("#totalDiscount").val();
+                let taxTotalStr = $("#taxTotal").val();
+                let pointDiscountStr = $("#discountByPoint").val();
+
+                let basePrice = totalDiscount === "TIDAK ADA KUPON" ? parseCurrency(taxTotalStr) : parseCurrency(totalDiscount);
+                let pointDiscount = parseCurrency(pointDiscountStr);
+
+                let finalPrice = basePrice - pointDiscount;
+                if (finalPrice < 0) finalPrice = 0;
+
+                // **Pembulatan ke atas**
+                finalPrice = Math.ceil(finalPrice);
+
+                console.log("Final Price:", finalPrice);
+                console.log("Base Price:", basePrice);
+                console.log("Point Discount:", pointDiscount);
+
+                // Format angka ke mata uang Indonesia
+                $("#finalPrice").val("Rp " + finalPrice.toLocaleString("id-ID"));
             }
+
 
             // Panggil updateFinalPrice() setelah menghitung kupon dan setelah perhitungan pajak
             $(document).on("input", "#coupon-name, .quantity, #jumlahUang", function() {
                 updateFinalPrice();
             });
 
+            function calculateMembershipDiscount() {
+                // Ambil nilai input poin yang akan digunakan
+                let usePoints = parseInt($("#use-points").val()) || 0;
+
+                const POINT_THRESHOLD = 100000;
+                const DISCOUNT_PER_THRESHOLD = 8000;
+                const MAX_POINT = 200000;
+
+                if (usePoints > MAX_POINT) {
+                    // Tampilkan notifikasi jika belum ada
+                    if ($("#use-points").next(".membership-warning").length === 0) {
+                        $("#use-points").after(
+                            '<p class="text-warning membership-warning">Maksimal poin yang bisa digunakan adalah ' +
+                            MAX_POINT + '</p>');
+                    }
+                    // Set nilai input menjadi maksimal
+                    $("#use-points").val(MAX_POINT);
+                    usePoints = MAX_POINT;
+                } else {
+                    // Hapus notifikasi jika nilai sudah valid
+                    $("#use-points").next(".membership-warning").remove();
+                }
+
+                // Perhitungan yang benar: membagi poin yang digunakan dengan POINT_THRESHOLD
+                let discountMultiplier = Math.floor(usePoints / POINT_THRESHOLD);
+                return discountMultiplier * DISCOUNT_PER_THRESHOLD;
+            }
+
+
+            // Event listener agar ketika input membership point berubah, perhitungan diulang
+            $(document).on("input", "#use-points", function() {
+                updateFinalPrice();
+                calculatePayment();
+            });
+
+            //jika input lain dimasukkan hitung lagi final price
+            $(document).on("input", "#coupon-name, .quantity, #jumlahUang", function() {
+                updateFinalPrice();
+            });
 
             // Fungsi untuk menghitung pajak
             function calculateTax(productTotal) {
                 let taxRate = 0.12;
                 let taxAmount = productTotal * taxRate;
                 let totalWithTax = productTotal + taxAmount;
-
-                // console.log('pajak :', totalWithTax);
 
                 // Menampilkan pajak yang dihitung
                 $("#taxAmount").val("Rp " + taxAmount.toLocaleString("id-ID"));
@@ -415,27 +498,57 @@
             }
 
             // Menghitung pembayaran berdasarkan total harga setelah diskon
+            // function calculatePayment() {
+            //     // Ambil total harga setelah diskon
+            //     let finalTotalAfterDiscount = parseFloat($("#finalPrice").val().replace(/[^\d]/g, '')) || 0;
+
+            //     // Ambil jumlah uang yang diinputkan
+            //     let inputMoney = parseFloat($('#jumlahUang').val().replace(/[^\d]/g, '')) || 0;
+
+            //     // Hitung kembalian
+            //     let changeMoney = inputMoney - finalTotalAfterDiscount;
+
+            //     // Menampilkan hasil kembalian
+            //     if (changeMoney >= 0) {
+            //         $('#uangKembalian').val("Rp " + changeMoney.toLocaleString("id-ID"));
+            //     } else {
+            //         $('#uangKembalian').val("Uang tidak cukup");
+            //     }
+            // }
+
             function calculatePayment() {
+                // Fungsi untuk konversi string mata uang ke angka float
+                function parseCurrency(input) {
+                    if (!input) return 0; // Pastikan input tidak kosong
+                    input = input.trim(); // Hilangkan spasi yang mungkin tersembunyi
+                    let processed = input.replace(/[^\d,]/g, '').replace(',', '.'); // Hanya simpan angka dan koma
+                    return parseFloat(processed) || 0;
+                }
+
                 // Ambil total harga setelah diskon
-                let finalTotalAfterDiscount = parseFloat($("#finalPrice").val().replace(/[^\d]/g, '')) || 0;
+                let finalTotalAfterDiscount = parseCurrency($("#finalPrice").val());
 
                 // Ambil jumlah uang yang diinputkan
-                let inputMoney = parseFloat($('#jumlahUang').val().replace(/[^\d]/g, '')) || 0;
+                let inputMoney = parseCurrency($('#jumlahUang').val());
 
                 // Hitung kembalian
                 let changeMoney = inputMoney - finalTotalAfterDiscount;
 
-                // console.log("Total setelah diskon:", finalTotalAfterDiscount);
-                // console.log("Uang dibayarkan:", inputMoney);
-                // console.log("Kembalian:", changeMoney);
+                console.log("Final Price:", finalTotalAfterDiscount);
+                console.log("Input Money:", inputMoney);
+                console.log("Change Money:", changeMoney);
 
                 // Menampilkan hasil kembalian
                 if (changeMoney >= 0) {
-                    $('#uangKembalian').val("Rp " + changeMoney.toLocaleString("id-ID"));
+                    $('#uangKembalian').val("Rp " + changeMoney.toLocaleString("id-ID", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }));
                 } else {
                     $('#uangKembalian').val("Uang tidak cukup");
                 }
             }
+
 
             function countCoupon(totalWithTax) {
                 let couponValue = parseFloat($('#coupon-value').val()) || 0;
@@ -444,17 +557,14 @@
 
                 // Pastikan total pajak diambil dengan benar
                 let totalWithTaxRaw = $('#taxTotal').val();
-                // console.log("Raw tax total:", totalWithTaxRaw);
-
 
                 totalWithTax = parseFloat(totalWithTaxRaw.replace(/[^\d]/g, '')) || 0;
-                // console.log("Total harga setelah pajak (parsed):", totalWithTax);
 
                 let discountAmount = 0;
                 if (couponValue > 0) {
                     discountAmount = couponValue;
                 } else if (couponPercentage > 0) {
-                    discountAmount = totalWithTax * (couponPercentage / 100);
+                    discountAmount = (couponPercentage / 100) * totalWithTax;
                 }
 
                 let finalTotal = totalWithTax - discountAmount;
@@ -491,6 +601,7 @@
             $("#purchaseForm").submit(function(e) {
                 e.preventDefault(); // Cegah reload halaman
 
+                //ambil data dari user dan yang lain
                 let userId = $("#user_id").val();
                 let couponId = $("#coupon_id").length ? $("#coupon_id").val() : null;
                 let membershipId = $("#hidden-membership_id").length ? $("#hidden-membership_id").val() : null;
@@ -516,8 +627,8 @@
                         let productName = row.find(".product-name").val().trim(); // Pastikan field ini terisi
                         let quantity = parseInt(row.find(".quantity").val()) || 0;
 
-                        console.log('code :', productCode);
-                        console.log('id :', productId);
+                        // console.log('code :', productCode);
+                        // console.log('id :', productId);
 
                         // Hapus format mata uang dan ubah ke angka
                         let sellingPriceText = row.find(".selling_price").text().trim()
@@ -543,7 +654,7 @@
                 // Panggil fungsi untuk mendapatkan data produk
                 let productData = getProductData();
 
-                console.log(productData);
+                // console.log(productData);
 
                 let formData = {
                     user_id: userId,

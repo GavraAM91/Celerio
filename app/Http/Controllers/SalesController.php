@@ -182,6 +182,7 @@ class SalesController extends Controller
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'membership_id' => 'nullable|exists:memberships,id',
+            'used_points' => 'nullable',
             'coupon_id' => 'nullable|exists:coupons,id',
             'total_price' => 'required|numeric',
             'tax'  => 'required|numeric',
@@ -189,8 +190,6 @@ class SalesController extends Controller
             'final_price' => 'required|numeric',
             'cash_received'  => 'required|numeric|min:0',
             'change' => 'required|numeric',
-            'use_all_points' => 'boolean',
-            'use_points' => 'nullable|numeric|min:0', // Jumlah poin yang ingin digunakan
             'data' => 'required|array',
             'data.*.product_code' => 'required|exists:products,product_code',
             'data.*.product_id' => 'required|exists:products,id',
@@ -213,35 +212,31 @@ class SalesController extends Controller
         $membershipId = $validatedData['membership_id'] ?? null;
         $finalPrice   = $validatedData['final_price'];
         $couponId     = $validatedData['coupon_id'] ?? null;
-        $useAllPoints = $validatedData['use_all_points'] ?? false;
-        $usePoints    = $validatedData['use_points'] ?? 0;
+        $usePoints    = $validatedData['used_points'] ?? 0;
 
 
-        $membership_name = "Non Member";
+        $membershipUsername = "Non Member";
         $availablePoints = 0;
-
         if ($membershipId) {
-            $membershipInfo = Membership::where('id', $membershipId)->first();
-            $membership_name = $membershipInfo->name;
-            $availablePoints = $membershipInfo->point;
+            $membershipInfo = Membership::find($membershipId);
+            if ($membershipInfo) {
+                $membershipUsername = $membershipInfo->name;
+                $availablePoints = $membershipInfo->point;
 
-            // Jika user memilih menggunakan seluruh poin
-            if ($useAllPoints) {
-                $usePoints = $availablePoints;
+                // Batasi penggunaan poin agar tidak melebihi jumlah yang tersedia
+                $usePoints = min($usePoints, $availablePoints);
+
+                // Kurangi poin dari akun membership
+                $membershipInfo->point -= $usePoints;
+
+                // Tambahkan poin baru yang didapat dari final price sebesar 2%
+                $pointsEarned = round($finalPrice * 0.02);
+                $membershipInfo->point += $pointsEarned;
+
+                $membershipInfo->save();
             }
-
-            $usePoints = min($usePoints, $availablePoints);
-
-            // Kurangi total harga dengan jumlah poin yang digunakan
-            $finalPrice -= $usePoints;
-
-            // Pastikan harga final tidak negatif
-            $finalPrice = max($finalPrice, 0);
-
-            // Kurangi poin dari akun member
-            $membershipInfo->point -= $usePoints;
-            $membershipInfo->save();
         }
+
 
         if ($couponId) {
             $couponInfo = Coupon::where('id', $couponId)->first();
@@ -256,14 +251,14 @@ class SalesController extends Controller
             'membership_id' => $membershipId,
             'coupon_id' => $couponId,
             'invoice_sales' => $invoiceSales,
-            'membership_name' => $membership_name,
+            'membership_name' => $membershipUsername,
             'tax' => $validatedData['tax'],
             'total_product_price' => $validatedData['total_price'],
             'total_price_discount' => $validatedData['total_price_with_discount'],
             'final_price' => $finalPrice,
             'cash_received' => $validatedData['cash_received'],
             'change' => $validatedData['change'],
-            'points_used' => $usePoints, // Simpan jumlah poin yang digunakan
+            'used_point' => $usePoints,
         ]);
 
         foreach ($validatedData['data'] as $item) {
@@ -295,7 +290,7 @@ class SalesController extends Controller
             ->event('transaction')
             ->withProperties([
                 'invoice_sales' => $invoiceSales,
-                'membership' => $membership_name,
+                'membership' => $membershipUsername,
                 'total_price' => $validatedData['total_price'],
                 'final_price' => $finalPrice,
                 'cash_received' => $validatedData['cash_received'],
@@ -318,6 +313,7 @@ class SalesController extends Controller
             ]
         ], 201);
     }
+
 
 
     public function DetailTransaction(Request $request)
