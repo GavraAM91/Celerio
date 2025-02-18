@@ -20,7 +20,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\MembershipBenefits;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator as FacadesValidator;
+use Illuminate\Support\Facades\Validator;
 
 class SalesController extends Controller
 {
@@ -179,19 +179,20 @@ class SalesController extends Controller
 
     public function PurchasedProduct(Request $request)
     {
-        $validator = FacadesValidator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'membership_id' => 'nullable|exists:memberships,id',
             'coupon_id' => 'nullable|exists:coupons,id',
             'total_price' => 'required|numeric',
-            'tax' => 'required|numeric',
+            'tax'  => 'required|numeric',
             'total_price_with_discount' => 'nullable|numeric',
             'final_price' => 'required|numeric',
-            'cash_received' => 'required|numeric|min:0',
+            'cash_received'  => 'required|numeric|min:0',
             'change' => 'required|numeric',
-            'use_all_points' => 'boolean',  // Menentukan apakah semua poin digunakan
+            'use_all_points' => 'boolean',
             'use_points' => 'nullable|numeric|min:0', // Jumlah poin yang ingin digunakan
             'data' => 'required|array',
+            'data.*.product_code' => 'required|exists:products,product_code',
             'data.*.product_id' => 'required|exists:products,id',
             'data.*.product_name' => 'required',
             'data.*.quantity' => 'required|integer|min:1',
@@ -201,16 +202,20 @@ class SalesController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validasi gagal',
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors()
             ], 400);
         }
 
-        $validatedData = $validator->validate();
+        // Ambil data yang sudah tervalidasi
+        $validatedData = $validator->validated();
+
+        // Ambil variabel yang dibutuhkan
         $membershipId = $validatedData['membership_id'] ?? null;
-        $finalPrice = $validatedData['final_price'];
-        $couponId = $validatedData['coupon_id'] ?? null;
+        $finalPrice   = $validatedData['final_price'];
+        $couponId     = $validatedData['coupon_id'] ?? null;
         $useAllPoints = $validatedData['use_all_points'] ?? false;
-        $usePoints = $validatedData['use_points'] ?? 0;
+        $usePoints    = $validatedData['use_points'] ?? 0;
+
 
         $membership_name = "Non Member";
         $availablePoints = 0;
@@ -225,7 +230,6 @@ class SalesController extends Controller
                 $usePoints = $availablePoints;
             }
 
-            // Pastikan user tidak menggunakan lebih banyak poin dari yang tersedia
             $usePoints = min($usePoints, $availablePoints);
 
             // Kurangi total harga dengan jumlah poin yang digunakan
@@ -263,6 +267,14 @@ class SalesController extends Controller
         ]);
 
         foreach ($validatedData['data'] as $item) {
+            // Cek apakah stok mencukupi sebelum melakukan transaksi
+            $stockProduct = StockProduct::where('product_code', $item['product_code'])->first();
+            if ($stockProduct && $stockProduct->stock < $item['quantity']) {
+                return response()->json([
+                    'message' => 'Stok tidak mencukupi untuk produk ' . $item['product_name'],
+                ], 400);
+            }
+
             SalesDetail::create([
                 'sales_id' => $sales->id,
                 'product_id' => $item['product_id'],
@@ -271,10 +283,10 @@ class SalesController extends Controller
                 'selling_price' => $item['selling_price'],
             ]);
 
-            $productData = Product::where('id', $item['product_id'])->first();
-            $productData->sold_product += $item['quantity'];
-            $productData->stock -= $item['quantity'];
-            $productData->save();
+            // Update sold_product dan stock di StockProduct
+            $stockProduct->sold_product += $item['quantity'];
+            $stockProduct->stock -= $item['quantity'];
+            $stockProduct->save();
         }
 
         activity()
@@ -294,11 +306,6 @@ class SalesController extends Controller
             ])
             ->log("Admin " . Auth::user()->name . " melakukan transaksi dengan kode {$invoiceSales}.");
 
-        if ($productData->sold_product > $productData->stock) {
-            $productData->product_status = 'out of stock';
-            $productData->save();
-        }
-
         return response()->json([
             'success' => true,
             'message' => 'Transaksi berhasil',
@@ -311,6 +318,7 @@ class SalesController extends Controller
             ]
         ], 201);
     }
+
 
     public function DetailTransaction(Request $request)
     {

@@ -182,11 +182,11 @@
 
             //get product
             $(document).ready(function() {
-
+                // Ketika menambahkan baris produk baru
                 $("#addProduct").click(function() {
                     let newRow = `
             <tr>
-               <td><input type="text" class="form-control product_id" readonly></td>
+                <td><input type="text" class="form-control product-code" readonly></td>
                 <td><input type="text" class="form-control product-name" placeholder="Nama Produk"></td>
                 <td><input type="number" class="form-control stock" value="0" min="0" readonly></td>
                 <td><input type="number" class="form-control quantity" value="1" min="1"></td>
@@ -195,43 +195,51 @@
                 <td class="total">Rp 0</td>
                 <td><button class="btn btn-danger removeProduct">Hapus</button></td>
                 <input type="hidden" class="sellingMultiplier-input" value="0">
+                <input type="hidden" class="form-control product-id" readonly>
             </tr>
         `;
                     $("#productTableBody").append(newRow);
                 });
 
-                //remove product
+                // Menghapus baris produk
                 $(document).on("click", ".removeProduct", function() {
                     $(this).closest("tr").remove();
                     calculateProductTotal();
                 });
 
-                //search data from db
+                // Mencari data produk dari database ketika mengetik nama produk
                 $(document).on("input", ".product-name", function() {
                     let row = $(this).closest("tr");
-                    let productName = $(this).val();
+                    let typedName = $(this).val();
                     let membershipType = $("#hidden-membership-type").val() || "type3"; // Default jika kosong
 
-                    if (productName.length >= 1) {
+                    if (typedName.length >= 4) {
                         let url = "{{ route('sales.searchProduct') }}?productName=" + encodeURIComponent(
-                            productName) + "&membershipType=" + encodeURIComponent(membershipType);
+                            typedName) + "&membershipType=" + encodeURIComponent(membershipType);
 
                         $.ajax({
                             url: url,
                             method: 'GET',
                             success: function(response) {
                                 if (response.success && response.data) {
-                                    let product_id = response.data.product.id;
-                                    let stock = response.data.product.stock;
-                                    let price = response.data.product.product_price;
+                                    // Ambil data dari respon
+                                    let product = response.data.product;
+                                    // let productId = response.data.product.id;
+                                    let stock = response.data.stockProduct.stock;
+                                    let price = product.product_price;
                                     let sellingMultiplier = response.data.sellingPrice
                                         .selling_price || 1; // Default multiplier 1
                                     let quantity = parseInt(row.find(".quantity").val());
-
                                     let sellingPrice = price * sellingMultiplier;
                                     let total = sellingPrice * quantity;
 
-                                    row.find(".product_id").val(product_id);
+                                    console.log(product.id);
+
+                                    // Update field-field pada baris produk
+                                    row.find(".product-code").val(product.product_code);
+                                    row.find(".product-id").val(product.id);
+                                    // Penting: update field product-name dengan nama produk yang benar
+                                    row.find(".product-name").val(product.product_name);
                                     row.find(".stock").val(stock);
                                     row.find(".price").text("Rp " + price.toLocaleString("id-ID"));
                                     row.find(".sellingMultiplier-input").val(sellingMultiplier);
@@ -254,9 +262,26 @@
                 });
 
 
-                //update total saat quantity berubah
+                // Update total saat quantity berubah
                 $(document).on("input", ".quantity", function() {
                     let row = $(this).closest("tr");
+                    let stock = parseInt(row.find(".stock").val());
+                    let quantity = parseInt($(this).val());
+
+                    // Hapus notifikasi lama
+                    row.find(".stock-warning").remove();
+
+                    // Check if quantity exceeds stock
+                    if (quantity > stock) {
+                        // Tambahkan notifikasi kuning di bawah input
+                        let warningMessage =
+                            `<p class="text-warning stock-warning">Produk tidak mencukupi! </br> Stok hanya tersedia ${stock}</p>`;
+                        row.find(".quantity").after(warningMessage);
+
+                        // Reset quantity ke stok maksimum
+                        $(this).val(stock);
+                    }
+
                     updateRowTotal(row);
                     calculateProductTotal();
 
@@ -265,6 +290,7 @@
                     countCoupon(totalWithTax);
                     calculatePayment();
                 });
+
 
                 //update total
                 function updateRowTotal(row) {
@@ -299,6 +325,7 @@
                     calculateTax(productTotal);
                 }
             });
+
 
             //coupon
             $(document).ready(function() {
@@ -460,100 +487,102 @@
             });
 
 
-            $(document).ready(function() {
-                $("#purchaseForm").submit(function(e) {
-                    e.preventDefault(); // Mencegah reload form
+            // Submit form pembelian
+            $("#purchaseForm").submit(function(e) {
+                e.preventDefault(); // Cegah reload halaman
 
-                    let userId = $("#user_id").val();
-                    let couponId = $("#coupon_id").length ? $("#coupon_id").val() : null;
-                    let membership_id = $("#hidden-membership_id").length ? $("#hidden-membership_id").val() :
-                        null;
-                    let usedPoints = parseInt($('#use-points').val()) || 0;
-                    let membershipId = $('#hidden-membership_id').val() || null;
+                let userId = $("#user_id").val();
+                let couponId = $("#coupon_id").length ? $("#coupon_id").val() : null;
+                let membershipId = $("#hidden-membership_id").length ? $("#hidden-membership_id").val() : null;
+                let usedPoints = parseInt($('#use-points').val()) || 0;
 
-                    let totalPrice = ($("#productTotal").val() || "0").replace(/[^\d]/g, '');
-                    let tax = 0.12;
-                    let totalPriceWithDiscount = $("#totalDiscount").length ? ($("#totalDiscount").val())
-                        .replace(/[^\d]/g, '') : null;
-                    let finalPrice = ($("#finalPrice").val() || "0").replace(/[^\d]/g, '');
-                    let cashReceived = ($("#jumlahUang").val() || "0").replace(/[^\d]/g, '');
-                    let change = cashReceived - finalPrice; // Hitung uang kembalian otomatis
+                let totalPrice = ($("#productTotal").val() || "0").replace(/[^\d]/g, '');
+                let tax = 0.12;
+                let totalPriceWithDiscount = $("#totalDiscount").length ? ($("#totalDiscount").val()).replace(/[^\d]/g,
+                    '') : null;
+                let finalPrice = ($("#finalPrice").val() || "0").replace(/[^\d]/g, '');
+                let cashReceived = ($("#jumlahUang").val() || "0").replace(/[^\d]/g, '');
+                let change = cashReceived - finalPrice; // Hitung uang kembalian
 
-                    function getProductData() {
-                        let products = [];
+                // Fungsi untuk mengambil data produk dari tabel
+                function getProductData() {
+                    let products = [];
 
-                        $("#productTableBody tr").each(function() {
-                            let row = $(this);
+                    $("#productTableBody tr").each(function() {
+                        let row = $(this);
 
-                            let productId = row.find(".product_id").val().trim();
-                            let productName = row.find(".product-name").val()
-                                .trim(); // Ubah ke product_name
-                            let quantity = parseInt(row.find(".quantity").val()) || 0;
+                        let productCode = row.find(".product-code").val().trim();
+                        let productId = row.find(".product-id").val().trim();
+                        let productName = row.find(".product-name").val().trim(); // Pastikan field ini terisi
+                        let quantity = parseInt(row.find(".quantity").val()) || 0;
 
-                            let sellingPriceText = row.find(".selling_price").text().trim()
-                                .replace("Rp ", "").replace(/\./g, "").replace(",", ".");
-                            let sellingPrice = parseFloat(sellingPriceText) || 0;
+                        console.log('code :', productCode);
+                        console.log('id :', productId);
 
-                            if (productId && productName && quantity > 0 && sellingPrice > 0) {
-                                products.push({
-                                    product_id: productId,
-                                    product_name: productName, // Ubah dari name ke product_name
-                                    quantity: quantity,
-                                    selling_price: sellingPrice // Ubah dari price ke selling_price
-                                });
-                            }
-                        });
-                        return products;
-                    }
+                        // Hapus format mata uang dan ubah ke angka
+                        let sellingPriceText = row.find(".selling_price").text().trim()
+                            .replace("Rp ", "")
+                            .replace(/\./g, "")
+                            .replace(",", ".");
+                        let sellingPrice = parseFloat(sellingPriceText) || 0;
 
-                    // Panggil fungsi ini sebelum mengirim data ke server
-                    let productData = getProductData();
-
-
-                    let formData = {
-                        user_id: userId,
-                        membership_id: membership_id,
-                        membership_id: membershipId,
-                    used_points: usedPoints,
-                        coupon_id: couponId,
-                        total_price: totalPrice,
-                        tax: tax,
-                        total_price_with_discount: totalPriceWithDiscount,
-                        final_price: finalPrice,
-                        cash_received: cashReceived,
-                        change: change,
-                        data: productData
-                    };
-
-                    // console.log(formData);
-
-                    $.ajax({
-                        url: "{{ route('sales.PurchasedProduct') }}",
-                        type: "POST",
-                        data: JSON.stringify(formData),
-                        contentType: "application/json",
-                        headers: {
-                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
-                        },
-                        success: function(response) {
-                            // Redirect langsung ke halaman DetailTransaction dengan invoice_sales
-                            if (response.data.invoice_sales) {
-                                window.location.href =
-                                    "{{ route('sales.DetailTransaction') }}?invoice_sales=" +
-                                    encodeURIComponent(response.data.invoice_sales);
-                            } else {
-                                console.error("invoice_sales tidak ditemukan dalam response.data:",
-                                    response.data);
-                            }
-                        },
-                        error: function(xhr) {
-                            // alert("Gagal menyimpan transaksi. Cek kembali input Anda.");
-                            showToast("Gagal menyimpan transaksi. Cek kembali input Anda.",
-                                "error");
-                            console.log(xhr.responseText);
-
+                        // Masukkan data produk jika semua field valid
+                        if (productId && productCode && productName && quantity > 0 && sellingPrice > 0) {
+                            products.push({
+                                product_id: productId,
+                                product_code: productCode,
+                                product_name: productName,
+                                quantity: quantity,
+                                selling_price: sellingPrice
+                            });
                         }
                     });
+                    return products;
+                }
+
+                // Panggil fungsi untuk mendapatkan data produk
+                let productData = getProductData();
+
+                console.log(productData);
+
+                let formData = {
+                    user_id: userId,
+                    membership_id: membershipId,
+                    used_points: usedPoints,
+                    coupon_id: couponId,
+                    total_price: totalPrice,
+                    tax: tax,
+                    total_price_with_discount: totalPriceWithDiscount,
+                    final_price: finalPrice,
+                    cash_received: cashReceived,
+                    change: change,
+                    data: productData
+                };
+
+                console.log("Data yang dikirim:", formData);
+
+                $.ajax({
+                    url: "{{ route('sales.PurchasedProduct') }}",
+                    type: "POST",
+                    data: JSON.stringify(formData),
+                    contentType: "application/json",
+                    headers: {
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")
+                    },
+                    success: function(response) {
+                        // Redirect ke halaman DetailTransaction jika invoice_sales tersedia
+                        if (response.data.invoice_sales) {
+                            window.location.href = "{{ route('sales.DetailTransaction') }}?invoice_sales=" +
+                                encodeURIComponent(response.data.invoice_sales);
+                        } else {
+                            console.error("invoice_sales tidak ditemukan dalam response.data:", response
+                                .data);
+                        }
+                    },
+                    error: function(xhr) {
+                        showToast("Gagal menyimpan transaksi. Cek kembali input Anda.", "error");
+                        console.log(xhr.responseText);
+                    }
                 });
             });
         </script>
