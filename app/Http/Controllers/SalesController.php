@@ -82,40 +82,6 @@ class SalesController extends Controller
         ], 404);
     }
 
-    //search product
-    // public function searchProduct(Request $request)
-    // {
-    //     $product_name = $request->query('productName');
-    //     $membershipType = $request->query('membershipType');
-
-    //     // Cari produk berdasarkan nama dan status aktif
-    //     $product = Product::where('product_name', 'LIKE', "%$product_name%")
-    //         ->where('product_status', 'active')
-    //         ->first();
-    //     if (!$product) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Data probably out of stock or deleted'
-    //         ]);
-    //     }
-    //     // $product = Product::where('product_name', 'LIKE', "%$product_name%")
-    //     //     ->first();
-
-    //     if (!$product) {
-    //         return response()->json(['success' => false, 'message' => 'Produk tidak ditemukan']);
-    //     }
-
-    //     $selling_price = SellingPrice::where('type_buyer', $membershipType)->first();
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'data' => [
-    //             'product' => $product,
-    //             'sellingPrice' => $selling_price,
-    //         ],
-    //     ]);
-    // }
-
     public function searchProduct(Request $request)
     {
         $product_name = $request->query('productName');

@@ -50,7 +50,7 @@
                             </div>
 
                             <!-- Daftar Ketentuan Password -->
-                            <ul id="password-requirements" class="list-unstyled">
+                            <ul id="password-requirements" class="list-unstyled my-2">
                                 <li class="text-danger">Minimal 8 karakter</li>
                                 <li class="text-danger">Harus ada huruf besar</li>
                                 <li class="text-danger">Harus ada huruf kecil</li>

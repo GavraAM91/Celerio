@@ -206,6 +206,7 @@ class CategoryProductController extends Controller
         return view('admin.trashed.category', compact('trashedCategories'));
     }
 
+
     public function restore($id)
     {
         $category_data = CategoryProduct::onlyTrashed()->find($id);

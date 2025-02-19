@@ -75,7 +75,6 @@
                                 <label class="form-label" for="role">User Role</label>
                                 <select class="form-control" id="role" name="role" required>
                                     <option value="" disabled selected>Select role</option>
-                                    <option value="admin">Admin</option>
                                     <option value="casier">Casier</option>
                                 </select>
                             </div>
@@ -111,7 +110,7 @@
             }
         }
 
-        
+
         document.addEventListener('DOMContentLoaded', function() {
             const passwordField = document.getElementById('password');
             const confirmPasswordField = document.getElementById('password_confirmation');

@@ -95,7 +95,7 @@
                 <!-- Button -->
                 <div class="d-flex gap-3 mx-4">
                     <a class="btn btn-danger" href="{{ route('category.trashed') }}">Data Terhapus</a>
-                    <a class="btn btn-primary" href="{{ route('category.create') }}">Add Admin</a>
+                    <a class="btn btn-primary" href="{{ route('category.create') }}">Tambah Kategori</a>
                 </div>
 
             </div>

@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="mt-4">
+    <div class="mt-4 min-h-screen">
         <h2>Add Category</h2>
         <div class="row">
             <div class="col-xl">
@@ -17,16 +17,6 @@
                                 <label class="form-label" for="category_name">Category Name</label>
                                 <input type="text" class="form-control" id="category_name" name="category_name"
                                     placeholder="Enter category name" required />
-                            </div>
-
-                            <!-- Access Role -->
-                            <div class="mb-6">
-                                <label class="form-label" for="access_role">Access Role</label>
-                                <select class="form-control" id="access_role" name="access_role" required>
-                                    <option value="" disabled selected>Select access role</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="user">User</option>
-                                </select>
                             </div>
 
                             <button type="submit" class="btn btn-primary">Submit</button>

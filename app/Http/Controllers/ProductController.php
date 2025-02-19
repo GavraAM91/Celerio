@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\Product;
 use App\Models\UnitOfGoods;
+use Illuminate\Support\Str;
 use App\Models\StockProduct;
 use Illuminate\Http\Request;
 use App\Models\CategoryProduct;
@@ -132,7 +133,8 @@ class ProductController extends Controller
         //created_by
         $created_by = Auth::user()->username;
 
-        $productCode = 'PRD' . strtoupper(substr(request()->product_name, 0, 4)) . Carbon::parse(request()->expired_at)->format('YmdHi');
+        $productCode = 'PRD' . strtoupper(substr(request()->product_name, 0, 4))
+            . Str::upper(Str::random(8));
 
         //created_at
         $created_at = now();
@@ -288,7 +290,8 @@ class ProductController extends Controller
 
         // Jika stok diubah, buat entri baru
         if (isset($request['stock']) && $request['stock'] != $data_stock->stock) {
-            $new_product_code = 'PRD' . strtoupper(substr(request()->product_name, 0, 4)) . Carbon::parse(request()->expired_at)->format('YmdHi');
+            $new_product_code = 'PRD' . strtoupper(substr(request()->product_name, 0, 4))
+                . Str::upper(Str::random(8));
 
             $data_request['product_code'] = $new_product_code;
             $data_request['sold_product'] = 0;
@@ -342,10 +345,11 @@ class ProductController extends Controller
     }
 
     // View Trashed Products
+
     public function trashed()
     {
-        $trashedProducts = Product::onlyTrashed()->get();
-        return view('admin.trashed.product', compact('trashedProducts'));
+        $trashedCategories = CategoryProduct::onlyTrashed()->get();
+        return view('admin.trashed.category', compact('trashedCategories'));
     }
 
     // Restore Product
@@ -420,7 +424,8 @@ class ProductController extends Controller
 
         $data_stock = StockProduct::findORFail($data_product->product_code);
 
-        $new_product_code = 'PRD' . strtoupper(substr($data_stock->product_name, 0, 4)) . Carbon::parse(request()->expired_at)->format('YmdHi');
+        $new_product_code = 'PRD' . strtoupper(substr(request()->product_name, 0, 4))
+            . Str::upper(Str::random(8));
 
         $new_product_data = $data_stock->replicate();
         $new_product_data->product_code = $new_product_code;

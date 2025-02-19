@@ -20,7 +20,7 @@ class RoleSeeder extends Seeder
         // Role::create(['name' => 'admin']);
         // Role::create(['name' => 'casier']);
 
-        // product permission
+        // //product permission
         // Permission::create(['name' => 'read-product']);
         // Permission::create(['name' => 'create-product']);
         // Permission::create(['name' => 'edit-product']);
@@ -32,7 +32,7 @@ class RoleSeeder extends Seeder
         // Permission::create(['name' => 'edit-membership']);
         // Permission::create(['name' => 'delete-membership']);
 
-        //coupon
+        // //coupon
         // Permission::create(['name' => 'read-coupon']);
         // Permission::create(['name' => 'create-coupon']);
         // Permission::create(['name' => 'edit-coupon']);
@@ -43,19 +43,25 @@ class RoleSeeder extends Seeder
         // $casierRole = Role::firstOrCreate(['name' => 'casier']);
 
         // Assign permission ke role admin
-        // $adminRole->givePermissionTo([
-        //     'read-membership',
-        //     'create-membership',
-        //     'edit-membership',
-        //     'delete-membership',
-        // ]);
-        $CasierRole = User::find(2);
-        
-        $CasierRole->givePermissionTo([
-            'read-membership',
-            'create-membership',
-            'edit-membership',
-        ]);
+
+        $adminRoles = Role::where('name', 'admin')->get();
+        foreach ($adminRoles as $role) {
+            $role->givePermissionTo([
+                'read-membership',
+                'create-membership',
+                'edit-membership',
+                'delete-membership',
+            ]);
+        }
+
+        $casierRoles = Role::where('name', 'casier')->get();
+        foreach ($casierRoles as $role) {
+            $role->givePermissionTo([
+                'read-membership',
+                'create-membership',
+                'edit-membership',
+            ]);
+        }
         //get all permissions from table
         // $getPermissions = PermissionsModel::all()->pluck('name')->toArray();
 
