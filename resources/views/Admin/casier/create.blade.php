@@ -19,8 +19,8 @@
                                     placeholder="Enter full name" required />
                             </div>
 
+
                             <div class="row">
-                                <!-- Email -->
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="email">Email</label>
@@ -40,37 +40,34 @@
                                                 required minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
                                                 title="Minimal 8 karakter, 1 huruf besar, 1 huruf kecil, dan 1 angka"
                                                 placeholder="Enter password">
-                                            <button class="btn btn-outline-secondary toggle-password" type="button"
-                                                data-target="password">
-                                                <i class="fa fa-eye"></i>
-                                            </button>
+                                            <span
+                                                class="input-group-text cursor-pointer bg-white border-gray-300 rounded-md shadow-sm"
+                                                onclick="togglePassword()">
+                                                <i class="bx bx-hide"></i>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <script>
-                                // Toggle password visibility
-                                document.querySelectorAll('.toggle-password').forEach(button => {
-                                    button.addEventListener('click', function() {
-                                        let target = document.getElementById(this.getAttribute('data-target'));
-                                        if (target.type === "password") {
-                                            target.type = "text";
-                                            this.innerHTML = '<i class="fa fa-eye-slash"></i>';
-                                        } else {
-                                            target.type = "password";
-                                            this.innerHTML = '<i class="fa fa-eye"></i>';
-                                        }
-                                    });
-                                });
-                            </script>
+                            <!-- Daftar Ketentuan Password -->
+                            <ul id="password-requirements" class="list-unstyled">
+                                <li class="text-danger">Minimal 8 karakter</li>
+                                <li class="text-danger">Harus ada huruf besar</li>
+                                <li class="text-danger">Harus ada huruf kecil</li>
+                                <li class="text-danger">Harus ada angka</li>
+                            </ul>
 
+                            <!-- Pesan Ketidakcocokan Password -->
+                            <div id="password-match" class="d-none text-danger mb-3">
+                                Password tidak cocok!
+                            </div>
 
                             <!-- Confirm Password -->
-                            <div class="mb-6">
-                                <label class="form-label" for="password_confirmation">Confirm Password</label>
+                            <div class="form-group">
+                                <label for="password_confirmation">Konfirmasi Password</label>
                                 <input type="password" class="form-control" id="password_confirmation"
-                                    name="password_confirmation" placeholder="Confirm password" required />
+                                    name="password_confirmation" placeholder="Confirm password" required>
                             </div>
 
                             <!-- Role -->
@@ -93,4 +90,90 @@
             </div>
         </div>
     </div>
+    <!-- Script JavaScript untuk validasi -->
+    <script>
+        //buka password
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.querySelector('.input-group-text i');
+
+            // Jika tipe input adalah password, ubah ke text
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                // Ganti ikon (misalnya dari bx-hide ke bx-show)
+                toggleIcon.classList.remove('bx-hide');
+                toggleIcon.classList.add('bx-show');
+            } else {
+                // Kembalikan ke tipe password
+                passwordInput.type = "password";
+                toggleIcon.classList.remove('bx-show');
+                toggleIcon.classList.add('bx-hide');
+            }
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordField = document.getElementById('password');
+            const confirmPasswordField = document.getElementById('password_confirmation');
+            const submitButton = document.getElementById('submit-button');
+            const passwordMatchText = document.getElementById('password-match');
+            const passwordRequirements = document.querySelectorAll('#password-requirements li');
+
+
+            //function validasi password
+            function validatePassword() {
+                const password = passwordField.value;
+                let isValid = true;
+
+                const rules = [{
+                        regex: /.{8,}/,
+                        element: passwordRequirements[0]
+                    }, // Minimal 8 karakter
+                    {
+                        regex: /[A-Z]/,
+                        element: passwordRequirements[1]
+                    },
+                    {
+                        regex: /[a-z]/,
+                        element: passwordRequirements[2]
+                    }, // Huruf kecil
+                    {
+                        regex: /\d/,
+                        element: passwordRequirements[3]
+                    } // Angka
+                ];
+
+                rules.forEach(rule => {
+                    if (rule.regex.test(password)) {
+                        rule.element.classList.remove('text-danger');
+                        rule.element.classList.add('text-success');
+                    } else {
+                        rule.element.classList.remove('text-success');
+                        rule.element.classList.add('text-danger');
+                        isValid = false;
+                    }
+                });
+
+                return isValid;
+            }
+
+            function checkPasswordMatch() {
+                if (passwordField.value !== confirmPasswordField.value) {
+                    passwordMatchText.classList.remove('d-none');
+                    submitButton.disabled = true;
+                } else {
+                    passwordMatchText.classList.add('d-none');
+                    // Submit button hanya aktif jika password valid
+                    submitButton.disabled = !validatePassword();
+                }
+            }
+
+            passwordField.addEventListener('input', function() {
+                validatePassword();
+                checkPasswordMatch();
+            });
+
+            confirmPasswordField.addEventListener('input', checkPasswordMatch);
+        });
+    </script>
 </x-app-layout>

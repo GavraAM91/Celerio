@@ -140,8 +140,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
         Route::get('/', [SalesReportController::class, 'index'])->name('index');
         Route::get('show/{id?}', [SalesReportController::class, 'show'])->name('show');
         Route::get('productReport', [SalesReportController::class, 'productReport'])->name('productReport');
+        Route::get('stockReport', [SalesReportController::class, 'stockReport'])->name('stockReport');
         Route::get('exportSales', [SalesReportController::class, 'exportSales'])->name('exportSales');
         Route::get('exportProduct', [SalesReportController::class, 'exportProduct'])->name('exportProduct');
+        Route::get('exportStockProduct', [SalesReportController::class, 'exportStockProduct'])->name('exportStockProduct');
     });
 
     //category

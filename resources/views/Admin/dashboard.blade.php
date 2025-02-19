@@ -72,7 +72,9 @@
                                                     style="font-size: 40px; color: coral">inventory_2</span>
                                             </div>
                                             <p class="mb-0 ms-2 ">Total Pendapatan</p>
-                                            <h4 class="card-title mb-0">{{ $productData }}</h4>
+                                            <h4 class="card-title mb-0">Rp
+                                                {{ number_format($totalSales7Days, 0, ',', '.') }}</h4>
+
 
                                         </div>
                                     </div>
@@ -136,10 +138,10 @@
                                             <ul class="p-0 m-0">
                                                 @foreach ($expiredTodayProducts as $product)
                                                     <li class="d-flex align-items-center mb-3">
-                                                        <div class="avatar flex-shrink-0 me-3">
+                                                        {{-- <div class="avatar flex-shrink-0 me-3">
                                                             <img src="{{ asset('storage/Product/product_image/' . $product->product_image) }}"
                                                                 alt="Product" class="rounded" />
-                                                        </div>
+                                                        </div> --}}
                                                         <div
                                                             class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                                             <div class="me-2">
@@ -175,10 +177,10 @@
                                             <ul class="p-0 m-0">
                                                 @foreach ($expiredSoonProducts as $product)
                                                     <li class="d-flex align-items-center mb-3">
-                                                        <div class="avatar flex-shrink-0 me-3">
+                                                        {{-- <div class="avatar flex-shrink-0 me-3">
                                                             <img src="{{ asset('storage/Product/product_image/' . $product->product_image) }}"
                                                                 alt="Product" class="rounded" />
-                                                        </div>
+                                                        </div> --}}
                                                         <div
                                                             class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                                             <div class="me-2">
@@ -274,7 +276,7 @@
                         }
                     });
                 </script>
-                
+
                 <script>
                     $(document).ready(function() {
                         // Fungsi untuk cek stok rendah & kedaluwarsa
@@ -294,7 +296,7 @@
 
                                     // Menampilkan alert jika ada produk yang mendekati expired
                                     if (response.expiredProducts.length > 0) {
-                                        alert("⚠️ Ada produk yang mendekati atau sudah expired!");
+                                        alert(" Ada produk yang mendekati atau sudah expired!");
                                         console.log("Expired Products:", response.expiredProducts);
                                     }
                                 },
@@ -343,6 +345,8 @@
                         // Jalankan fungsi pengecekan setiap 1 menit
                         setInterval(function() {
                             checkAllProducts();
+                            // updateAllStatuses();
+
                         }, 60000);
 
                         // Jalankan fungsi update stok dan status setiap 10 menit

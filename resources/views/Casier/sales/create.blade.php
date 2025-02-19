@@ -99,13 +99,14 @@
                             </div>
 
 
-                            <button type="submit" class="btn btn-success mt-3">Simpan</button>
+                            <button type="submit" id="submitButton" class="btn btn-success mt-3"
+                                disabled>Simpan</button>
                         </form>
 
                     </div>
                 </div>
             </div>
-        </div>~~~~~~
+        </div>
     </div>
 
     @push('scripts')
@@ -200,7 +201,10 @@
                     let newRow = `
             <tr>
                 <td><input type="text" class="form-control product-code" readonly></td>
-                <td><input type="text" class="form-control product-name" placeholder="Nama Produk"></td>
+                <td>
+                <input type="text" name="product_name" class="form-control product-name" placeholder="Nama Produk" list="productOptions">
+                </td>
+                </td>
                 <td><input type="number" class="form-control stock" value="0" min="0" readonly></td>
                 <td><input type="number" class="form-control quantity" value="1" min="1"></td>
                 <td class="price">Rp 0</td>
@@ -429,7 +433,7 @@
                 // Ambil nilai input poin yang akan digunakan
                 let usePoints = parseInt($("#use-points").val()) || 0;
 
-                const POINT_THRESHOLD = 100000;
+                const POINT_THRESHOLD = 10000;
                 const DISCOUNT_PER_THRESHOLD = 8000;
                 const MAX_POINT = 200000;
 
@@ -482,24 +486,6 @@
                 return totalWithTax;
             }
 
-            // Menghitung pembayaran berdasarkan total harga setelah diskon
-            // function calculatePayment() {
-            //     // Ambil total harga setelah diskon
-            //     let finalTotalAfterDiscount = parseFloat($("#finalPrice").val().replace(/[^\d]/g, '')) || 0;
-
-            //     // Ambil jumlah uang yang diinputkan
-            //     let inputMoney = parseFloat($('#jumlahUang').val().replace(/[^\d]/g, '')) || 0;
-
-            //     // Hitung kembalian
-            //     let changeMoney = inputMoney - finalTotalAfterDiscount;
-
-            //     // Menampilkan hasil kembalian
-            //     if (changeMoney >= 0) {
-            //         $('#uangKembalian').val("Rp " + changeMoney.toLocaleString("id-ID"));
-            //     } else {
-            //         $('#uangKembalian').val("Uang tidak cukup");
-            //     }
-            // }
 
             function calculatePayment() {
                 // Fungsi untuk konversi string mata uang ke angka float
@@ -519,18 +505,19 @@
                 // Hitung kembalian
                 let changeMoney = inputMoney - finalTotalAfterDiscount;
 
-                console.log("Final Price:", finalTotalAfterDiscount);
-                console.log("Input Money:", inputMoney);
-                console.log("Change Money:", changeMoney);
-
                 // Menampilkan hasil kembalian
                 if (changeMoney >= 0) {
                     $('#uangKembalian').val("Rp " + changeMoney.toLocaleString("id-ID", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
                     }));
+                    $('#submitButton').prop('disabled', false);
+                    return true;
+
                 } else {
                     $('#uangKembalian').val("Uang tidak cukup");
+                    $('#submitButton').prop('disabled', true);
+                    return false;
                 }
             }
 

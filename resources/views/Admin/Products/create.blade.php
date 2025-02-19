@@ -42,7 +42,25 @@
                             <div class="mb-6">
                                 <label class="form-label" for="product_price">Product Price</label>
                                 <input type="text" class="form-control" id="product_price" name="product_price"
-                                    placeholder="Enter product price" required />
+                                    placeholder="Enter product price" required onchange="hitungHargaJual()">
+                            </div>
+
+                            <!-- Harga Jual Tipe 1 (10%) -->
+                            <div class="mb-6">
+                                <label class="form-label" for="tipe1">Harga Jual Tipe 1 (10%)</label>
+                                <input type="text" class="form-control" id="tipe1" name="tipe1" readonly>
+                            </div>
+
+                            <!-- Harga Jual Tipe 2 (20%) -->
+                            <div class="mb-6">
+                                <label class="form-label" for="tipe2">Harga Jual Tipe 2 (20%)</label>
+                                <input type="text" class="form-control" id="tipe2" name="tipe2" readonly>
+                            </div>
+
+                            <!-- Harga Jual Tipe 3 (30%) -->
+                            <div class="mb-6">
+                                <label class="form-label" for="tipe3">Harga Jual Tipe 3 (30%)</label>
+                                <input type="text" class="form-control" id="tipe3" name="tipe3" readonly>
                             </div>
 
                             <!-- Stock -->
@@ -107,5 +125,30 @@
     </div>
 
     </div>
+    @push('scripts')
+        <script>
+            // Fungsi untuk menghitung harga jual secara otomatis
+            document.getElementById('product_price').addEventListener('input', function() {
+                var productPrice = parseFloat(this.value);
+
+                if (!isNaN(productPrice)) {
+                    // Hitung harga jual berdasarkan persentase
+                    var hargaTipe1 = productPrice * 1.10; // markup 10%
+                    var hargaTipe2 = productPrice * 1.20; // markup 20%
+                    var hargaTipe3 = productPrice * 1.30; // markup 30%
+
+                    // Tampilkan hasil perhitungan dengan 2 desimal
+                    document.getElementById('tipe1').value = hargaTipe1.toFixed(2);
+                    document.getElementById('tipe2').value = hargaTipe2.toFixed(2);
+                    document.getElementById('tipe3').value = hargaTipe3.toFixed(2);
+                } else {
+                    // Bersihkan field jika nilai tidak valid
+                    document.getElementById('tipe1').value = '';
+                    document.getElementById('tipe2').value = '';
+                    document.getElementById('tipe3').value = '';
+                }
+            });
+        </script>
+    @endpush
     <!-- / Content -->
 </x-app-layout>

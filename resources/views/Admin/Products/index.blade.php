@@ -115,6 +115,9 @@
                             <th>Product Code</th>
                             <th>Product</th>
                             <th>Price</th>
+                            <th>Harga Jual 1</th>
+                            <th>Harga Jual 2</th>
+                            <th>Harga Jual 3</th>
                             <th>Stock</th>
                             <th>Expired Date</th>
                             <th>Sold Product</th>
@@ -134,6 +137,9 @@
                                 <td>{{ $product->product_code }}</td>
                                 <td>{{ $product->product_name }}</td>
                                 <td>Rp {{ number_format($product->product_price, 0, ',', '.') }}</td>
+                                <td>Rp {{ number_format($product->product_price * 1.1, 0, ',', '.') }}</td>
+                                <td>Rp {{ number_format($product->product_price * 1.2, 0, ',', '.') }}</td>
+                                <td>Rp {{ number_format($product->product_price * 1.3, 0, ',', '.') }}</td>
                                 @foreach ($product->stockProducts as $stock)
                                     <td>
                                         {{ $stock->stock }}
@@ -149,15 +155,18 @@
                                 <td>{{ optional($product->categoryProduct)->category_name ?? 'kategori tidak tersedia' }}
                                 </td>
                                 <td>
-                                    <span
-                                        class="badge 
-                        @if ($product->product_status == 'active') bg-label-success 
-                        @elseif ($product->product_status == 'out of stock') bg-label-danger 
-                        @elseif ($product->product_status == 'expired') bg-label-warning 
-                        @elseif ($product->product_status == 'deleted') bg-label-primary
-                        @else bg-label-secondary @endif">
-                                        {{ ucfirst($product->product_status) }}
-                                    </span>
+                                    @foreach ($product->stockProducts as $stockProduct)
+                                        <span
+                                            class="badge 
+                                        @if ($stockProduct->status == 'active') bg-label-success 
+                                    @elseif ($stockProduct->status == 'out of stock') bg-label-warning 
+                                        @elseif ($stockProduct->status == 'Expired') bg-label-danger 
+                                        @elseif ($stockProduct->status == 'deleted') bg-label-primary
+                                        @else bg-label-secondary @endif">
+                                            {{ ucfirst($stockProduct->status) }}
+                                        </span>
+                                    @endforeach
+
                                 </td>
                                 <td>
                                     <div class="dropdown">
@@ -169,10 +178,6 @@
                                             <a class="dropdown-item"
                                                 href="{{ route('product.edit', $product->product_code) }}">
                                                 <i class="bx bx-edit-alt me-1"></i> Edit
-                                            </a>
-                                            <a class="dropdown-item"
-                                                href="{{ route('product.addStockView', $product->product_code) }}">
-                                                <i class="bx bx-edit-alt me-1"></i> Add Stock
                                             </a>
                                             <form action="{{ route('product.destroy', $product->id) }}"
                                                 class="d-inline">

@@ -65,7 +65,7 @@
 
                 <div class="d-flex gap-3 mx-4">
                     <a class="btn btn-danger" href="{{ route('user.trashed') }}">Data Terhapus</a>
-                    <a class="btn btn-primary" href="{{ route('user.createAdmin') }}">Add Admin</a>
+                    <a class="btn btn-primary" href="{{ route('user.createCasier') }}">Add Admin</a>
                 </div>
 
             </div>

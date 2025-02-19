@@ -65,7 +65,10 @@ class DashboardController extends Controller
             $salesByDay[$data->date] = $data->total_sales;
         }
 
-        return view('admin.dashboard', compact('productData', 'membershipData', 'categoryData', 'lowStockProducts', 'expiredTodayProducts', 'expiredSoonProducts', 'salesByDay'));
+        $totalSales7Days = ReportSales::whereBetween('created_at', [Carbon::now()->subDays(6), Carbon::now()])
+            ->sum('final_price');
+
+        return view('admin.dashboard', compact('productData', 'membershipData', 'categoryData', 'lowStockProducts', 'expiredTodayProducts', 'expiredSoonProducts', 'salesByDay', 'totalSales7Days'));
     }
 
 

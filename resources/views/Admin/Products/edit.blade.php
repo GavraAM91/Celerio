@@ -73,9 +73,10 @@
 
                             <!-- Stock -->
                             <div class="mb-6">
-                                <label class="form-label" for="minimum_stock">Stock</label>
-                                <input type="number" class="form-control" id="minimum_stock" name="minimum_stock"
-                                    placeholder="Enter minimum stock " required />
+                                <label class="form-label" for="minimum_stock">Minimum stock</label>
+                                <input type="text" class="form-control" id="minimum_stock" name="minimum_stock"
+                                    value="{{ old('minimum_stock', $data['data_product']->minimum_stock ?? '') }}"
+                                    placeholder="Enter minimum stock " />
                             </div>
 
                             <!-- Product Status -->

@@ -31,7 +31,7 @@
 
 
     <div class="mt-4">
-        <h2>Laporan Transaksi</h2>
+        <h2>Laporan Produk</h2>
     </div>
     <div class="mt-4 min-h-screen">
         <div class="card">
@@ -107,8 +107,6 @@
                         </ul>
                     </div>
                 </div>
-
-
             </div>
             <div class="table-responsive text-nowrap">
                 <table class="table table-hover">
@@ -117,13 +115,13 @@
                             <th>Invoice Sales</th>
                             <th>Nama Barang</th>
                             <th>Jumlah Barang Terjual</th>
-                            <th>Total Harga </th>
+                            <th>Harga barang Terjual</th>
                             <th>Dibuat</th>
                         </tr>
                     </thead>
                     <tbody class="table-border-bottom-0">
                         @foreach ($data_product as $transaction_product)
-                            <tr>
+                            <tr>\
                                 <td>{{ $transaction_product->invoice_sales }}</td>
                                 <td>{{ $transaction_product->product->product_name }}</td>
                                 <td>{{ $transaction_product->quantity }}</td>

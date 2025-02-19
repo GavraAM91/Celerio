@@ -150,6 +150,13 @@
                             <div class="text-truncate" data-i18n="category">Laporan Barang</div>
                         </a>
                     </li>
+
+                    <li class="menu-item {{ request()->is('sales_report.stockReport') ? 'active open' : '' }}">
+                        <a href="{{ route('sales_report.stockReport') }}" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                            <div class="text-truncate" data-i18n="category">Laporan Stok</div>
+                        </a>
+                    </li>
                 </ul>
             </li>
 
@@ -210,9 +217,9 @@
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">Data Master</span>
             </li>
-            <li class="menu-item {{ request()->is('product.index') ? 'active open' : '' }}">
+            <li class="menu-item {{ request()->is('membership.create') ? 'active open' : '' }}">
                 <a href="{{ route('membership.create') }}" class="menu-link">
-                    <span class="material-icons " style="">card_membership</span>
+                    <span class="material-icons" style="">card_membership</span>
                     <div class="text-truncate" data-i18n="Email">Membership</div>
                 </a>
             </li>
@@ -222,6 +229,12 @@
                     <div class="text-truncate" data-i18n="Email">Transaksi</div>
                 </a>
             </li>
+            {{-- <li class="menu-item {{ request()->is('sales.create') ? 'active open' : '' }}">
+                <a href="{{ route('sales.create') }}" class="menu-link">
+                    <span class="material-icons" style="">point_of_sales</span>
+                    <div class="text-truncate" data-i18n="Email">Laporan Kasir</div>
+                </a>
+            </li> --}}
         @endif
     </ul>
 

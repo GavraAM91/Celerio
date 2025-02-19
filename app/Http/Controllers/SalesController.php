@@ -34,7 +34,8 @@ class SalesController extends Controller
      */
     public function create(Request $request)
     {
-        return view('casier.sales.create', ['title => Create']);
+        $products = Product::all();
+        return view('casier.sales.create', compact('products'), ['title => Create']);
     }
 
     /**
@@ -122,7 +123,6 @@ class SalesController extends Controller
 
         // Cari produk berdasarkan nama dan status aktif
         $product = Product::where('product_name', 'LIKE', "%$product_name%")
-            ->where('product_status', 'active')
             ->first();
 
         // dd($product);
@@ -136,6 +136,7 @@ class SalesController extends Controller
 
         // Ambil data stok produk berdasarkan product_code yang memiliki expired_time paling dekat
         $stockProduct = StockProduct::where('product_code', $product->product_code)
+            ->where('status', 'active')
             ->whereDate('expired_at', '>=', now())
             ->orderBy('expired_at', 'asc')
             ->first();

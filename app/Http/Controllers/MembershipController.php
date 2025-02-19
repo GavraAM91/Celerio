@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Membership;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator as FacadesValidator;
-use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Support\Facades\Validator as FacadesValidator;
 
 class MembershipController extends Controller implements HasMiddleware
 {
@@ -101,7 +102,7 @@ class MembershipController extends Controller implements HasMiddleware
         } else {
             $point = 100;
         }
-        
+
         $membership_code = 'kosong';
 
         // Tambahkan data member baru
@@ -117,12 +118,9 @@ class MembershipController extends Controller implements HasMiddleware
         ];
 
         $membership_data = Membership::create($data_request);
-
-        // Generate dan update kode membership
-        $membership_code = 'MBR' . strtoupper(substr($request->name, 0, 4)) . now()->format('Ymd');
+        $membership_code = 'MBR' . strtoupper(substr($request->name, 0, 4)) . strtoupper(Str::random(6));
         $membership_data->update(['membership_code' => $membership_code]);
 
-        // Pengecekan duplikasi setelah update kode membership
         // Cari berdasarkan email, username, atau membership_code
         $duplicateCount = Membership::where('email', $request->email)
             ->orWhere('username', $request->username)

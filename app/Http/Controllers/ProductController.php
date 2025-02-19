@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\Product;
 use App\Models\UnitOfGoods;
+use App\Models\StockProduct;
 use Illuminate\Http\Request;
 use App\Models\CategoryProduct;
-use App\Models\StockProduct;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
@@ -18,31 +19,42 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
+
     public function index(Request $request)
     {
         $query = Product::query();
 
-        // Eager Load Relasi stockproduct dan unitofgoods   
+        // Eager load relasi stockProducts, unitOfGoods, dan categoryProduct
         $query->with(['stockProducts', 'unitOfGoods', 'categoryProduct']);
 
         // Filter jika ada
         if ($request->has('filter')) {
-            if ($request->filter === 'sold') {
-                $query->where('sold_product', '>', 0);
-            } else if ($request->filter === 'stock') {
-                $query->where('stock', '>', 0);
-            } else if ($request->filter === 'expired') {
-                $query->where('expired_at', '<', now());
+            switch ($request->filter) {
+                case 'sold':
+                    // Filter produk yang memiliki sold_product > 0 pada relasi stockProducts
+                    $query->whereHas('stockProducts', function ($q) {
+                        $q->where('sold_product', '>', 0);
+                    });
+                    break;
+                case 'stock':
+                    // Filter produk yang memiliki stock > 0 pada relasi stockProducts
+                    $query->whereHas('stockProducts', function ($q) {
+                        $q->where('stock', '>', 0);
+                    });
+                    break;
+                case 'expired':
+                    // Filter produk yang memiliki expired_at kurang dari waktu sekarang pada relasi stockProducts
+                    $query->whereHas('stockProducts', function ($q) {
+                        $q->where('expired_at', '<', now());
+                    });
+                    break;
             }
         }
 
-        // Sorting
+        // Sorting berdasarkan nama produk
         if ($request->has('sort')) {
-            if ($request->sort === 'asc') {
-                $query->orderBy('product_name', 'asc');
-            } else if ($request->sort === 'desc') {
-                $query->orderBy('product_name', 'desc');
-            }
+            $order = $request->sort === 'asc' ? 'asc' : 'desc';
+            $query->orderBy('product_name', $order);
         }
 
         // Search by Product Name
@@ -50,20 +62,12 @@ class ProductController extends Controller
             $query->where('product_name', 'like', '%' . $request->search . '%');
         }
 
-        // Ambil data produk dengan relasi
+        // Ambil data produk beserta relasinya
         $data_product = $query->get();
-
-        // dd($data_product);
 
         return view('admin.Products.index', compact('data_product'), ['title' => 'Product']);
     }
-    /**
-     * Display a listing of the resource.
-     */
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         // Ambil hanya kolom yang diperlukan (optimasi query)
@@ -78,9 +82,7 @@ class ProductController extends Controller
             'title' => 'Product'
         ]);
     }
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
     {
         $request = request()->all();
@@ -160,9 +162,6 @@ class ProductController extends Controller
             'expired_at' => Carbon::parse($request['expired_at'])->format('Y-m-d'),
             'stock' => $request['stock'],
         ];
-
-        // var_dump($data_stock);
-
         // Menambahkan stok ke StockProduct
         $data_stock = StockProduct::create($data_stock);
 
@@ -233,8 +232,8 @@ class ProductController extends Controller
             'product_image' => 'nullable|mimes:png,jpg,jpeg|max:10240',
             'product_price' => 'sometimes',
             'stock' => 'sometimes|integer|min:0',
-            'expired_at' => 'required|date_format:Y-m-d\TH:i',
-            'minimum_stock' => 'required',
+            'expired_at' => 'sometimes|date_format:Y-m-d\TH:i',
+            'minimum_stock' => 'sometimes',
             'access_role' => 'sometimes',
             'product_status' => 'nullable',
             'unit_id' => 'required|exists:unit_of_goods,id',
@@ -479,12 +478,30 @@ class ProductController extends Controller
         ]);
     }
 
-
     public function updateAllStatuses()
     {
-        $updatedCount = StockProduct::whereDate('expired_at', '<', now())
-            ->update(['status' => 'Expired']);
+        // Ambil produk yang sudah expired
+        $expiredProducts = StockProduct::where('expired_at', '<', now())->get();
+        // Variabel status baru
+        $newStatus = 'Expired';
 
-        return response()->json(['success' => true, 'message' => "$updatedCount produk diubah menjadi Expired!"]);
+        // Inisialisasi counter untuk jumlah produk yang berhasil diupdate
+        $updatedCount = 0;
+
+        // Update setiap produk satu per satu
+        foreach ($expiredProducts as $product) {
+            // Hanya update jika status belum sesuai
+            if ($product->status !== $newStatus) {
+                $product->status = $newStatus;
+                if ($product->save()) {
+                    $updatedCount++;
+                }
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "$updatedCount produk diubah menjadi $newStatus!"
+        ]);
     }
 }
