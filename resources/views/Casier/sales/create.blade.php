@@ -389,21 +389,6 @@
                 });
             });
 
-            //final price function
-            // function updateFinalPrice() {
-            //     let totalDiscount = $("#totalDiscount").val();
-            //     let pointDiscount = $("#discountByPoint").val();
-            //     let finalPrice;
-
-            //     if (totalDiscount === "TIDAK ADA KUPON") {
-            //         finalPrice = $("#taxTotal").val(); // Gunakan harga setelah pajak jika tidak ada kupon
-            //     } else {
-            //         finalPrice = totalDiscount; // Gunakan harga setelah diskon jika ada kupon
-            //     }
-
-            //     $("#finalPrice").val(finalPrice);
-            // }
-
             function updateFinalPrice() {
                 // Fungsi untuk konversi string mata uang ke angka float
                 function parseCurrency(input) {

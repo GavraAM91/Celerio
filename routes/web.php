@@ -32,6 +32,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::prefix('membership')->name('membership.')->group(function () {
+    Route::get('create', [MembershipController::class, 'create'])->name('create')->middleware('permission:create-membership');
+    Route::post('store', [MembershipController::class, 'store'])->name('store')->middleware('permission:create-membership');
+    Route::get('edit/{id}', [MembershipController::class, 'edit'])->name('edit')->middleware('permission:edit-membership');
+    Route::get('destroy/{id?}', [MembershipController::class, 'destroy'])->name('destroy')->middleware('permission:delete-membership');
+});
+
 Route::prefix('dashboard')->name('dashboard.')->group(function () {
     Route::get('admin', [DashboardController::class, 'dashboardAdmin'])
         ->name('admin')
@@ -89,12 +96,12 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     //membership
     Route::prefix('membership')->name('membership.')->group(function () {
         Route::get('/', [MembershipController::class, 'index'])->name('index');
-        Route::get('create', [MembershipController::class, 'create'])->name('create');
-        Route::post('store', [MembershipController::class, 'store'])->name('store');
-        Route::get('edit/{id}', [MembershipController::class, 'edit'])->name('edit');
+        // Route::get('create', [MembershipController::class, 'create'])->name('create')->middleware('permission:create-membership');
+        // Route::post('store', [MembershipController::class, 'store'])->name('store')->middleware('permission:create-membership');
+        // Route::get('edit/{id}', [MembershipController::class, 'edit'])->name('edit')->middleware('permission:edit-membership');
         Route::get('show/{id?}', [MembershipController::class, 'view'])->name('show');
         Route::post('update/{id}', [MembershipController::class, 'update'])->name('update');
-        Route::get('destroy/{id?}', [MembershipController::class, 'destroy'])->name('destroy');
+        // Route::get('destroy/{id?}', [MembershipController::class, 'destroy'])->name('destroy')->middleware('permission:delete-membership');
         Route::get('trashed', [MembershipController::class, 'trashed'])->name('trashed');
         Route::post('restore/{id}', [MembershipController::class, 'restore'])->name('restore');
         Route::delete('forceDelete/{id}', [MembershipController::class, 'forceDelete'])->name('forceDelete');
@@ -187,11 +194,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified', 'role:casier'])->group(function () {
-    //dashboard
-    // Route::prefix('dashboard')->name('dashboard.')->group(function () {
-    //     Route::get('dashboardCasier', [DashboardController::class, 'dashboardCasier'])->name('casier');
-    // });
-
     //sales 
     Route::prefix('sales')->name('sales.')->group(function () {
         Route::get('/', [SalesController::class, 'index'])->name('index');

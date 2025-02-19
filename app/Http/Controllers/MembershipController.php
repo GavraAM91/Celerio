@@ -7,9 +7,20 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class MembershipController extends Controller
+class MembershipController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:read-membership', only: ['index']),
+            new Middleware('permission:create-membership', only: ['create']),
+            new Middleware('permission:edit-membership', only: ['edit']),
+            new Middleware('permission:delete-membership', only: ['destroy']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */
@@ -45,6 +56,12 @@ class MembershipController extends Controller
         return view('admin.membership.create', ['title => create membership']);
     }
 
+    public function CasierCreateMembership()
+    {
+        return view('casier.membership.create', ['title' => 'create membership']);
+    }
+
+
     // generate code for member
     public function codeGenerator($id, $username)
     {
@@ -62,44 +79,63 @@ class MembershipController extends Controller
     public function store(Request $request)
     {
         $validator = FacadesValidator::make($request->all(), [
-            'name' => 'required|string',
-            'username' => 'required|string',
-            'email' => 'required|string',
-            'type' => 'required|string',
+            'name'         => 'required|string',
+            'username'     => 'required|string',
+            'email'        => 'required|string',
+            'type'         => 'required|string',
             'phone_number' => 'required',
-            'address' => 'required|string',
-            'status' => 'required',
+            'address'      => 'required|string',
+            'status'       => 'required',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Error in input',
-                'errors' => $validator->errors()
+                'errors'  => $validator->errors()
             ], 400);
         }
 
-
         $point = 100;
+        if ($request->type == 'type1') {
+            $point = 1000;
+        } else {
+            $point = 100;
+        }
+        
         $membership_code = 'kosong';
 
         // Tambahkan data member baru
         $data_request = [
-            'name' => $request->name,
-            'username' => $request->username,
-            'email' => $request->email,
-            'type' => $request->type,
-            'point' => $point,
-            'membership_code' => $membership_code,
-            'phone_numbber' => $request->phone_number,
-            'address' => $request->address,
-            'status' => $request->status
+            'name'          => $request->name,
+            'username'      => $request->username,
+            'email'         => $request->email,
+            'type'          => $request->type,
+            'point'         => $point,
+            'phone_numbber' => $request->phone_number, // pastikan nama kolom sesuai dengan database
+            'address'       => $request->address,
+            'status'        => $request->status
         ];
 
         $membership_data = Membership::create($data_request);
 
-        // Generate kode membership
+        // Generate dan update kode membership
         $membership_code = 'MBR' . strtoupper(substr($request->name, 0, 4)) . now()->format('Ymd');
         $membership_data->update(['membership_code' => $membership_code]);
+
+        // Pengecekan duplikasi setelah update kode membership
+        // Cari berdasarkan email, username, atau membership_code
+        $duplicateCount = Membership::where('email', $request->email)
+            ->orWhere('username', $request->username)
+            ->orWhere('membership_code', $membership_code)
+            ->count();
+
+        if ($duplicateCount > 1) {
+            // Hapus data yang baru saja dibuat untuk mencegah duplikasi
+            $membership_data->delete();
+
+            // Redirect kembali ke halaman create dengan pesan error dan membawa input sebelumnya
+            return redirect()->back()->with('error', 'Data sudah ada di database')->withInput();
+        }
 
         if ($membership_data) {
             // Catat aktivitas pembuatan member baru
@@ -109,16 +145,28 @@ class MembershipController extends Controller
                 ->event('created')
                 ->withProperties([
                     'email' => $membership_data->email,
-                    'name' => $membership_data->name
+                    'name'  => $membership_data->name
                 ])
                 ->log(Auth::user()->name . " menambahkan member baru: {$membership_data->name} ({$membership_data->email}).");
-            return redirect()->route('membership.index')
-                ->with('success', 'Tambah Membership Berhasil!');
+
+            if (Auth::user()->role === 'admin') {
+                return redirect()->route('membership.index')
+                    ->with('success', 'Tambah Membership Berhasil!');
+            } else {
+                return redirect()->route('dashboard.casier')
+                    ->with('success', 'Tambah membership berhasil');
+            }
         } else {
-            return redirect()->route('membership.index')
-                ->with('error', 'Gagal Tambah Membership!');
+            if (Auth::user()->role === 'admin') {
+                return redirect()->route('membership.index')
+                    ->with('error', 'Gagal Tambah Membership!');
+            } else {
+                return redirect()->route('dashboard.casier')
+                    ->with('error', 'Gagal Tambah Membership!');
+            }
         }
     }
+
 
     /**
      * Display the specified resource.
