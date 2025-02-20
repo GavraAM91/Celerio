@@ -99,10 +99,6 @@
                                                 href="{{ route('user.editCasier', $casier->id) }}">
                                                 <i class="bx bx-edit-alt me-1"></i> Edit
                                             </a>
-                                            <a class="dropdown-item"
-                                                href="{{ route('user.showCasier', $casier->id) }}">
-                                                <i class="bx bx-edit-alt me-1"></i> Detail
-                                            </a>
                                             <form action="{{ route('user.destroy', $casier->id) }}" method="POST"
                                                 class="d-inline">
                                                 @csrf

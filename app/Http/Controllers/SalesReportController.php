@@ -188,21 +188,27 @@ class SalesReportController extends Controller
                 ],
             ],
         ];
+        // Terapkan border untuk header (kolom A sampai O)
+        $activeWorksheet->getStyle('A6:O6')->applyFromArray($styleArray);
 
-        $activeWorksheet->getStyle('A6:L6')->applyFromArray($styleArray);
+        // Header Baris 6
         $activeWorksheet->setCellValue('A6', 'INVOICE SALES');
         $activeWorksheet->setCellValue('B6', 'MEMBERSHIP NAME');
-        $activeWorksheet->setCellValue('C6', 'TOTAL HARGA PRODUK');
-        $activeWorksheet->setCellValue('D6', 'TOTAL DENGAN DISKON');
-        $activeWorksheet->setCellValue('E6', 'PAJAK');
-        $activeWorksheet->setCellValue('F6', 'TOTAL HARGA AKHIR');
-        $activeWorksheet->setCellValue('G6', 'PEMBAYARAN');
-        $activeWorksheet->setCellValue('H6', 'KEMBALIAN');
-        $activeWorksheet->setCellValue('I6', 'TANGGAL DIBUAT');
-        $activeWorksheet->setCellValue('J6', 'PRODUCT NAME');
-        $activeWorksheet->setCellValue('K6', 'QUANTITY');
-        $activeWorksheet->setCellValue('L6', 'SELLING PRICE');
+        $activeWorksheet->setCellValue('C6', 'MEMBERSHIP TYPE');
+        $activeWorksheet->setCellValue('D6', 'TOTAL POIN YANG DIGUNAKAN');
+        $activeWorksheet->setCellValue('E6', 'TOTAL HARGA PRODUK');
+        $activeWorksheet->setCellValue('F6', 'TOTAL DENGAN DISKON');
+        $activeWorksheet->setCellValue('G6', 'PAJAK');
+        $activeWorksheet->setCellValue('H6', 'TOTAL HARGA AKHIR');
+        $activeWorksheet->setCellValue('I6', 'PEMBAYARAN');
+        $activeWorksheet->setCellValue('J6', 'KEMBALIAN');
+        $activeWorksheet->setCellValue('K6', 'TANGGAL DIBUAT');
+        $activeWorksheet->setCellValue('L6', 'PRODUCT NAME');
+        $activeWorksheet->setCellValue('M6', 'QUANTITY');
+        $activeWorksheet->setCellValue('N6', 'SELLING PRICE');
+        $activeWorksheet->setCellValue('O6', 'CASIER NAME');
 
+        // Style untuk border (misalnya BORDER_HAIR)
         $styleArray = [
             'borders' => [
                 'allBorders' => [
@@ -211,44 +217,38 @@ class SalesReportController extends Controller
             ],
         ];
 
-        // $column = 7;
-        // $no = 1;
-        // foreach ($warehouse as $key => $value) {
-        //     $activeWorksheet->setCellValue('A' . $column, $no);
-        //     $activeWorksheet->setCellValue('B' . $column, $value->warehouse_name);
-        //     $activeWorksheet->setCellValue('C' . $column, $value->warehouse_owner);
-        //     $activeWorksheet->setCellValue('D' . $column, $value->warehouse_address);
-        //     $activeWorksheet->setCellValue('E' . $column, $value->warehouse_description);
-
-        //     $column++;
-        //     $no++;
-        // }
         // Initialize counter untuk nomor urut
         $counter = 1;
-        $column = 7;
+        $column = 7; // Baris mulai pengisian data
         $startRow = $column;
+
+        // Looping untuk mengisi data
         foreach ($data_sales as $sale) {
             foreach ($sale->salesDetails as $detail) {
-                // Set nomor urut di kolom A
-                $activeWorksheet->setCellValue('A' . $column, $counter);
+                $activeWorksheet->setCellValue('A' . $column, $sale->invoice_sales ?? '');
                 $activeWorksheet->setCellValue('B' . $column, $sale->membership->name ?? 'Non Member');
-                $activeWorksheet->setCellValue('C' . $column, $sale->total_product_price);
-                $activeWorksheet->setCellValue('D' . $column, $sale->total_price_discount ?? 'kosong');
-                $activeWorksheet->setCellValue('E' . $column, $sale->tax);
-                $activeWorksheet->setCellValue('F' . $column, $sale->final_price);
-                $activeWorksheet->setCellValue('G' . $column, $sale->cash_received);
-                $activeWorksheet->setCellValue('H' . $column, $sale->change);
-                $activeWorksheet->setCellValue('I' . $column, $sale->created_at->format('d-m-Y H:i'));
-                $activeWorksheet->setCellValue('J' . $column, $detail->product->product_name ?? 'kosong');
-                $activeWorksheet->setCellValue('K' . $column, $detail->quantity);
-                $activeWorksheet->setCellValue('L' . $column, $detail->selling_price);
+                $activeWorksheet->setCellValue('C' . $column, $sale->membership->type ?? 'Non Member');
+                // Asumsi total poin yang digunakan disimpan pada property "total_points_used"
+                $activeWorksheet->setCellValue('D' . $column, $sale->total_points_used ?? '0');
+                $activeWorksheet->setCellValue('E' . $column, $sale->total_product_price);
+                $activeWorksheet->setCellValue('F' . $column, $sale->total_price_discount ?? 'kosong');
+                $activeWorksheet->setCellValue('G' . $column, $sale->tax);
+                $activeWorksheet->setCellValue('H' . $column, $sale->final_price);
+                $activeWorksheet->setCellValue('I' . $column, $sale->cash_received);
+                $activeWorksheet->setCellValue('J' . $column, $sale->change);
+                $activeWorksheet->setCellValue('K' . $column, $sale->created_at->format('d-m-Y H:i'));
+                $activeWorksheet->setCellValue('L' . $column, $detail->product->product_name ?? 'kosong');
+                $activeWorksheet->setCellValue('M' . $column, $detail->quantity);
+                $activeWorksheet->setCellValue('N' . $column, $detail->selling_price);
+                $activeWorksheet->setCellValue('O' . $column, $sale->user->name ?? '');
 
                 $column++; // Pindah ke baris berikutnya
-                $counter++; // Increment nomor urut
+                $counter++; // Increment nomor urut (jika diperlukan)
             }
         }
 
-        $activeWorksheet->getStyle("A{$startRow}:L" . ($column - 1))->applyFromArray($styleArray);
+        // Terapkan style border untuk seluruh data dari header sampai baris terakhir
+        $activeWorksheet->getStyle("A{$startRow}:O" . ($column - 1))->applyFromArray($styleArray);
 
         $dirPath = 'report/export/';
         if (!is_dir($dirPath)) {

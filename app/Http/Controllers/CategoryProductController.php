@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\CategoryProduct;
 use App\Http\Controllers\Controller;
@@ -75,27 +76,14 @@ class CategoryProductController extends Controller
             ], 400);
         }
 
-        // Ambil kategori terakhir berdasarkan kode
-        $lastCategory = CategoryProduct::latest('category_code')->first();
-
-        if ($lastCategory) {
-            // Ambil angka terakhir dari kode kategori (misal CTG-001 → ambil 1)
-            $lastNumber = (int) substr($lastCategory->category_code, 4);
-
-            // Tingkatkan angka dan format menjadi 3 digit (misal 2 → 002)
-            $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-        } else {
-            // Jika tidak ada data, mulai dari 001
-            $newNumber = '001';
-        }
-
-        // Gabungkan dengan format kode kategori
-        $category_code = 'CTG-' . $newNumber;
+        $category_code = 'CTG' . strtoupper(substr(request()->category_name, 0, 3))
+            . Str::upper(Str::random(8));
 
         $data_category = CategoryProduct::create([
             'category_name' => $request->category_name,
-            'category_product' => $category_code,
+            'category_code' => $category_code,
         ]);
+
 
         if ($data_category) {
             // Logging activity using Spatie
@@ -151,7 +139,7 @@ class CategoryProductController extends Controller
 
         $category = CategoryProduct::findOrFail($id);
 
-        $oldData = $category->getOriginal(); // Data sebelum diubah
+        $oldData = $category->getOriginal();
 
         $category->update([
             'category_name' => $request->category_name,

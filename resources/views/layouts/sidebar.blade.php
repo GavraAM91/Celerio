@@ -60,7 +60,7 @@
             <!-- Dashboards -->
             <li class="menu-item {{ request()->is('dashboard.admin') ? 'active-open' : '' }}">
                 <a href="{{ route('dashboard.admin') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                    <span class="material-icons" style="font-size: 25px;">group</span>
                     <div class="text-truncate" data-i18n="Dashboards">Dashboards</div>
                 </a>
             </li>
@@ -71,31 +71,31 @@
             </li>
             <li class="menu-item {{ request()->is('dashboard.activitylog') ? 'active open' : '' }}">
                 <a href="{{ route('dashboard.activitylog') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-envelope"></i>
+                    <span class="material-icons" style="font-size: 25px;">history</span>
                     <div class="text-truncate" data-i18n="Email">Activity Log</div>
                 </a>
             </li>
             <li class="menu-item">
                 <a href="javascript:void(0)" class="menu-link menu-toggle">
-                    <i class="menu-icon tf-icons bx bx-box"></i>
+                    <span class="material-icons" style="font-size: 25px;">group</span>
                     <div class="text-truncate" data-i18n="Main Menu">Data Pengguna</div>
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->is('user.indexAdmin') ? 'active open' : '' }}">
                         <a href="{{ route('user.indexAdmin') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <span class="material-icons" style="font-size: 25px;">admin_panel_settings</span>
                             <div class="text-truncate">Data Admin</div>
                         </a>
                     </li>
                     <li class="menu-item {{ request()->is('user.indexCasier') ? 'active open' : '' }}">
                         <a href="{{ route('user.indexCasier') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                            <span class="material-icons" style="font-size: 25px;">group</span>
                             <div class="text-truncate">Data Kasir</div>
                         </a>
                     </li>
                     <li class="menu-item {{ request()->is('membership.index') ? 'active open' : '' }}">
                         <a href="{{ route('membership.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                            <span class="material-icons" style="font-size: 25px;">card_membership</span>
                             <div class="text-truncate">Membership Data</div>
                         </a>
                     </li>
@@ -110,21 +110,21 @@
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->is('product.index') ? 'active open' : '' }}">
                         <a href="{{ route('product.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <i class="menu-icon tf-icons bx bx-box"></i>
                             <div class="text-truncate" data-i18n="Email">Data Barang</div>
                         </a>
                     </li>
 
                     <li class="menu-item {{ request()->is('category.index') ? 'active open' : '' }}">
                         <a href="{{ route('category.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                            <span class="material-icons" style="font-size: 25px;">category</span>
                             <div class="text-truncate" data-i18n="category">Data Kategori</div>
                         </a>
                     </li>
 
                     <li class="menu-item {{ request()->is('coupon.index') ? 'active open' : '' }}">
                         <a href="{{ route('coupon.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <span class="material-icons" style="font-size: 25px;">sell</span>
                             <div class="text-truncate" data-i18n="Email">Data Kupon</div>
                         </a>
                     </li>
@@ -139,21 +139,21 @@
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->is('sales_report.index') ? 'active open' : '' }}">
                         <a href="{{ route('sales_report.index') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <span class="material-icons" style="font-size: 25px;">receipt_long</span>
                             <div class="text-truncate" data-i18n="Email">Laporan Transaksi</div>
                         </a>
                     </li>
 
                     <li class="menu-item {{ request()->is('sales_report.productReport') ? 'active open' : '' }}">
                         <a href="{{ route('sales_report.productReport') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                            <i class="menu-icon tf-icons bx bx-box"></i>
                             <div class="text-truncate" data-i18n="category">Laporan Barang</div>
                         </a>
                     </li>
 
                     <li class="menu-item {{ request()->is('sales_report.stockReport') ? 'active open' : '' }}">
                         <a href="{{ route('sales_report.stockReport') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                            <span class="material-icons" style="font-size: 25px;">receipt_long</span>
                             <div class="text-truncate" data-i18n="category">Laporan Stok</div>
                         </a>
                     </li>
@@ -162,41 +162,41 @@
 
             <li class="menu-item">
                 <a href="javascript:void(0)" class="menu-link menu-toggle">
-                    <i class="menu-icon tf-icons bx bx-box"></i>
+                    <span class="material-icons" style="font-size: 25px;">archive</span>
                     <div class="text-truncate" data-i18n="Main Menu">Arsip</div>
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->is('user.trashed') ? 'active open' : '' }}">
                         <a href="{{ route('user.trashed') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <span class="material-icons" style="font-size: 25px;">folder_delete</span>
                             <div class="text-truncate" data-i18n="Email">Arsip User</div>
                         </a>
                     </li>
 
                     <li class="menu-item {{ request()->is('membership.trashed') ? 'active open' : '' }}">
                         <a href="{{ route('membership.trashed') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <span class="material-icons" style="font-size: 25px;">folder_delete</span>
                             <div class="text-truncate" data-i18n="Email">Arsip Member</div>
                         </a>
                     </li>
 
                     <li class="menu-item {{ request()->is('product.trashed') ? 'active open' : '' }}">
                         <a href="{{ route('product.trashed') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <span class="material-icons" style="font-size: 25px;">folder_delete</span>
                             <div class="text-truncate" data-i18n="Email">Arsip Produk</div>
                         </a>
                     </li>
 
                     <li class="menu-item {{ request()->is('coupon.trashed') ? 'active open' : '' }}">
                         <a href="{{ route('coupon.trashed') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <span class="material-icons" style="font-size: 25px;">folder_delete</span>
                             <div class="text-truncate" data-i18n="Email">Arsip Kupon</div>
                         </a>
                     </li>
 
                     <li class="menu-item {{ request()->is('coupon.trashed') ? 'active open' : '' }}">
                         <a href="{{ route('coupon.trashed') }}" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-envelope"></i>
+                            <span class="material-icons" style="font-size: 25px;">folder_delete</span>
                             <div class="text-truncate" data-i18n="Email">Arsip Kategori</div>
                         </a>
                     </li>
@@ -208,7 +208,7 @@
             <!-- Dashboards -->
             <li class="menu-item {{ request()->is('dashboard.casier') ? 'active open' : '' }}">
                 <a href="{{ route('dashboard.casier') }}" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-home-smile"></i>
+                    <span class="material-icons" style="font-size: 25px;">group</span>
                     <div class="text-truncate" data-i18n="Dashboards">Dashboards</div>
                 </a>
             </li>

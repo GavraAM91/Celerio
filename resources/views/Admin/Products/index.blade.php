@@ -121,6 +121,7 @@
                             <th>Stock</th>
                             <th>Expired Date</th>
                             <th>Sold Product</th>
+                            <th>Minimum Stock</th>
                             <th>Unit</th>
                             <th>Category</th>
                             <th>Status</th>
@@ -149,6 +150,9 @@
                                     </td>
                                     <td>
                                         {{ $stock->sold_product }}
+                                    </td>
+                                    <td>
+                                        {{ $product->minimum_stock }}
                                     </td>
                                 @endforeach
                                 <td>{{ optional($product->unitOfGoods)->unit ?? 'Unit tidak tersedia' }}</td>

@@ -28,7 +28,7 @@
             </div>
         </div>
     @endif
-    
+
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
@@ -93,4 +93,9 @@
 
             {{-- </div> --}}
             <!-- / Layout wrapper -->
+            {{-- @if (!session('auth'))
+                <script>
+                    window.location.href = "{{ route('login') }}";
+                </script>
+            @endif --}}
 </x-app-layout>
